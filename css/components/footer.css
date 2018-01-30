@@ -28,7 +28,8 @@
 }
 
 .footer__center {
-  width: 3%;
+  margin: 0 auto;
+  width: 28px;
 }
 
 .footer__arrow {
