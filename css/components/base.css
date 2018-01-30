@@ -1,0 +1,35 @@
+body {
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+  box-sizing: border-box;
+  line-height: 1.42857143;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.title {
+  position: relative;
+  display: inline-block;
+  font-size: 2em;
+  font-weight: 300;
+  margin: 0 0 30px 0;
+  color: #374054
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  width: 50px;
+  top: 100%;
+  left: 0px;
+  right: 0px;
+  margin: 0 auto;
+  background: #3498db;
+}
+
+.section-container {
+  padding: 50px 15px;
+  border-bottom: 1px solid #dcd9d9;
+  text-align: center;
+}

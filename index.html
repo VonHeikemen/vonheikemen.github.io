@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+  <link rel="stylesheet" href="/css/font-awesome.css">
+  <link rel="stylesheet" href="/css/components/base.css">
+  <link rel="stylesheet" href="/css/components/card.css">
+  <link rel="stylesheet" href="/css/components/header.css">
+  <link rel="stylesheet" href="/css/components/navigation.css">
+  <link rel="stylesheet" href="/css/components/about.css">
+  <link rel="stylesheet" href="/css/components/projects.css">
+  <link rel="stylesheet" href="/css/components/footer.css">
+</head>
+<body>
+  <input id="toggle-menu" type="checkbox">
+  <label for="toggle-menu" class="mobile-menu">
+    <i class="fa fa-bars" aria-hidden="true"></i>
+  </label>
+
+  <nav class="nav">
+    <ul class="nav__container">
+      <li class="nav__item">
+        <a class="nav__link" href="#about">
+          About
+        </a>
+      </li>
+      <li class="nav__item">
+        <a class="nav__link" href="#projects">
+          Projects
+        </a>
+      </li>
+      <li class="nav__item">
+        <a class="nav__link" href="#contact">
+          Contact
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <header id="home">
+    <div class="header__container">
+      <h1 class="header__title">
+        HEIKER CURIEL
+      </h1>
+      <h2 class="header__subtitle">
+        Web Developer
+      </h2>
+      <a style="display:inline-block; padding: 10px 20px; display:none;" href="#">
+
+      </a>
+    </div>
+    <div class="header__overlay"></div>
+    <div class="header__container-bottom">
+      <a class="header__arrow" href="#about">
+        <i class="fa fa-chevron-down" aria-hidden="true"></i>
+      </a>
+    </div>
+  </header>
+  
+  <section id="about" class="about">
+    <div class="about__content">
+      <h2 class="title about__title">About Me</h2>
+      <p class="about__text">
+        Hello! I'm a web developer from Venezuela. I enjoy creating software, solving problems and finding ways to be better at what I do.
+        As web developer I've worked with tecnologies such as NodeJS, PHP and Bootstrap for almost three years now.
+        Currently on a path to complete the FreeCodeCamp challenges and projects.
+      </p>
+    </div>
+  </section>
+  
+  <section style="display: none;" id="experience"></section>
+  
+  <section style="display: none;" id="education"></section>
+  
+  <section id="projects" class="section-container projects">
+    <h2 class="title">Projects</h2>
+    <ul class="projects__list">
+      <!-- Tribute-Page -->
+      <li class="card">
+        <div class="card__container">
+          <div class="card__image">
+            <img src="/images/tribute-page.png" alt="tribute page screenshot">
+          </div>
+          <div class="card__info">
+            <h3 class="card__title">Tribute Page</h3>
+            <p>
+              A project part of the FreeCodeCamp basic frontend projects. Focused on the Lacey Sturm, american singer/songwriter and former lead vocalist of the hard rock band Flyleaf.
+            </p>
+            <a class="card__link" href="https://codepen.io/VonHeikemen/pen/WdmVPm">Link to project</a>
+          </div>
+        </div>
+      </li>
+
+      <!-- Node Chat App -->
+      <li class="card">
+        <div class="card__container">
+          <div class="card__image">
+            <img src="/images/node-chat-app.png" alt="node chat app screenshot">
+          </div>
+          <div class="card__info">
+            <h3 class="card__title">Node Chat App</h3>
+            <p>
+              A very basic chat application build with NodeJS and socket.io. You can visit the live demo <a class="card__link" href="https://salty-spire-72538.herokuapp.com/">here</a>
+            </p>
+            <a class="card__link" href="https://github.com/VonHeikemen/node-chat-app">Link to project</a>
+          </div>
+        </div>
+      </li>
+
+      <!-- Expensify -->
+      <li class="card">
+        <div class="card__container">
+          <div class="card__image">
+            <img src="/images/expensify-app.png" alt="expensify screenshot">
+          </div>
+          <div class="card__info">
+            <h3 class="card__title">Expensify</h3>
+            <p>
+              A React app create to track expenses. Build with React and Firebase. You can vist the live demo <a class="card__link" href="https://desolate-savannah-67115.herokuapp.com/login">here</a>
+            </p>
+            <a class="card__link" href="https://github.com/VonHeikemen/expensify-demo">Link to project</a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+  
+  <section style="display: none;" id="skills"></section>
+
+  <section style="display: none;" class="contact"></section>
+
+  <footer id="contact" class="footer">
+    <p class="copyright">
+      Copyright © 2018 Heiker Curiel
+    </p>
+    <div class="footer__center">
+      <a href="#home" class="footer__arrow">
+        <i class="fa fa-chevron-up" aria-hidden="true"></i>
+      </a>
+    </div>
+    <div class="footer__list-container">
+      <ul class="footer__list">
+        <li class="footer__link">
+          <a class="footer__link-anchor" target="_blank" href="https://github.com/VonHeikemen/">
+            <i class="fa fa-github" aria-hidden="true"></i>
+          </a>
+        </li>
+        <li class="footer__link">
+          <a class="footer__link-anchor" target="_blank" href="https://twitter.com/VonHeikemen_">
+            <i class="fa fa-twitter" aria-hidden="true"></i>
+          </a>
+        </li>
+        <li class="footer__link">
+          <a class="footer__link-anchor" target="_blank" href="https://www.linkedin.com/in/heiker-curiel-609970121/?locale=en_US">
+            <i class="fa fa-linkedin-square" aria-hidden="true"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+  
+  <script src="/js/index.js"></script>
+</body>
+</html>
