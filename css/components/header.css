@@ -17,7 +17,7 @@ header {
   font-weight: 900;
   letter-spacing: 0.05em;
   line-height: 0.9em;
-  color: #fff;
+  color: #EBEBEB;
   margin: 0px;
 }
 
@@ -41,7 +41,7 @@ header {
   right: 0;
   bottom: 0;
   left: 0;
-  background: #217dbbcc;
+  background: #2E354DCC;
   z-index: 1;
 }
 
@@ -93,7 +93,7 @@ header {
   .header__arrow {
     border-radius: 50%;
     width: 20px;
-    border: 3px solid #a0cfee;
+    border: 3px solid #779AB3;
     padding: 5px 5px;
     margin: 0 auto;
     text-align: center;

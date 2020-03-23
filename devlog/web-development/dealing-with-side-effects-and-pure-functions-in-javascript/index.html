@@ -1,0 +1,303 @@
+
+  
+
+
+
+  
+  
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Devlog</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+
+      
+  <meta name="keywords" content="javascript, functional-programming, software, coding, development">
+
+  
+    <meta name="description" content="A few ideas of how to use pure functions in the real world">
+  
+
+  
+    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;dealing-with-side-effects-and-pure-functions-in-javascript-16mg">
+  
+
+    </head>
+
+    
+    <body class="theme-base-custom ">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;"><h1>Devlog</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
+                        
+                        
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tags&#x2F;">Explore tags</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;">Devlog en español</a></li>
+                        
+                    </ul>
+                    © 2020 Heiker Curiel
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+
+
+<div class="post">
+  <h1 class="post-title">Dealing with side effects and pure functions in javascript</h1>
+  <span class="post-date">2020-01-05
+    
+    | Originally published at 
+    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;dealing-with-side-effects-and-pure-functions-in-javascript-16mg">
+      dev.to
+    </a>
+    
+    
+    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;web-development&#x2F;dealing-with-side-effects-and-pure-functions-in-javascript&#x2F;"> 
+        Leer en español
+      </a>
+    
+  </span>
+  <p>Have you ever heard the term &quot;pure function&quot;? What about &quot;side effects&quot;? If you have then probably you've heard that side effects are evil and should be avoided at all cost (just like <code>var</code>.) Here is the problem, if you write javascript you probably want to cause those side effects (specially if you get paid to write javascript) So the solution here is not to avoid all the side effects but to control them. I going to show you a few things that you can do to make your pure functions and your side effects get along just fine.</p>
+<p>Before we start let us just do a little recap on some terms, so we can all be in the same page.</p>
+<h2 id="concepts">Concepts</h2>
+<h3 id="pure-function">Pure function</h3>
+<p>For the sake of simplicity let us say that a pure function is a function whose output is only determined by its input and has no observable effect on the outside world. The main benefit they provide (in my opinion) is predictibility, if you give them the same input values they will always return you the same output. Lets look at some examples.</p>
+<p>This one is pure.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">increment</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">number</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">number </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>This one isn't</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#fac863;">Math</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">random</span><span style="color:#5fb3b3;">();
+</span></pre>
+<p>And these are tricky.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">A_CONSTANT </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">increment</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">number</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">number </span><span style="color:#5fb3b3;">+ </span><span style="color:#cccece;">A_CONSTANT</span><span style="color:#5fb3b3;">;
+}
+
+</span><span style="color:#fac863;">module</span><span style="color:#5fb3b3;">.</span><span style="color:#fac863;">exports </span><span style="color:#5fb3b3;">={
+  </span><span style="color:#cccece;">increment
+</span><span style="color:#5fb3b3;">};
+</span></pre><pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">a_constant</span><span style="color:#5fb3b3;">() {
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">increment</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">number</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">number </span><span style="color:#5fb3b3;">+ </span><span style="color:#6699cc;">a_constant</span><span style="color:#5fb3b3;">();
+}
+</span></pre><h3 id="side-effects">Side effects</h3>
+<p>I will call a side effect to anything that compromises the &quot;pureness&quot; of a function. The list includes but is not limited to:</p>
+<ul>
+<li>Changing (mutate) an external variable in any way.</li>
+<li>Showing things in the screen.</li>
+<li>Writing to a file.</li>
+<li>Making an http request.</li>
+<li>Spawn a process.</li>
+<li>Saving data in a database.</li>
+<li>Calling other functions with side-effects.</li>
+<li>DOM manipulation.</li>
+<li>Randomness.</li>
+</ul>
+<p>So, any action that can change the &quot;state of the world&quot; is a side effect.</p>
+<h2 id="how-do-we-use-those-things-together">How do we use those things together?</h2>
+<p>You're probably still thinking about that side effect list, is basically everything javascript is good for and yet some people still tell you to avoid them. Don't fear I come bearing suggestions.</p>
+<h3 id="good-old-function-composition">Good old function composition</h3>
+<p>Another way of saying it will be: good old separation of concerns. This is the non complicated way. If there is a way to break apart a computation from a side effect then put the computation on a function and give the output to the function/block that has the side effect.</p>
+<p>It could be as simple as doing something like this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">some_process</span><span style="color:#5fb3b3;">() {
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">data </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">get_data_somehow</span><span style="color:#5fb3b3;">();
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">clean_data </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">computation</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">);
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">save</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">clean_data</span><span style="color:#5fb3b3;">);
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>Now, <code>some_process</code> still isn't pure but that's okay, we are writing javascript we don't need everything to be pure, what we need is to keep our sanity. By splitting the side effects from the pure computation we have created three independent functions that solve only one problem at a time.  You could even take it one step further and use a helper function like <a href="https://ramdajs.com/docs/#pipe">pipe</a> to get rid of those intermediate variables and compose those functions directly.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">some_process </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">get_data_somehow</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">computation</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">save</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>But now we have created another problem, what happens when we want to make a side effect in the middle of one those? What do we do? Well if a helper function created the problem then I say use another helper function to get out of it. Something like this would work.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">tap</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return function </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">arg</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">);
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">;
+  }
+}
+</span></pre>
+<p>This will allow you place a function with a side effect in the middle of chain of functions while keeping data flow.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">some_process </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(
+  </span><span style="color:#cccece;">get_data_somehow</span><span style="color:#5fb3b3;">,
+  </span><span style="color:#6699cc;">tap</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#cccece;">computation</span><span style="color:#5fb3b3;">,
+  </span><span style="color:#6699cc;">tap</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">a_side_effect</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#cccece;">save
+</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>There is argument to be made against these type of things, some people would argue that now all your logic is scattered all over the place and that you have to move around to actually know what the function does. I really don't mind, it's a matter of preference. But enough about that, lets talk about <code>tap</code>'s signature, look at it <code>tap(fn)</code> it takes a callback as a parameter lets see how we can use that to our advantage.</p>
+<h3 id="make-someone-else-handle-the-problem">Make someone else handle the problem</h3>
+<p>As we all know life isn't always so simple, sometimes we just can't make that sweet pipeline of functions. In some situations we need to do some side-effect in the middle of a process and when that happens we can always cheat. In javascript we can treat functions as values which lets us do funny things like passing functions as parameters to other functions. This way the function can have the flexibility to execute a side effect when we need to while maintaining some of the predictibility that we know and love.</p>
+<p>Say for example that you have a function that is already pure and does something to a collection of data but now for some reason you need log the original and the transformed values right after the transformation happens. What you can do is add a function as a parameter and call it in the right moment.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">transform</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">onchange</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Array</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">isArray</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">) ? [] : {};
+  </span><span style="color:#c594c5;">for</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">let </span><span style="color:#cccece;">key </span><span style="color:#5fb3b3;">in </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">] = </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">] + </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+    </span><span style="color:#6699cc;">onchange</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">], </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">]);
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>This tecnically fulfills some of the requirements of a pure function, the output (and behavior) of the function is still determined by its input, it just so happens that one of those inputs is a function that can trigger any side effect.  Again, the goal in here is not to fight against the nature of javascript and have everything be 100% pure, we want to control when the side effect happens. So in this case the one who controls whether or not to have side effects is the caller of the function. One extra benefit of this is that if you want to use that function in a unit test to prove that still works as expected the only thing you'll need to do is supply its arguments, you don't have grab any mocking library to test it. </p>
+<p>You may be wondering why put the callback as the first parameter, this is really about personal preference. If you put the <code>thing</code> that changes the most frecuently in the last position you make it easier to do partial application, that is binding the values of the parameters without executing the function. For example you could use <code>transform.bind</code> to create a specialized function which already has the <code>onchange</code> callback.</p>
+<h3 id="lazy-effects">Lazy effects</h3>
+<p>The idea here is to delay the inevitable. Instead of performing the side effect right away what you do is provide a way for the caller of your function to execute the side-effect when they see fit. You can do this in a couple of ways.</p>
+<h4 id="using-function-wrappers">Using function wrappers</h4>
+<p>As I mentioned before in javascript you can treat functions as values and one thing you can do with values is returning them from functions. I'm talking about functions that return functions. We already saw how usefull that can be and if you think about is not that crazy, how many times have you seen something like this?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Stuff</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">thing</span><span style="color:#5fb3b3;">) {
+  
+  </span><span style="color:#5f6364;">// setup
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#6699cc;">some_method</span><span style="color:#5fb3b3;">() {
+      </span><span style="color:#5f6364;">// code...
+    </span><span style="color:#5fb3b3;">},
+    </span><span style="color:#6699cc;">other</span><span style="color:#5fb3b3;">() {
+      </span><span style="color:#5f6364;">// code...
+    </span><span style="color:#5fb3b3;">}
+  }
+}
+</span></pre>
+<p>This is an old school &quot;constructor.&quot; Before, in the good ol' days of ES5, this was one way of emulating classes. Is a regular function that returns an object, and is we all know objects can have methods. What we want to do is little bit like that, we want convert the block that contains the side effect into a function and return it.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">some_process</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">) {
+
+  </span><span style="color:#5f6364;">/*
+   * do some pure computation with config
+   */
+
+  </span><span style="color:#c594c5;">return function </span><span style="color:#6699cc;">_effect</span><span style="color:#5fb3b3;">() {
+   </span><span style="color:#5f6364;">/*
+    * do whatever you want in here
+    */ 
+  </span><span style="color:#5fb3b3;">}
+}
+</span></pre>
+<p>This way we give the caller of our function the oportunity to use the side effect when they want, and they can even pass it around and compose it with other functions. Interestingly enough this is not a very common pattern, maybe because there are other ways to achieve the same goal.</p>
+<h4 id="using-data-structures">Using data structures</h4>
+<p>Another way to create lazy effects is to wrap a side effect inside a data structure. What we want to do is to treat our effects as regular data, have the ability to manipulate them and even chain other effects in safe way (I mean without executing them). You've probably seen this before, one example that I can think of is Observables. Take a look at this code that uses rxjs.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// taken from:
+// https://www.learnrxjs.io/operators/creation/create.html
+
+/*
+  Increment value every 1s, emit even numbers.
+*/
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">evenNumbers </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Observable</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">create</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">value </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">interval </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">setInterval</span><span style="color:#5fb3b3;">(() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value </span><span style="color:#5fb3b3;">% </span><span style="color:#f99157;">2 </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">);
+    }
+    </span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">++;
+  }, </span><span style="color:#f99157;">1000</span><span style="color:#5fb3b3;">);
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">clearInterval</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">interval</span><span style="color:#5fb3b3;">);
+});
+</span></pre>
+<p>The result of <code>Observable.create</code> not only delays the execution of <code>setInterval</code> but also gives you the ability to call <code>evenNumbers.pipe</code> to chain other observables that can also have other side effects. Now of course Observables and rxjs aren't the only way, we can create our own effect type. If we want to create one all we need is a function to execute the effect and another one that lets us compose effects.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Effect</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">effect</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#6699cc;">run</span><span style="color:#5fb3b3;">(...</span><span style="color:#f99157;">args</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">effect</span><span style="color:#5fb3b3;">(...</span><span style="color:#cccece;">args</span><span style="color:#5fb3b3;">);
+    },
+    </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Effect</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">effect</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">)));
+    }
+  };
+}
+
+</span></pre>
+<p>It may not look like much but this is actually enough to be useful. You can start to composing your effects without triggering any changes to the environment. You can now do stuff like this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#6699cc;">persist </span><span style="color:#5fb3b3;">= (</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(`</span><span style="color:#99c794;">saving </span><span style="color:#5fb3b3;">${</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> to a database...</span><span style="color:#5fb3b3;">`);
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">? </span><span style="color:#f99157;">true </span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">;
+};
+</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">show_message </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">result </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">result 
+  </span><span style="color:#5fb3b3;">? </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">we good</span><span style="color:#5fb3b3;">&#39;) 
+  : </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">we not good</span><span style="color:#5fb3b3;">&#39;);
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">save </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">Effect</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">persist</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">show_message</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#cccece;">save</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">run</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">some stuff</span><span style="color:#5fb3b3;">&#39;);
+</span><span style="color:#5f6364;">// saving some stuff to a database...
+// we good
+
+</span><span style="color:#cccece;">save</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">run</span><span style="color:#5fb3b3;">(&#39;&#39;);
+</span><span style="color:#5f6364;">// saving  to a database...
+// we not good 
+</span></pre>
+<p>If you have used <code>Array.map</code> to compose data transformations you'll be feeling right at home when using <code>Effect</code>, all you have to do is provide the functions with the side effect and at the of the chain the resulting <code>Effect</code> will know what to do when you are ready to call it.</p>
+<p>I've only scratched the surface of what you can do with <code>Effect</code>, if you want to learn more try to search the term <code>functor</code> and <code>IO Monad</code>, I promise you is going to be fun. </p>
+<h2 id="what-now">What now?</h2>
+<p>Now you click on the link in the end of the post, it's a really good article (basically a better version of this one). </p>
+<p>I hope now you are confident enough to start writing pure functions in your code and combine them with the convenient side effects that javascript lets you do.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">How to deal with dirty side effects in your pure functional JavaScript</a></li>
+</ul>
+
+</div>
+
+        </div>
+
+    </body>
+
+</html>

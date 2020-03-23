@@ -1,0 +1,395 @@
+
+  
+
+
+
+  
+  
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Devlog</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+
+      
+  <meta name="keywords" content="javascript, software, coding, development">
+
+  
+    <meta name="description" content="Solving the mystery of why sometimes the callback goes first">
+  
+
+  
+    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;functional-programming-for-your-everyday-javascript-partial-application-6dm">
+  
+
+    </head>
+
+    
+    <body class="theme-base-custom ">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;"><h1>Devlog</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
+                        
+                        
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tags&#x2F;">Explore tags</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;">Devlog en español</a></li>
+                        
+                    </ul>
+                    © 2020 Heiker Curiel
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+
+
+<div class="post">
+  <h1 class="post-title">Functional programming for your everyday javascript: Partial application</h1>
+  <span class="post-date">2020-03-10
+    
+    | Originally published at 
+    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;functional-programming-for-your-everyday-javascript-partial-application-6dm">
+      dev.to
+    </a>
+    
+    
+    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;web-development&#x2F;functional-programming-for-your-everyday-javascript-partial-application&#x2F;"> 
+        Leer en español
+      </a>
+    
+  </span>
+  <p>Today we are here to solve a mystery, the mystery of why some people choose to create functions that take a callback as the first argument. You might be thinking that the answer is partial application and you would be half right, but partial application is just the means to an end, the real reason to do such a thing is to enable a &quot;better&quot; function composition. But before we get into details of partial application let's explore how we do things now.</p>
+<h2 id="how-we-do-things">How we do things</h2>
+<p>When we create a function we usually sort the arguments by some kind of importance/priority level, where the most important goes first. As a result, when we create a function that works on a piece of data it becomes the first thing on the list, it's followed by less important configuration arguments and the last thing are optional arguments that we can omit. </p>
+<p>Say that we want to create a function that picks specific properties from a plain object. Let's think of what we need. The object, that was your first thought? It's natural, you don't want to omit it by accident when you call the function. That leaves the keys that we are going to choose as the last argument.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">obj</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">keys</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= {};
+  
+  </span><span style="color:#c594c5;">for</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">key of keys</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">] = </span><span style="color:#cccece;">obj</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">];
+  }
+  
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<blockquote>
+<p>Note: We are not the only ones that think like this, check out <a href="https://lodash.com/docs/#pick">lodash pick</a></p>
+</blockquote>
+<p>Now, say that we have a <code>user</code> object and we want to hide any &quot;sensitive&quot; data. We would use it like this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">user </span><span style="color:#5fb3b3;">= {
+  </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">7</span><span style="color:#5fb3b3;">,
+  </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Tom</span><span style="color:#5fb3b3;">&quot;,
+  </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Keen</span><span style="color:#5fb3b3;">&quot;,
+  </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
+  </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">hudson</span><span style="color:#5fb3b3;">&quot;
+};
+
+</span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]); 
+
+</span><span style="color:#5f6364;">// { name: &quot;Tom&quot;, lastname: &quot;Keen&quot; }
+</span></pre>
+<p>That works great, but what happens when we need to work with an array of users? </p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">users </span><span style="color:#5fb3b3;">= [
+  {
+    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">7</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Tom</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Keen</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">hudson</span><span style="color:#5fb3b3;">&quot;
+  },
+  {
+    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">30</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Smokey</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Putnum</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">carnival</span><span style="color:#5fb3b3;">&quot;
+  },
+  {
+    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">69</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Lady</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Luck</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
+    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">norestforthewicked</span><span style="color:#5fb3b3;">&quot;
+  }
+];
+</span></pre>
+<p>We are force to iterate over the array and apply the function.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+});
+
+</span><span style="color:#5f6364;">/*
+[
+  {&quot;name&quot;: &quot;Tom&quot;, &quot;lastname&quot;: &quot;Keen&quot;},
+  {&quot;name&quot;: &quot;Smokey&quot;, &quot;lastname&quot;: &quot;Putnum&quot;},
+  {&quot;name&quot;: &quot;Lady&quot;, &quot;lastname&quot;: &quot;Luck&quot;}
+]
+*/
+</span></pre>
+<p>Is not that bad. And you know what? That callback actually looks useful. We could put it in another place and give it a name.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">public_info</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+}
+
+</span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>What is actually happening? What we do here is bind the second argument to the function with the value <code>['name', 'lastname']</code> and force <code>pick</code> to wait for the user data to be executed. </p>
+<p>Now let's take this example one step further, pretend that <code>Async/Await</code> doesn't exists and that the <code>users</code> array comes from a <code>Promise</code>, maybe an http requests using <code>fetch</code>. What do we do?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+  })
+});
+</span></pre>
+<p>Now that is bad. Maybe some arrow functions can make it better?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;])));
+</span></pre>
+<p>Is it better? A question for another day. We prepared for this, we have the <code>public_info</code> function let's use it.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">));
+</span></pre>
+<p>This is acceptable, I like it. If we wanted we could make another function that binds <code>public_info</code> to <code>.map</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">user_list</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>So now we get.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>Let's see everything we needed for that.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">obj</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">keys</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#5f6364;">// code...
+</span><span style="color:#5fb3b3;">}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">public_info</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">user_list</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+}
+
+</span><span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>What if I told you that we can create <code>public_info</code> and <code>user_list</code> in another way? What if we could have this?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">public_info </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">user_list </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>Or put everything inline if that is your jam.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;])));
+</span></pre>
+<p>We can have it but first we'll need to change the way we think about functions a little bit. </p>
+<h2 id="thinking-differently">Thinking differently</h2>
+<p>Instead of thinking of priority we should start thinking in dependencies and data. When you're creating a function just ask yourself, out of all this arguments what is the most likely to change? Put that as your last argument.</p>
+<p>Let's make a function that takes the first elements of something. What do we need? We need that &quot;something&quot; and also the number of elements we are going to take. Of those two, which is most likely to change? It's the data, that &quot;something&quot;.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">count</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">count</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>In a normal situation you would use it like this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">first</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">second</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">rest</span><span style="color:#5fb3b3;">&#39;]);
+
+</span><span style="color:#5f6364;">// [&quot;first&quot;, &quot;second&quot;]
+</span></pre>
+<p>But with a little bit of magic (which will be revealed soon) you can reuse it like this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">first_two </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">first_two</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">first</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">second</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">rest</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>This way ordering your arguments gets even more convenient when callbacks are involved. Let's &quot;reverse&quot; <code>Array.filter</code> arguments and see what we can do.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>We start simple, exclude falsey values from an array.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+
+</span><span style="color:#5f6364;">// =&gt; [ true, &quot;that&quot; ]
+</span></pre>
+<p>That's good and it could be better if we add more context.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>I'm hoping you can see the posibilities that this kind of pattern can provide. There are libraries (like <a href="https://ramdajs.com/docs/">Ramda</a>) that use this approach to build complex functions by assembling smaller single purpose utilities. </p>
+<p>Enough talking, let's see now how we can do this ourselves.</p>
+<h2 id="this-is-the-way">This is the way</h2>
+<p>Like with everything in javascript you can do this in a million ways, some are more convenient than others, some require a little bit of magic. Let us begin.</p>
+<h3 id="the-built-in-magic-of-bind">The built-in magic of bind</h3>
+<p>Turns out that we don't need to do anything extraordinary to bind values to the arguments of a function because every function has a method called <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">bind</a>. The syntax is not as convenient as the one I showed but it gets close. Another thing that you have to be aware of is that the first argument to <code>Function.bind</code> is the &quot;context&quot;, that is the value of the keyword <code>this</code> inside the function. This is the basic usage.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre><h3 id="the-magic-within">The magic within</h3>
+<p>This one requires some work and it involves another enigmatic keyword, the <code>arguments</code>. What we will do is leverage the fact that <code>arguments</code> is an array-like structure that has a length, we will count the argument the function gets and if its less than what we want we return another function. Sounds confusing?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+
+  </span><span style="color:#5f6364;">// This is it. We are counting.
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// if .length is 1 that means we got `func`
+    // it also means we don&#39;t have `data`
+    // so we return another function that
+    // remembers `func` and wait for `data`
+    </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">);
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>Now it is possible to do this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>And also.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>Isn't that nice?</p>
+<h3 id="a-simple-approach">A simple approach?</h3>
+<p>And of course we can also create our bind utility. With the help of the spread operator we can collect arguments and simply apply them to a callback. </p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, ...</span><span style="color:#f99157;">first_args</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">(...</span><span style="color:#f99157;">rest</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">func</span><span style="color:#5fb3b3;">(...</span><span style="color:#cccece;">first_args</span><span style="color:#5fb3b3;">, ...</span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>The first step gets the function and collects a list of arguments into an array, then we return a function that collects another list of arguments and finally call <code>func</code> with everything.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>The cool thing about this one is that if you flip <code>first_args</code> with <code>rest</code> you have a <code>bind_last</code> function.</p>
+<h3 id="no-more-magic">No more magic</h3>
+<p>I do have mixed feelings about this one but it really is the most simple.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+  }
+}
+</span></pre>
+<p>Which is equivalent to this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#6699cc;">filter </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">func </span><span style="color:#c594c5;">=&gt; </span><span style="color:#f99157;">data </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>The idea is to take one argument at a time in separate functions. Basically, keep returning functions until you have all the arguments you need. This is what people call &quot;currying&quot;. How do you use it?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>That is one case. This is the other.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#6699cc;">filter </span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">) ([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>Notice the extra pair of parenthesis? That's the second function. You'll need one pair for each argument you provide.</p>
+<h3 id="curry-it-for-me">Curry it for me</h3>
+<p>Going back to subject of magic, you can &quot;automate&quot; the process of currying using a helper function.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">arity</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// Guess how many arguments
+    // the function needs.
+    // This doesn&#39;t always work.
+    </span><span style="color:#cccece;">arity </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length</span><span style="color:#5fb3b3;">;
+  }
+
+  </span><span style="color:#5f6364;">// Omit `fn` and `arity`, gather the rest
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">rest </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Array</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">prototype</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">call</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">);
+
+  </span><span style="color:#5f6364;">// Do have what we need?
+  </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">arity </span><span style="color:#5fb3b3;">&lt;= </span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">apply</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">);
+  }
+
+  </span><span style="color:#5f6364;">// Execute `curry.bind` with `fn`, `arity` and `rest` as arguments
+  // it will return a function waiting for more arguments
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">curry</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">apply</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">curry</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">arity</span><span style="color:#5fb3b3;">, ...</span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">]);
+}
+</span></pre>
+<p>With it you can transform your existing functions or create new ones that support currying from the start.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">curried_filter </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curried_filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre>
+<p>Or.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">filter </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">); 
+});
+</span></pre>
+<p>That's it folks. Hope you had a good time reading.</p>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=m3svKOdZijA">Hey Underscore, You're Doing It Wrong! (video)</a></li>
+<li><a href="http://benalman.com/news/2012/09/partial-application-in-javascript/">Partial Application in JavaScript</a></li>
+</ul>
+
+</div>
+
+        </div>
+
+    </body>
+
+</html>

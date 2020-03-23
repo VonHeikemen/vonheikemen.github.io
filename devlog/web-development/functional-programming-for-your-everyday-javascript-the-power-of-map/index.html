@@ -1,0 +1,422 @@
+
+  
+
+
+
+  
+  
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Devlog</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+
+      
+  <meta name="keywords" content="javascript, functional-programming, learning, software, coding, development">
+
+  
+    <meta name="description" content="Let&#x27;s see what makes map so special">
+  
+
+  
+    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;functional-programming-for-your-everyday-javascript-the-power-of-map-4n9m">
+  
+
+    </head>
+
+    
+    <body class="theme-base-custom ">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;"><h1>Devlog</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
+                        
+                        
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tags&#x2F;">Explore tags</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;">Devlog en español</a></li>
+                        
+                    </ul>
+                    © 2020 Heiker Curiel
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+
+
+<div class="post">
+  <h1 class="post-title">Functional programming for your everyday javascript: The power of map</h1>
+  <span class="post-date">2020-02-16
+    
+    | Originally published at 
+    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;functional-programming-for-your-everyday-javascript-the-power-of-map-4n9m">
+      dev.to
+    </a>
+    
+    
+    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;web-development&#x2F;functional-programming-for-your-everyday-javascript-the-power-of-map&#x2F;"> 
+        Leer en español
+      </a>
+    
+  </span>
+  <p>This time we are going to take a look inside the world of <code>functors</code> and what makes them so special. Functors is one of those term that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.</p>
+<h2 id="what-is-a-functor">What is a functor?</h2>
+<p>I'm convinced that the term is dificult to understand because one, you need to some other terms in order to get the whole picture and two, the theory behind it doesn't really translate very well in code. Let's start with the abstract.</p>
+<p>You can think of them as a relation that exist between two sets of values. Bear with me, this will make sense in a second. Say we have two arrays.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">favorite_numbers  </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">42</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">69</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">73</span><span style="color:#5fb3b3;">];
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">increased_numbers </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">43</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">70</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">74</span><span style="color:#5fb3b3;">];
+</span></pre>
+<p>Nice, we have a set <code>favorite_numbers</code> and a set <code>increased_numbers</code>, they are two separate arrays in diferent variables but we all know that there is a connection between those two, but more importantly we can express that connection with code. Imagine that the array <code>increased_numbers</code> doesn't exist but we still need those numbers, to make them appear again all we need is our good old friend <code>map</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">increased_numbers </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">favorite_numbers</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p><code>map</code> will go through every number, increase it and put it in a new array which brings <code>increased_numbers</code> back into existence. Even though <code>increased_numbers</code> is something we made, we didn't create it out nowhere, we didn't magically invent <code>43</code>, <code>70</code> and <code>74</code>. All we did was describe a relation between those numbers and our <code>favorite_numbers</code>.</p>
+<p>Is that the whole history? Are functors just arrays? The answer to that is a big no. Arrays are just a freakishly convenient way to ilustrate a common use of functors. This leaves a question in the air.</p>
+<h2 id="how-do-you-recognize-them">How do you recognize them?</h2>
+<p>I often hear other people describing functors as boxes. I for one don't think they're wrong because using a container data structure is one of easiest ways to implement a functor. The box analogy is specially funny 'cause in javascript we use brackets to create arrays, so you can actually create a functor by putting a value in a box. See.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// A value
+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#5f6364;">// A box
+</span><span style="color:#5fb3b3;">[];
+
+</span><span style="color:#5f6364;">// Look, a value in a box.
+</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">];
+
+</span><span style="color:#5f6364;">// I regret nothing.
+</span></pre>
+<p>Going back to the original question, how do we recognize them? Okay, so it turns out that there are rules.</p>
+<h3 id="da-rules">Da rules</h3>
+<p>Again I'll be using array of numbers just because is convenient but this rules must apply to any structure that wants to be in the functor club.</p>
+<h4 id="identity">Identity</h4>
+<p>Given the <code>identity</code> function.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">identity</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">x</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">x</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p><code>value</code> and <code>value.map(identity)</code> must be equivalent.</p>
+<p>For example.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5fb3b3;">[</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">];               </span><span style="color:#5f6364;">// =&gt; [1,2,3]
+</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">].</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">identity</span><span style="color:#5fb3b3;">); </span><span style="color:#5f6364;">// =&gt; [1,2,3]
+</span></pre>
+<p>Why is this important? What does this tell us?</p>
+<p>Valid questions. This tells us that the <code>map</code> function must preserve the shape of the data structure. In our example, if we map an array of three elements we must recieve a new array of three elements. If we had an array of a hundred elements, using <code>.map(identity)</code> should return an array of a hundred elements. You get the point.</p>
+<h4 id="composition">Composition</h4>
+<p>Given two functions <code>fx</code> and <code>gx</code> the following must be true.</p>
+<p><code>value.map(fx).map(gx)</code> and <code>value.map(arg =&gt; gx(fx(arg)))</code> must be equivalent.</p>
+<p>Example time.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">* </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">;
+}
+
+[</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">].</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">times_two</span><span style="color:#5fb3b3;">);         </span><span style="color:#5f6364;">// =&gt; [4]
+</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">].</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">))); </span><span style="color:#5f6364;">// =&gt; [4]
+</span></pre>
+<p>If you know how <code>Array.map</code> works this feels like 'well duh!'. This actually gives you chance to optimize your code for readability or performance. In the case of arrays, multiple calls to <code>map</code> can have a big impact on performance when the number of elements in the list grows.</p>
+<p>And that's it. Those two rules are all you need to know to spot a functor.</p>
+<h2 id="does-it-always-has-to-be-map">Does it always has to be .map?</h2>
+<p>I guess by now you wish to know what other things out there follow those rules that I just mentioned, if not I'll tell you anyway. There is another popular structure that also follows the rules and that is <code>Promise</code>. Let's see.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// A value
+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#5f6364;">// A box
+</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">resolve</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#5f6364;">// Look, a value in a box
+</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">resolve</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Identity rule
+</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">resolve</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">identity</span><span style="color:#5fb3b3;">); </span><span style="color:#5f6364;">// =&gt; 1 (in the future)
+
+// Composition
+</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">resolve</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">times_two</span><span style="color:#5fb3b3;">);        </span><span style="color:#5f6364;">// =&gt; 4
+</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">resolve</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">))); </span><span style="color:#5f6364;">// =&gt; 4
+</span></pre>
+<p>To be fair, <code>Promise.then</code> behaves more like <code>Array.flatMap</code> than <code>Array.map</code> but we will ignore that.</p>
+<p>Fine, we have <code>Array</code> and we have <code>Promise</code> both are containers of some sort and both have methods that follow the rules. But what if they didn't have those methods, what if <code>Array.map</code> didn't exists? Would that mean that <code>Array</code> is no longer a functor? Do we lose all the benefits?</p>
+<p>Let's take a step back. If <code>Array.map</code> doesn't exists then <code>Array</code> is no longer a functor? I don't know, I'm not an FP lawyer. Do we lose all the benefits? No, we could still treat arrays as functors, we just lose the super convenient <code>.map</code> syntax. We can create our own <code>map</code> outside of the structure.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">List </span><span style="color:#5fb3b3;">= {
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">arr</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= [];
+    </span><span style="color:#c594c5;">for </span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">let </span><span style="color:#cccece;">data </span><span style="color:#5fb3b3;">of </span><span style="color:#cccece;">arr</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">push</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">));
+    }
+
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+  }
+};
+</span></pre>
+<p>See? Is not that bad. And it works.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Identity rule
+</span><span style="color:#fac863;">List</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">identity</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">]); </span><span style="color:#5f6364;">// =&gt; [1]
+
+// Composition
+</span><span style="color:#fac863;">List</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">times_two</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">List</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">]));   </span><span style="color:#5f6364;">// =&gt; [4]
+</span><span style="color:#fac863;">List</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">)), [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">]); </span><span style="color:#5f6364;">// =&gt; [4]
+</span></pre>
+<p>Are you thinking what I'm thinking? Probably not. This is what I'm thinking, if we can map arrays without a <code>.map</code> then nothing can stop us from doing the same thing with plain objects, because after all, objects can also hold sets of values.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#cccece;">Obj </span><span style="color:#5fb3b3;">= {
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">ob</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= {};
+    </span><span style="color:#c594c5;">for </span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">let </span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">] of </span><span style="color:#fac863;">Object</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">entries</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">ob</span><span style="color:#5fb3b3;">)) {
+      </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">] = </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">);
+    }
+
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+  }
+};
+
+</span><span style="color:#5f6364;">// Why stop at `map`? 
+// Based on this you can also create a `filter` and `reduce`
+</span></pre>
+<p>Let's see it.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Identity rule
+</span><span style="color:#fac863;">Obj</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">identity</span><span style="color:#5fb3b3;">, {</span><span style="color:#6699cc;">some</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">prop</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">}); </span><span style="color:#5f6364;">// =&gt; {some: 1, prop: 2}
+
+// Composition
+</span><span style="color:#fac863;">Obj</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">times_two</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">Obj</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">, {</span><span style="color:#6699cc;">some</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">prop</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">})); </span><span style="color:#5f6364;">// =&gt; {some: 4, prop: 6}
+</span><span style="color:#fac863;">Obj</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">)), {</span><span style="color:#6699cc;">some</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">prop</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">}); </span><span style="color:#5f6364;">// =&gt; {some: 4, prop: 6}
+</span></pre><h2 id="do-it-yourself">Do It Yourself</h2>
+<p>All this talk about arrays and plain objects is useful but now I feel like we know enough to make our own functor, the rules seem to be very simple. Let's do something vaguely useful. Have you ever heard of Observables? Good, because we are going to something like that. We'll make a simpler version of <a href="https://mithril.js.org/stream.html">mithril-stream</a>, it'll be fun.</p>
+<p>The goal here to handle a stream of values over time. The API of our utility will be this.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Set initial state
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">num_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Create a dependent stream
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">increased </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">num_stream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Get the value from a stream
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 0
+
+// Push a value to the stream
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">42</span><span style="color:#5fb3b3;">); </span><span style="color:#5f6364;">// =&gt; 42
+
+// The source stream updates
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 42
+
+// The dependent stream also updates
+</span><span style="color:#6699cc;">increased</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 43
+</span></pre>
+<p>Let's start with the getter and setter function.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">state</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">let </span><span style="color:#6699cc;">stream </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// If we get an argument we update the state
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">state </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">;
+    }
+
+    </span><span style="color:#5f6364;">// return current state
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">state</span><span style="color:#5fb3b3;">;
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">stream</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>This should work.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Initial state
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">num_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">42</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Get state
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 42
+
+// Update
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">73</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Check
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 73
+</span></pre>
+<p>We know we want a <code>map</code> method but what is the effect we want? We want the callback to listen to the changes of the source stream. Let's start with the listener part, we want to store an array of listeners and execute each one right after the state changes.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;">  function Stream(state) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">   let listeners = [];
+</span><span style="color:#5fb3b3;">+
+</span><span style="color:#cccece;">    let stream = function(value) {
+      if(arguments.length &gt; 0) {
+        state = value;
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">       listeners.forEach(fn =&gt; fn(value));
+</span><span style="color:#cccece;">      }
+
+      return state;
+    }
+
+    return stream;
+  }
+</span></pre>
+<p>Now we go for the <code>map</code> method, but is not going to be just any method, we need to follow the rules:</p>
+<ul>
+<li>
+<p>Identity: When <code>map</code> is called it needs to preserve the shape of the structure. This means that we need to return a new stream.</p>
+</li>
+<li>
+<p>Composition: Calling <code>map</code> multiple times must be equivalent of composing the callbacks supplied to those <code>map</code>s.</p>
+</li>
+</ul>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">state</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">listeners </span><span style="color:#5fb3b3;">= [];
+
+  </span><span style="color:#c594c5;">let </span><span style="color:#6699cc;">stream </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">state </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">;
+      </span><span style="color:#cccece;">listeners</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">forEach</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+    }
+
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">state</span><span style="color:#5fb3b3;">;
+  }
+
+  </span><span style="color:#fac863;">stream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// Create new instance with transformed state.
+    // This will execute the callback when calling `map`
+    // this might not be what you want if you use a 
+    // function that has side effects. Just beware.
+    </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">target </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">state</span><span style="color:#5fb3b3;">));
+
+    </span><span style="color:#5f6364;">// Transform the value and update stream
+    </span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">listener </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">target</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+
+    </span><span style="color:#5f6364;">// Update the source listeners
+    </span><span style="color:#cccece;">listeners</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">push</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">listener</span><span style="color:#5fb3b3;">);
+
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">target</span><span style="color:#5fb3b3;">;
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">stream</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>Let's test the rules. We begin with identity.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Streams are like a cascade
+// the first is the most important
+// this is the one that triggers all the listeners
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">num_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Create dependent stream
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">identity_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">num_stream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">identity</span><span style="color:#5fb3b3;">); 
+
+</span><span style="color:#5f6364;">// update the source
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">42</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Check
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">();      </span><span style="color:#5f6364;">// =&gt; 42
+</span><span style="color:#6699cc;">identity_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 42
+</span></pre>
+<p>Now let's check the composition rule.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Create source stream
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">num_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Create dependents
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">map_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">num_stream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">add_one</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">times_two</span><span style="color:#5fb3b3;">);
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">composed_stream </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">num_stream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">times_two</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">add_one</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">)));
+
+</span><span style="color:#5f6364;">// Update source
+</span><span style="color:#6699cc;">num_stream</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#5f6364;">// Check
+</span><span style="color:#6699cc;">map_stream</span><span style="color:#5fb3b3;">();      </span><span style="color:#5f6364;">// =&gt; 4
+</span><span style="color:#6699cc;">composed_stream</span><span style="color:#5fb3b3;">(); </span><span style="color:#5f6364;">// =&gt; 4
+</span></pre>
+<p>Our job is done. But is this any useful? Can you do something with it? Well yes, you could use it in event handlers to manipulate user input. Like this.</p>
+<p 
+  class="codepen" 
+  data-height="600" 
+  data-theme-id="dark" 
+  data-default-tab="js,result" 
+  data-user="VonHeikemen" 
+  data-slug-hash="dyoMJRw" 
+  data-preview="true" 
+  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
+  data-pen-title="an fmap example">
+  <span>
+    See the Pen <a href="https://codepen.io/VonHeikemen/pen/dyoMJRw">an fmap example</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+<h3 id="more-examples">More examples</h3>
+<p>I think by now you understand really well what functors do, but if you still want to see more examples you can check out this articles. </p>
+<ul>
+<li><a href="https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-using-a-maybe/">Handling the absence of a value</a></li>
+<li><a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">Handling side effects</a></li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>The only question that remains is &quot;what is the benefit of using functors?&quot;</p>
+<p>I'll do my best here:</p>
+<ul>
+<li>
+<p>This pattern allows you to focus on one problem at time. The <code>map</code> function handles how you get the data and in the callback you can focus only on processing the data.</p>
+</li>
+<li>
+<p>Reusability. This style of programming really encourage the creation of single purpose function that a lot of the times can become useful even across projects.</p>
+</li>
+<li>
+<p>Extensibility through composition. People have mixed feelings about this one, specially if we are talking about arrays. This is another thing that functors encourage, that is using chains of functions to implement a procedure.</p>
+</li>
+</ul>
+<h2 id="sources">Sources</h2>
+<ul>
+<li><a href="https://dev.to/techgirl1908/why-is-map-called-map-2l03">Why is map called map?</a></li>
+<li><a href="https://github.com/fantasyland/fantasy-land">Fantasy land</a></li>
+<li><a href="https://github.com/fantasyland/static-land">Static land</a></li>
+<li><a href="https://github.com/thefrontside/funcadelic.js">funcadelic.js</a></li>
+<li><a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">How to deal with dirty side effects in your pure functional JavaScript</a></li>
+<li><a href="https://jrsinclair.com/articles/2020/whats-more-fantastic-than-fantasy-land-static-land/">What’s more fantastic than fantasy land? An Introduction to Static land</a></li>
+<li><a href="https://medium.com/@lettier/your-easy-guide-to-monads-applicatives-functors-862048d61610">Your easy guide to Monads, Applicatives, &amp; Functors</a></li>
+</ul>
+
+</div>
+
+        </div>
+
+    </body>
+
+</html>

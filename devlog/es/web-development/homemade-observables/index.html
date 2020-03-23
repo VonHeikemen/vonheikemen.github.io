@@ -1,0 +1,467 @@
+
+  
+
+
+
+  
+  
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Devlog</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+
+      
+  <meta name="keywords" content="javascript, paradigma-reactivo, aprendizaje, software, coding, development">
+
+  
+    <meta name="description" content="Creando un observable como los de RxJS desde cero">
+  
+
+  
+    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;observables-hechos-en-casa-1bch">
+  
+
+    </head>
+
+    
+    <body class="theme-base-custom ">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;"><h1>Devlog</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
+                        
+                        
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;tags&#x2F;">Explorar tags</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;">Devlog in english</a></li>
+                        
+                    </ul>
+                    © 2020 Heiker Curiel
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+
+
+<div class="post">
+  <h1 class="post-title">Observables hechos en casa</h1>
+  <span class="post-date">2019-11-24
+    
+    | Originalmente publicado en 
+    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;observables-hechos-en-casa-1bch">
+      dev.to
+    </a>
+    
+    
+    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;web-development&#x2F;homemade-observables&#x2F;"> 
+        Read in english
+      </a>
+    
+  </span>
+  <p>En esta ocasión implementaremos nuestros propios observables. Al terminar espero que tengan un mejor entendimiento de cómo este patrón es usado en librerías como RxJS.</p>
+<h2 id="los-observables">Los Observables</h2>
+<h3 id="que-son">¿Qué son?</h3>
+<p>Empecemos con <strong>mi</strong> definición de observable.</p>
+<blockquote>
+<p>Un Observable es una función que sigue una convención y es usada para conectar una fuente que emite datos a un consumidor.</p>
+</blockquote>
+<p>En nuestro caso la fuente puede ser cualquier cosa produzca valores. Y, un consumidor es el que recibe datos.</p>
+<h3 id="datos-curiosos">Datos curiosos</h3>
+<h4 id="los-observables-no-hacen-nada-por-si-solos">Los Observables no hacen nada por sí solos</h4>
+<p>Quiero decir que estos no producen ningún efecto o comienzan a trabajar hasta que es absolutamente necesario. No hacen nada hasta que te suscribes a ellos.</p>
+<h4 id="pueden-emitir-datos">Pueden emitir datos</h4>
+<p>Dependendiendo de la fuente, pueden recibir un número infinito de valores.</p>
+<h4 id="pueden-ser-sincronos-o-asincronos">Pueden ser síncronos o asíncronos</h4>
+<p>Todo dependerá de su implementación. Se puede crear un observable que reciba valores de un evento que puede ocurrir en cualquier momento, también se pueden crear para procesar una colección de datos de manera síncrona.</p>
+<h3 id="algunas-reglas">Algunas reglas</h3>
+<p>Ya mencioné que se debe seguir una convención. Bueno, ahora vamos a definir algunas reglas arbitrarias que nuestra implementación va a seguir. Estas son importantes porque crearemos un pequeño ecosistema con nuestros observables.</p>
+<ol>
+<li>Deberán tener un método <code>subscribe</code>.</li>
+<li>Nuestro &quot;constructor&quot; de observables aceptará un parámetro, será el suscriptor (<code>subscriber</code>) el cual será una función.</li>
+<li>El suscriptor aceptará un parámetro, este será un objeto que llamaremos <code>observer</code>.</li>
+<li>El objeto <code>observer</code> puede implementar los siguientes métodos: <code>next</code>, <code>error</code> y <code>complete</code>.</li>
+</ol>
+<p>Empecemos.</p>
+<h3 id="el-codigo">El código</h3>
+<h3 id="constructor">Constructor</h3>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">subscriber</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">observer </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">subscriber</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">)
+  };
+}
+
+</span><span style="color:#5f6364;">// Se los juro, esto funciona
+</span></pre>
+<p>Tal vez es menos mágico de lo que pensaron. Lo que vemos aquí es que el constructor <strong>Observable</strong> sólo es una forma de posponer el trabajo hasta que se ejecuta <code>subscribe</code>. La función <code>subscriber</code> es la que hace el trabajo pesado, eso es bueno porque podemos hacer lo que sea ahí, es lo que hace que nuestros observable sean útiles.</p>
+<p>Hasta ahora no he explicado el rol de <code>observer</code> o <code>subscriber</code>. Es mejor explicarlo con un ejemplo.</p>
+<h2 id="un-ejemplo">Un ejemplo</h2>
+<p>Digamos que queremos convertir un arreglo en un Observable. ¿Cómo lo hacemos?</p>
+<p>Pensemos en lo que sabemos hasta ahora:</p>
+<ul>
+<li>Podemos colocar la lógica dentro de la función <code>subscriber</code>.</li>
+<li>Podemos contar con que nuestro objeto <code>observer</code> tendrá uno de estos tres métodos <code>next</code>, <code>error</code> y <code>complete</code></li>
+</ul>
+<p>Podemos usar los métodos de <code>observer</code> como canales de cómunicación. La función <code>next</code> recibirá los valores que nos de la fuente. Utilizaremos <code>error</code> cuando algo salga mal, algo así como el método <code>catch</code> que tienen las promesas. Por último, utilizaremos <code>complete</code> cuando la fuente deje de producir valores.</p>
+<p>La función para convertir un arreglo a observable puede ser así.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">fromArray</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">arr</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">try </span><span style="color:#5fb3b3;">{
+      </span><span style="color:#cccece;">arr</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">forEach</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+      </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">complete</span><span style="color:#5fb3b3;">();
+    } </span><span style="color:#c594c5;">catch </span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">e</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">error</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">e</span><span style="color:#5fb3b3;">);
+    }
+  });
+}
+
+</span><span style="color:#5f6364;">// Así la usamos
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">arrayStream </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">fromArray</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">4</span><span style="color:#5fb3b3;">]);
+
+</span><span style="color:#cccece;">arrayStream</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">({
+  </span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">error</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">err </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">error</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">err</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">complete</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">info</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">Listo</span><span style="color:#5fb3b3;">&#39;)
+});
+
+</span><span style="color:#5f6364;">// Y ahora a ver qué pasa en la cónsola.
+</span></pre><h3 id="tengan-cuidado">Tengan cuidado</h3>
+<p>Justo ahora nuestros observables básicamente son como un pueblo sin ley, podemos hacer todo tipo de cosas indebidas como seguir enviando valores después de llamar el método <code>complete</code>. En un mundo ideal nuestros observables deberían darnos algunas garantías. </p>
+<ul>
+<li>Los métodos del objeto <code>observer</code> deberían ser opcionales.</li>
+<li>Los métodos <code>complete</code> y <code>error</code> deberían llamar una función para dejar de observar, una función <code>unsubscribe</code> (si esta existe).</li>
+<li>Si ejecutas <code>unsubscribe</code> yo no podrás ejecutar los demás métodos.</li>
+<li>Si se ejecuta <code>complete</code> o <code>error</code> se dejarán de recibir valores.</li>
+</ul>
+<h3 id="un-ejemplo-interactivo">Un ejemplo interactivo</h3>
+<p>Ya podemos empezar a hacer cosas interesantes con lo que tenemos hasta ahora. En este ejemplo hice una función que nos permite crear un observable de un evento. </p>
+<p 
+  class="codepen" 
+  data-height="600" 
+  data-theme-id="dark" 
+  data-default-tab="js,result" 
+  data-user="VonHeikemen" 
+  data-slug-hash="wxNYPV" 
+  data-preview="true" 
+  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
+  data-pen-title="Observables - basics">
+  <span>
+    See the Pen <a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables - basics</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+<h2 id="composicion">Composición</h2>
+<p>Ahora que sabemos cómo crearlos veamos cómo podemos manipularlos para extender sus capacidades.</p>
+<p>Esta vez lo que haremos será crear funciones complementarias y modificar nuestra implementación.</p>
+<h3 id="todo-esta-en-los-operadores">Todo está en los operadores</h3>
+<p>Los operadores son funciones que nos permitirán agregar características a nuestros observables mediante una cadena de funciones. Cada una de estas funciones aceptará un observable como parámetro, lo convertirá en su fuente y devolverá un nuevo observable.</p>
+<p>Sigamos con la temática del arreglo y hagamos un operador <strong>map</strong> que intente imitar el comportamiento del método nativo map que tienen los arreglos. Nuestro operador hará lo siguiente: tomará un valor, aplicará una función sobre ese valor y emitirá el resultado.</p>
+<p>Hagamos el intento:</p>
+<p>Primer paso, vamos a recibir la función y la fuente de datos, luego devolveremos un observable.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">transformFn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">source$</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// continuará
+  </span><span style="color:#5fb3b3;">});
+}
+</span></pre>
+<p>Ahora viene lo interesante, la fuente que recibimos es un observable y eso significa que podemos suscribirnos para recibir valores.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> function map(transformFn, source$) {
+   return Observable(function(observer) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    return source$.subscribe(function(value) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      // continuará
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    });
+</span><span style="color:#cccece;">   });
+ }
+</span></pre>
+<p>Lo siguiente será pasar el resultado de la transformación a <code>observer</code> para que puedan &quot;verlo&quot; cuando se suscriban a este nuevo observable.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> function map(transformFn, source$) {
+   return Observable(function(observer) {
+     return source$.subscribe(function(value) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      var newValue = transformFn(value);
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      observer.next(newValue);
+</span><span style="color:#cccece;">     });
+   });
+ }
+</span></pre>
+<p>Hay otra forma de hacer esto. Si usamos funciones de una expresión (Arrow functions como se les conoce por ahí) sería algo así.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">transformFn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">source$</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer </span><span style="color:#c594c5;">=&gt; 
+    </span><span style="color:#cccece;">source$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(
+      </span><span style="color:#6699cc;">transformFn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">)
+    ))
+  );
+}
+</span></pre>
+<p>Ya podemos empezar a usarlo pero justo ahora tendríamos que hacerlo de esta manera.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">fromArray</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">arr</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#cccece;">arr</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">forEach</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+    </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">complete</span><span style="color:#5fb3b3;">();
+  });
+}
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">thisArray </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">4</span><span style="color:#5fb3b3;">];
+</span><span style="color:#c594c5;">var </span><span style="color:#6699cc;">plusOne   </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">array$    </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">plusOne</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">fromArray</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thisArray</span><span style="color:#5fb3b3;">));
+
+</span><span style="color:#cccece;">array$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+</span></pre>
+<p>Eso no es muy cómodo. Y si queremos seguir usando más funciones <code>map</code> tendríamos que &quot;envolverlas&quot;, no me parece bien. Nos ocuparemos de eso ahora.</p>
+<h3 id="la-cadena">La cadena</h3>
+<p>Crearemos otro método que nos permitirá usar una cadena de operadores que extenderan un observable fuente. Esta función tomará una lista de funciones, cada función en la lista usará el observable retornado por la anterior.</p>
+<p>Primero veamos como podría hacerse esto en una función aislada.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">aFunctionArray</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">initialSource</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">var </span><span style="color:#6699cc;">reducerFn </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">source</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">source</span><span style="color:#5fb3b3;">);
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+  };
+
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">finalResult </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">aFunctionArray</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reduce</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">reducerFn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">initialSource</span><span style="color:#5fb3b3;">);
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">finalResult</span><span style="color:#5fb3b3;">;
+}
+</span></pre>
+<p>Aquí usamos <code>reduce</code> para recorrer el arreglo de funciones y por cada elemento se ejecuta <code>reducerFn</code>. Dentro de <code>reducerFn</code> en el primer recorrido <code>source</code> tendrá el valor de <code>initialSource</code> y en el resto <code>source</code> será lo que <code>reducerFn</code> retorne. <code>finalResult</code> simplemente es el último resultado de <code>reducerFn</code>.</p>
+<p>Con algunos ajustes a nuestro constructor podemos agregar esta función. También he reducido la implementación del método <code>pipe</code> con algo de ayuda.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">Observable </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">subscriber</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">observable </span><span style="color:#5fb3b3;">= {
+    </span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">observer </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">subscriber</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">SafeObserver</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">)),
+    </span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">: </span><span style="color:#c594c5;">function </span><span style="color:#5fb3b3;">(...</span><span style="color:#f99157;">fns</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">fns</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reduce</span><span style="color:#5fb3b3;">((</span><span style="color:#f99157;">source</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">source</span><span style="color:#5fb3b3;">), </span><span style="color:#cccece;">observable</span><span style="color:#5fb3b3;">);
+    }
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">observable</span><span style="color:#5fb3b3;">; 
+}
+</span></pre>
+<p>Aún tenemos que hacer una cosa para asegurarnos que los operadores sean compatibles con el método <code>pipe</code>. Justo ahora el operador <code>map</code> espera tanto <code>transformFn</code> como <code>source</code>, eso no funcionará cuando usemos <code>pipe</code>. Tendremos que dividirlo en dos funciones, una que reciba el parámetro inicial y otra que acepte la fuente. </p>
+<p>Tenemos opciones.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// Opción 1
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">transformFn</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#5f6364;">// En lugar de devolver el observable
+  // regresamos una función que espera `source`
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">source$ </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer </span><span style="color:#c594c5;">=&gt; 
+    </span><span style="color:#cccece;">source$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(
+      </span><span style="color:#6699cc;">transformFn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">)
+    ))
+  );
+}
+
+</span><span style="color:#5f6364;">// Opción 2
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">transformFn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">source$</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">source$ </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">undefined</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// en caso de no recibir `source` 
+    // devolvemos una función una que recuerde `transformFn` 
+    // y que espere `source`    
+    </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">placeholder </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">transformFn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">placeholder</span><span style="color:#5fb3b3;">);
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer </span><span style="color:#c594c5;">=&gt; 
+    </span><span style="color:#cccece;">source$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(
+      </span><span style="color:#6699cc;">transformFn</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">)
+    ))
+  );
+}
+</span></pre>
+<p>Y ya finalmente podemos extender nuestros observables así.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">var </span><span style="color:#cccece;">thisArray </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">4</span><span style="color:#5fb3b3;">];
+</span><span style="color:#c594c5;">var </span><span style="color:#6699cc;">plusOne   </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+</span><span style="color:#c594c5;">var </span><span style="color:#6699cc;">timesTwo  </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">* </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">array$ </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">fromArray</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thisArray</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">plusOne</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timesTwo</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">number: </span><span style="color:#5fb3b3;">${</span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">}`),
+  </span><span style="color:#5f6364;">// y otros...
+</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#cccece;">array$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">));
+</span></pre>
+<p>Estamos listos para crear más operadores.</p>
+<h2 id="otro-ejercicio">Otro ejercicio</h2>
+<p>Digamos que tenemos una función que muestra la hora en la cónsola cada segundo, y se detiene después de cinco segundos (sólo porque sí).</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">startTimer</span><span style="color:#5fb3b3;">() {
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">interval </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">setInterval</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">() {
+    </span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">+ </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">;
+
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">minutes </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Math</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">floor</span><span style="color:#5fb3b3;">((</span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">/ </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">) % </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">toString</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">padStart</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&#39;);
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">seconds </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Math</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">floor</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">% </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">toString</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">padStart</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&#39;);
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">timeString </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">minutes </span><span style="color:#5fb3b3;">+ &#39;</span><span style="color:#99c794;">:</span><span style="color:#5fb3b3;">&#39; + </span><span style="color:#cccece;">seconds</span><span style="color:#5fb3b3;">;
+
+    </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timeString</span><span style="color:#5fb3b3;">);
+
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timeString </span><span style="color:#5fb3b3;">=== &#39;</span><span style="color:#99c794;">00:05</span><span style="color:#5fb3b3;">&#39;) {
+      </span><span style="color:#6699cc;">clearInterval</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">interval</span><span style="color:#5fb3b3;">);
+    }
+  }, </span><span style="color:#f99157;">1000</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>Ahora bien, esa función no tiene nada de malo. Digo, hace su trabajo, es predecible y todo lo que necesitas saber está a plena vista. Pero recien aprendimos algo nuevo y queremos aplicarlo. Convertiremos esto en un observable.</p>
+<p>Primero lo primero, vamos a extraer la lógica que maneja el formateo y el cálculo del tiempo.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">paddedNumber</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">num</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">num</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">toString</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">padStart</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&#39;);
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">readableTime</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">time</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">minutes </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Math</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">floor</span><span style="color:#5fb3b3;">((</span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">/ </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">) % </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">);
+  </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">seconds </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Math</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">floor</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">time </span><span style="color:#5fb3b3;">% </span><span style="color:#f99157;">60</span><span style="color:#5fb3b3;">);
+ 
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">paddedNumber</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">minutes</span><span style="color:#5fb3b3;">) + &#39;</span><span style="color:#99c794;">:</span><span style="color:#5fb3b3;">&#39; + </span><span style="color:#6699cc;">paddedNumber</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">seconds</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>Veamos qué hacemos con el tiempo. <code>setInterval</code> es un buen candidato para convertirse una fuente, recibe un &quot;callback&quot; en el cual podemos producir valores y también tiene un mecanismo de &quot;limpieza&quot;. Es un buen observable.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">interval</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">delay</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">counter   </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+    </span><span style="color:#c594c5;">var </span><span style="color:#6699cc;">callback  </span><span style="color:#5fb3b3;">= () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">counter</span><span style="color:#5fb3b3;">++);
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">_interval </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">setInterval</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">callback</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">delay</span><span style="color:#5fb3b3;">);
+    
+    </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">setUnsubscribe</span><span style="color:#5fb3b3;">(() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">clearInterval</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">_interval</span><span style="color:#5fb3b3;">));
+    
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">unsubscribe</span><span style="color:#5fb3b3;">;
+  });
+}
+</span></pre>
+<p>Tenemos una forma reusable de crear y destruir un <code>interval</code>.</p>
+<p>Puede que hayan notado que le pasamos un número a <code>observer</code>, no lo llamamos &quot;segundos&quot; porque <code>delay</code> puede ser cualquier número. Aquí no estamos siguiendo el tiempo, estamos contando las veces que <code>callback</code> es ejecutado. ¿Por qué? Porque queremos que nuestros constructores sean genéricos. Siempre podremos modificar su comportamiento con operadores.</p>
+<p>Así usamos nuestro nuevo constructor.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// fingiremos que las demás funciones están por aquí
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">time$ </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">interval</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1000</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">plusOne</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">readableTime</span><span style="color:#5fb3b3;">)
+);
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">unsubscribe </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">time$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">timeString</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timeString</span><span style="color:#5fb3b3;">);
+  
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timeString </span><span style="color:#5fb3b3;">=== &#39;</span><span style="color:#99c794;">00:05</span><span style="color:#5fb3b3;">&#39;) {
+    </span><span style="color:#6699cc;">unsubscribe</span><span style="color:#5fb3b3;">();
+  }
+});
+</span></pre>
+<p>Está mejor. Pero ese <code>if</code> me molesta. Como que no debería estar ahí. ¿Saben que podemos hacer? Crear otro operador, uno que cancele la suscripción después de que <code>interval</code> emita cinco valores.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;">
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">total</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">source$ </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Observable</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">observer</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#5f6364;">// tendremos nuestro propio contador porque no confío
+    // en los valores que emiten otros observables
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">count </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+    </span><span style="color:#c594c5;">var </span><span style="color:#cccece;">unsubscribeSource </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">source$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">count</span><span style="color:#5fb3b3;">++;
+      </span><span style="color:#5f6364;">// pasamos cada valor a `observer`
+      // la función subscribe aún recibirá cada valor original
+      </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">);
+      
+      </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">count </span><span style="color:#5fb3b3;">=== </span><span style="color:#cccece;">total</span><span style="color:#5fb3b3;">) {
+        </span><span style="color:#5f6364;">// indicamos que el flujo a terminado y lo &quot;destruimos&quot;
+        </span><span style="color:#cccece;">observer</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">complete</span><span style="color:#5fb3b3;">();
+        </span><span style="color:#6699cc;">unsubscribeSource</span><span style="color:#5fb3b3;">();
+      }
+    });
+  });
+}
+</span></pre>
+<p>Ya tenemos un contador que se autodestruye. Finalmente.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// las otras funciones siguen ahí
+
+</span><span style="color:#c594c5;">var </span><span style="color:#cccece;">time$ </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">interval</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1000</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">pipe</span><span style="color:#5fb3b3;">(
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">plusOne</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">readableTime</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">5</span><span style="color:#5fb3b3;">)
+);
+
+</span><span style="color:#cccece;">time$</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">subscribe</span><span style="color:#5fb3b3;">({
+  </span><span style="color:#6699cc;">next</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">timeString </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">timeString</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#6699cc;">complete</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">info</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Time&#39;s up</span><span style="color:#5fb3b3;">&quot;)
+});
+</span></pre><h2 id="patio-de-juegos">Patio de juegos</h2>
+<p>Hice un par de ejemplos en codepen para poder hacer experimentos con estas cosas. <a href="https://codepen.io/VonHeikemen/pen/OwQYxG">Este de aquí</a> contiene todos el código relacionado con <code>Observable</code> y algo más.</p>
+<p>Y este de aquí es el del ejercicio.</p>
+<p 
+  class="codepen" 
+  data-height="600" 
+  data-theme-id="dark" 
+  data-default-tab="js,result" 
+  data-user="VonHeikemen" 
+  data-slug-hash="VGZXZa" 
+  data-preview="true" 
+  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
+  data-pen-title="Observables - boring timer">
+  <span>
+    See the Pen <a href="https://codepen.io/VonHeikemen/pen/VGZXZa">Observables - boring timer</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<h2 id="conclusion">Conclusión</h2>
+<p>Los Observables nos permiten hacer muchas cosas y con un algo de creatividad puedes convertir lo que sea en un observable. En serio, una promesa (Promise), una petición AJAX, un evento en el DOM, un arreglo... otro observable. Todo lo que se pueden imaginar puede ser una fuente de datos que pueden envolver en un observable. También nos dan habilidad de ensamblar soluciones utilizando funciones genéricas y otras más específicas.</p>
+<p>Aún así no son la solución perfecta para todo. Tendrán que decidir si la complejidad que traen vale la pena. Como en el ejemplo del intervalo, perdimos la simplicidad de <code>startTimer</code> por la &quot;flexibilidad&quot; de los observables.</p>
+<h2 id="fuentes">Fuentes</h2>
+<ul>
+<li><a href="https://medium.com/@benlesh/learning-observable-by-building-observable-d5da57405d87">Learning Observable By Building Observable</a></li>
+<li><a href="https://medium.com/@kevinkreuzer/observables-just-powerful-functions-a033c355b22c">Observables, just powerful functions?</a></li>
+<li><a href="https://netbasal.com/whos-afraid-of-observables-bde0dc4f48cc">Who’s Afraid of Observables?</a></li>
+<li><a href="https://netbasal.com/understanding-mergemap-and-switchmap-in-rxjs-13cf9c57c885">Understanding mergeMap and switchMap in RxJS</a></li>
+<li><a href="https://netbasal.com/javascript-observables-under-the-hood-2423f760584">JavaScript — Observables Under The Hood</a></li>
+<li><a href="https://github.com/zenparsing/zen-observable">Github repository - zen-observable</a></li>
+<li><a href="https://dev.to/supermanitu/understanding-observables">Understanding Observables</a></li>
+</ul>
+
+</div>
+
+        </div>
+
+    </body>
+
+</html>

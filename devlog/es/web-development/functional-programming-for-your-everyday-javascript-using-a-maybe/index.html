@@ -1,0 +1,571 @@
+
+  
+
+
+
+  
+  
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Devlog</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+
+      
+  <meta name="keywords" content="javascript, paradigma-funcional, aprendizaje, software, coding, development">
+
+  
+    <meta name="description" content="Veremos cómo afectaría nuestro código si utilizaramos una estructura conocida como Maybe">
+  
+
+  
+    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;un-poco-del-paradigma-funcional-en-tu-javascript-usando-un-maybe-4a33">
+  
+
+    </head>
+
+    
+    <body class="theme-base-custom ">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;"><h1>Devlog</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
+                        
+                        
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;tags&#x2F;">Explorar tags</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;">Devlog in english</a></li>
+                        
+                    </ul>
+                    © 2020 Heiker Curiel
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+
+
+<div class="post">
+  <h1 class="post-title">Un poco del paradigma funcional en tu javascript: Usando un Maybe</h1>
+  <span class="post-date">2019-10-29
+    
+    | Originalmente publicado en 
+    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;un-poco-del-paradigma-funcional-en-tu-javascript-usando-un-maybe-4a33">
+      dev.to
+    </a>
+    
+    
+    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;web-development&#x2F;functional-programming-for-your-everyday-javascript-using-a-maybe&#x2F;"> 
+        Read in english
+      </a>
+    
+  </span>
+  <p>¿Alguna vez han escuchado de las estructuras llamadas &quot;monads&quot; y lo geniales que son? Tal vez sí, pero aún no las entienden completamente. Bueno... aquí no intentaré definirlas y tampoco les diré si son geniales o no, lo que haré es mostrarles un ejemplo de cómo sería si las usaran en sus javascripts (específicamente el monad <code>Maybe</code>).</p>
+<p>Haremos algo gracioso, resolveremos un problema trivial usando métodos innecesariamente complicados.</p>
+<p>Supongamos que tenemos un diccionario guardado en un archivo .json o en un objeto plano en nuestro script.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5fb3b3;">{
+    &quot;</span><span style="color:#99c794;">accident</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#cccece;">: </span><span style="color:#5fb3b3;">[&quot;</span><span style="color:#99c794;">An unexpected, unfortunate mishap, failure or loss with the potential for harming human life, property or the environment.</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">An event that happens suddenly or by chance without an apparent cause.</span><span style="color:#5fb3b3;">&quot;], 
+    &quot;</span><span style="color:#99c794;">accumulator</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#cccece;">: </span><span style="color:#5fb3b3;">[&quot;</span><span style="color:#99c794;">A rechargeable device for storing electrical energy in the form of chemical energy, consisting of one or more separate secondary cells.</span><span style="color:#5fb3b3;">\\</span><span style="color:#99c794;">n(Source: CED)</span><span style="color:#5fb3b3;">&quot;],
+    &quot;</span><span style="color:#99c794;">acid</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#cccece;">: </span><span style="color:#5fb3b3;">[&quot;</span><span style="color:#99c794;">A compound capable of transferring a hydrogen ion in solution.</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">Being harsh or corrosive in tone.</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">Having an acid, sharp or tangy taste.</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">A powerful hallucinogenic drug manufactured from lysergic acid.</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">Having a pH less than 7, or being sour, or having the strength to neutralize  alkalis, or turning a litmus paper red.</span><span style="color:#5fb3b3;">&quot;],
+    
+     </span><span style="color:#5f6364;">// ... más palabras y significados
+    
+    </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">Paris</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#cccece;">: </span><span style="color:#5fb3b3;">[&quot;</span><span style="color:#99c794;">The capital and largest city of France.</span><span style="color:#5fb3b3;">&quot;]
+  }
+</span></pre>
+<p>Queremos crear un formulario que le permita a un usuario buscar uno de estos términos y luego muestre su signicado. Parece simple ¿Qué podría salir mal?</p>
+<p>Y porque todo el mundo adora HTML empezaremos por ahí.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">search_form</span><span style="color:#5fb3b3;">&quot;&gt;
+  &lt;</span><span style="color:#eb606b;">label </span><span style="color:#bb80b3;">for</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">search_input</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">Search a word</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">label</span><span style="color:#5fb3b3;">&gt;
+  &lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">search_input</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">text</span><span style="color:#5fb3b3;">&quot;&gt;
+  &lt;</span><span style="color:#eb606b;">button </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">submit</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">Submit</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">button</span><span style="color:#5fb3b3;">&gt;
+&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+
+&lt;</span><span style="color:#eb606b;">div </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">result</span><span style="color:#5fb3b3;">&quot;&gt;&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+</span></pre>
+<p>En nuestro primer intento sólo intentaremos obtener uno de esos valores basado en la consulta del usuario.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+// haz magia y tráeme los datos
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">entries </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">data</span><span style="color:#5fb3b3;">();
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">format</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">results</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">results</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">join</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">&lt;br&gt;</span><span style="color:#5fb3b3;">&#39;);
+}
+
+</span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">search_form</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">addEventListener</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">submit</span><span style="color:#5fb3b3;">&#39;, </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">ev</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">preventDefault</span><span style="color:#5fb3b3;">();
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">input </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">target</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">];
+  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">innerHTML </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">format</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">entries</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">input</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">]);
+});
+</span></pre>
+<p>Naturalmente lo primero que haremos es probar con acid. Ahora contemplen los resultados.</p>
+<blockquote>
+<p>A compound capable of transferring a hydrogen ion in solution.
+Being harsh or corrosive in tone.
+Having an acid, sharp or tangy taste.
+A powerful hallucinogenic drug manufactured from lysergic acid.
+Having a pH less than 7, or being sour, or having the strength to neutralize alkalis, or turning a litmus paper red.</p>
+</blockquote>
+<p>Ahora buscaremos &quot;paris&quot;, estoy seguro que está ahí. ¿Qué obtuvimos? Nada. No exactamente, tenemos.</p>
+<blockquote>
+<p>TypeError: results is undefined</p>
+</blockquote>
+<p>Pero tambíen tenemos un botón impredecible que se congela en ocasiones. ¿Pero qué queremos? ¿Qué queremos en realidad? Seguridad, objetos que no hagan estallar nuestra aplicación, queremos objetos confiables.</p>
+<p>Entonces lo que haremos será implementar una especie de contenedor que nos permita describir el flujo de ejecución sin tener que preocuparnos por el valor que este contenga. ¿Suena bien, no? Déjenme mostrarles lo que quiero decir con un poco de javascript. Intenten esto.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#6699cc;">is_even </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">num </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">num </span><span style="color:#5fb3b3;">% </span><span style="color:#f99157;">2 </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">;
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">odd_arr </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">4</span><span style="color:#5fb3b3;">,</span><span style="color:#f99157;">5</span><span style="color:#5fb3b3;">].</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">is_even</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">toString</span><span style="color:#5fb3b3;">());
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">empty_arr </span><span style="color:#5fb3b3;">= [].</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">is_even</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">toString</span><span style="color:#5fb3b3;">());
+
+</span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">({</span><span style="color:#cccece;">odd_arr</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">empty_arr</span><span style="color:#5fb3b3;">});
+</span></pre>
+<p>¿Generó un error el arreglo vacío? (si lo hizo díganme). ¿No es genial? ¿No se siente bien saber que los métodos del arreglo harán lo correcto incluso si no tienen nada con qué trabajar? Eso es lo que queremos.</p>
+<p>Tal vez se estén preguntando ¿No puedo simplemente poner un <code>if</code> y ya? Bueno... sí, ¿pero eso qué tiene de divertido? Todos saben que hacer una cadena de funciones se ve genial, y somos fánaticos de la &quot;programación funcional,&quot; así que haremos lo que los conocedores de ese paradigma harían: <strong>esconderemos todo dentro de una función</strong>. </p>
+<p>Entonces lo que haremos será esconder un par de <code>if</code>, si el valor que debemos evaluar es indefinido devolveremos un contenedor que sabrá qué hacer sin importar lo que pase.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// maybe.js
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">the_thing</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">the_thing </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">null 
+     </span><span style="color:#5fb3b3;">|| </span><span style="color:#cccece;">the_thing </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">undefined 
+     </span><span style="color:#5fb3b3;">|| </span><span style="color:#cccece;">the_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">is_nothing
+  </span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Nothing</span><span style="color:#5fb3b3;">();
+  }
+
+  </span><span style="color:#5f6364;">// No queremos estructuras anidadas.
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">the_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">the_thing</span><span style="color:#5fb3b3;">;
+  }
+
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Just</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">the_thing</span><span style="color:#5fb3b3;">);
+}
+
+</span></pre>
+<p>Pero estos contenedores no serán los típicos <code>Maybe</code> que se ven en un lenguaje propio del paradigma funcional. Nosotros haremos trampa en el nombre de la conveniencia y los efectos secundarios. Sus métodos estaran inspirados por el tipo de dato <code>Option</code> que tiene Rust. Aquí es donde está la magia.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// maybe.js
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">Just</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">thing</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">)),
+    </span><span style="color:#6699cc;">and_then</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">),
+    </span><span style="color:#6699cc;">or_else</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">),
+    </span><span style="color:#6699cc;">tap</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">), </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">)),
+    </span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">,
+    
+    </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">predicate_fun </span><span style="color:#c594c5;">=&gt; 
+      </span><span style="color:#6699cc;">predicate_fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">) 
+        ? </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">) 
+        : </span><span style="color:#6699cc;">Nothing</span><span style="color:#5fb3b3;">(),
+    
+    </span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">is_nothing</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#6699cc;">inspect</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">Just(</span><span style="color:#5fb3b3;">${</span><span style="color:#cccece;">thing</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">)</span><span style="color:#5fb3b3;">`,
+  };
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">Nothing</span><span style="color:#5fb3b3;">() {
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#cccece;">map</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">Nothing</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">and_then</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">Nothing</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#6699cc;">or_else</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(),
+    </span><span style="color:#cccece;">tap</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">Nothing</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">,
+
+    </span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">Nothing</span><span style="color:#5fb3b3;">,
+
+    </span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">is_nothing</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#6699cc;">inspect</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">Nothing</span><span style="color:#5fb3b3;">`,
+  };
+}
+</span></pre>
+<p>¿Qué hacen estos métodos?</p>
+<ul>
+<li><code>map</code>: Aplica la función <code>fun</code> a <code>the_thing</code> y vuelve a colocarlo en un <code>Maybe</code> para mantener la forma del objeto, esto para que podamos encadenar más funciones.</li>
+<li><code>and_then</code>: Este sólo está ahí para los casos de emergencia. Aplica la función <code>fun</code> y que el destino decida el resto.</li>
+<li><code>or_else</code>: Este sería el complemento <code>else</code> para nuestro <code>map</code> y <code>and_then</code>. Es el otro camino. El &quot;¿qué pasa si no hay nada ahí?&quot;</li>
+<li><code>tap</code>: Está ahí para cuando necesitemos una función que afecta algo que está fuera de su ámbito (o tal vez es sólo para colocar un <code>console.log</code>).</li>
+<li><code>filter</code>: Si la función que proporcionas devuelve <code>true</code> o algo parecido entonces &quot;te dejará pasar.&quot; </li>
+<li><code>unwrap_or</code>: Este es el que saca el valor del contenedor. Usarán esto cuando se cansen de encadenar funciones y estén listos para volver al mundo imperativo.</li>
+</ul>
+<p>Volvamos a nuestro formulario para aplicar todo esto. Crearemos una función <code>search</code> que puede o no devolvernos un resultado a la consulta del usuario. Si lo hace encadenamos otras funciones que se ejecutarán en un &quot;contexto seguro.&quot;</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">search </span><span style="color:#5fb3b3;">= (</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">input</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">input</span><span style="color:#5fb3b3;">]);
+
+</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">search_word </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">word </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">search</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">entries</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">format</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">word not found</span><span style="color:#5fb3b3;">&#39;);
+</span></pre>
+<p>Ahora reemplazamos la antigua función.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> window.search_form.addEventListener(&#39;submit&#39;, function(ev) {
+   ev.preventDefault();
+   let input = ev.target[0];
+</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  window.result.innerHTML = format(entries[input.value]);
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  window.result.innerHTML = search_word(input.value);
+</span><span style="color:#cccece;"> });
+</span></pre>
+<p>Probemos. Buscaremos &quot;accident.&quot;</p>
+<blockquote>
+<p>An unexpected, unfortunate mishap, failure or loss with the potential for harming human life, property or the environment.
+An event that happens suddenly or by chance without an apparent cause.</p>
+</blockquote>
+<p>Ahora Paris. Busquemos &quot;paris.&quot;</p>
+<blockquote>
+<p>word not found</p>
+</blockquote>
+<p>No congeló el botón, eso es bueno. Pero yo sé que Paris está ahí. Si revisan verán que está &quot;Paris.&quot; Sólo tendremos que colocar en mayúscula la primera letra para que el usuario no tenga que hacerlo. Primero intentaremos buscar la palabra exacta y luego intentamos del otro modo.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">create_search</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">exact</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">input </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">word </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">exact </span><span style="color:#5fb3b3;">? </span><span style="color:#cccece;">input </span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">capitalize</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">input</span><span style="color:#5fb3b3;">);
+    </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">]);
+  }
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">capitalize</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">str</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">str</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">charAt</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">toUpperCase</span><span style="color:#5fb3b3;">() + </span><span style="color:#cccece;">str</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">);
+}
+</span></pre>
+<p>Modificamos la función <code>search</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;"> const search = (data, input) =&gt; Maybe(data[input]);
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> const search = create_search(entries, true);
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> const search_name = create_search(entries, false);
+</span><span style="color:#5fb3b3;">-
+-</span><span style="color:#ec5f67;"> const search_word = word =&gt; search(entries, word)
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> const search_word = word =&gt; search(word)
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">   .or_else(() =&gt; search_name(word))
+</span><span style="color:#cccece;">    .map(format)
+    .unwrap_or(&#39;word not found&#39;);
+</span></pre>
+<p>Bien. Esto es lo que tenemos hasta ahora en <code>main.js</code> si quieren ver todo el panorama.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">entries </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">data</span><span style="color:#5fb3b3;">();
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">create_search</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">exact</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">input </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">word </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">exact </span><span style="color:#5fb3b3;">? </span><span style="color:#cccece;">input </span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">capitalize</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">input</span><span style="color:#5fb3b3;">);
+    </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">]);
+  }
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">capitalize</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">str</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">str</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">charAt</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">toUpperCase</span><span style="color:#5fb3b3;">() + </span><span style="color:#cccece;">str</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">);
+}
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">format</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">results</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">results</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">join</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">&lt;br&gt;</span><span style="color:#5fb3b3;">&#39;);
+}
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">search </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">create_search</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">entries</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">);
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">search_name </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">create_search</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">entries</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">);
+
+</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">search_word </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">word </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">search</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">or_else</span><span style="color:#5fb3b3;">(() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">search_name</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">))
+  .</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">format</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">word not found</span><span style="color:#5fb3b3;">&#39;);
+
+</span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">search_form</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">addEventListener</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">submit</span><span style="color:#5fb3b3;">&#39;, </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">ev</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">preventDefault</span><span style="color:#5fb3b3;">();
+  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">input </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">target</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">];
+  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">innerHTML </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">search_word</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">input</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">);
+});
+</span></pre>
+<p>¿Pero es todo lo que queremos? No, claro que no, también queremos encontrar el amor, pero ya que javascript no puede hacer eso, nos conformaremos con agregar una funcionalidad de &quot;sugerencia.&quot; Quiero que cuando escriba &quot;accu&quot; y presione el botón, que salga un dialogo que me diga &quot;Did you mean accumulator?&quot; (en inglés porque no me pagan lo suficiente para traducir los mensajes del sistema) </p>
+<p>Para esto necesitaremos ayuda, instalaremos una dependencia, una que encuentre resultados similares: <a href="https://github.com/wouter2203/fuzzy-search#readme">fuzzy-search</a>. Agreguemos lo siguiente.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">import </span><span style="color:#cccece;">FuzzySearch </span><span style="color:#c594c5;">from </span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">https://unpkg.com/fuzzy-search@3.0.1/src/FuzzySearch.js</span><span style="color:#5fb3b3;">&#39;;
+
+</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">fzf </span><span style="color:#5fb3b3;">= new </span><span style="color:#cccece;">FuzzySearch</span><span style="color:#5fb3b3;">(
+  </span><span style="color:#fac863;">Object</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">keys</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">entries</span><span style="color:#5fb3b3;">),
+  [],
+  {</span><span style="color:#6699cc;">caseSensitive</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">sort</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">}
+);
+</span></pre>
+<p>Pero volvemos a la misma situación, esta no sería una operación segura porque en el momento que intentemos sacar un resultado de un arreglo vacío todo se cae. ¿Entonces qué hacemos? Escondemos todo debajo de una función.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">suggest</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">word</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">matches </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">fzf</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">search</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">word</span><span style="color:#5fb3b3;">);
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">matches</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">]);
+}
+</span></pre>
+<p>FuzzySearch está listo, ahora agregaremos un grandioso dialogo de confirmación.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">confirm_word</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value </span><span style="color:#5fb3b3;">&amp;&amp; </span><span style="color:#6699cc;">confirm</span><span style="color:#5fb3b3;">(`</span><span style="color:#99c794;">Did you mean </span><span style="color:#5fb3b3;">${</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">}`)) {
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">;
+  }
+}
+</span></pre>
+<p>Combinemos las nuevas funciones con <code>search</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// main.js
+
+</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">suggest_word </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">value </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">suggest</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">value</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">confirm_word</span><span style="color:#5fb3b3;">)
+  .</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">search</span><span style="color:#5fb3b3;">);
+</span></pre>
+<p>Agregamos la nueva funcionalidad a <code>search_word</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> const search_word = word =&gt; search(word)
+   .or_else(() =&gt; search_name(word))
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  .or_else(suggest_word(word))
+</span><span style="color:#cccece;">   .map(format)
+   .unwrap_or(&#39;word not found&#39;);
+</span></pre>
+<p>Funciona. Pero ahora digamos que somos alérgicos a los <code>if</code>, sin mencionar que es de mala educación devolver <code>undefined</code> de una función. Podemos ser mejores.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> function confirm_word(value) {
+</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  if(value &amp;&amp; confirm(`Did you mean ${value}`)) {
+</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    return value;
+</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  }
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  return confirm(`Did you mean ${value}`);
+</span><span style="color:#cccece;"> }
+</span></pre><pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> const suggest_word = value =&gt; () =&gt; suggest(value)
+</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  .map(confirm_word)
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  .filter(confirm_word)
+</span><span style="color:#cccece;">   .map(search);
+</span></pre>
+<p>Algo me molesta. Cuando busco &quot;accu,&quot; el dialogo aparece, confirmo la sugerencia y el resultado aparece. Pero &quot;accu&quot; sigue ahí en el formulario, es incómodo. Haremos el formulario se actualice con la palabra correcta.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">const </span><span style="color:#6699cc;">update_input </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">search_form</span><span style="color:#5fb3b3;">[</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">].</span><span style="color:#f99157;">value </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">;
+</span></pre><pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> const suggest_word = value =&gt; () =&gt; suggest(value)
+   .filter(confirm_word)
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  .tap(update_input)
+</span><span style="color:#cccece;">   .map(search);
+</span></pre>
+<p>¿Quieren verlo en acción? Aquí tienen.</p>
+<p 
+  class="codepen" 
+  data-height="600" 
+  data-theme-id="dark" 
+  data-default-tab="js,result" 
+  data-user="VonHeikemen" 
+  data-slug-hash="JjjNvLE" 
+  data-preview="true" 
+  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
+  data-pen-title="Maybe I got your word">
+  <span>
+    See the Pen <a href="https://codepen.io/VonHeikemen/pen/JjjNvLE">Maybe I got your word</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+<h2 id="bonus-track">Bonus track</h2>
+<blockquote>
+<p><em>Advertencia</em>: El objetivo de todo esto ya fue logrado, que vieran ese ejemplo en codepen. Lo que sigue es un experimento para ver si podía agregar soporte de operaciones asíncronas en la función <code>Maybe</code>. Si ya están cansados vayan directo al final y vean el último ejemplo.</p>
+</blockquote>
+<p>Ahora quizá estén pensando: muy bonito y todo pero en el &quot;mundo real&quot; hacemos peticiones a servidores, consultamos bases de datos, hacemos todo tipo de cosas asíncronas, ¿puedo usar eso en este contexto? </p>
+<p>Bien. Entiendo. La implementación actual sólo contempla tareas normales. Tendrían que romper la cadena de <code>Maybe</code>s en el momento que aparezca una promesa (<code>Promise</code>)</p>
+<p>Podemos crear un nuevo <code>Just</code> que esté consciente de que contiene una promesa. Es perfectamente posible, ¿un <code>AsyncJust</code>? ¿<code>JustAsync</code>? Suena horrible. </p>
+<p>Por si no lo saben, una promesa en javascript (me refiero a una instancia de la clase <code>Promise</code>) es un tipo de dato que se utiliza para coordinar eventos futuros. Lo hace usando un método llamado <code>then</code> el cual acepta una función (lo que llaman callback) y también tiene un método <code>catch</code> para cuando las cosas salen mal. Pero si controlamos lo que va dentro del <code>then</code> podemos mantener la misma interface del <code>Maybe</code>.</p>
+<p>¿Qué tan buenos son siguiendo un montón de callbacks?</p>
+<p>Aquí está. Lo llamaré <code>Future</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#5f6364;">// no me juzguen
+
+</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">promise_thing</span><span style="color:#5fb3b3;">) { 
+  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">map_future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">))),
+    </span><span style="color:#6699cc;">and_then</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">map_future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">))),
+    </span><span style="color:#6699cc;">or_else</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">catch</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">)),
+    </span><span style="color:#6699cc;">tap</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">), </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">))),
+    </span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">catch</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">),
+
+    </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_thing</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">filter_future</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">))), 
+
+    </span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">is_nothing</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#cccece;">is_future</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">,
+    </span><span style="color:#6699cc;">inspect</span><span style="color:#5fb3b3;">: () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">&lt;Promise&gt;</span><span style="color:#5fb3b3;">`
+  };
+}
+</span></pre>
+<p>Si apartamos todo el ruido tal vez se pueda entender mejor.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;">
+</span><span style="color:#5fb3b3;">{
+  </span><span style="color:#cccece;">map</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#cccece;">and_then: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#cccece;">or_else: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">catch</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">),
+  </span><span style="color:#cccece;">tap: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">), </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">))</span><span style="color:#cccece;">)</span><span style="color:#5fb3b3;">,
+  </span><span style="color:#cccece;">unwrap_or: </span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">catch</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">),
+
+  </span><span style="color:#cccece;">filter: </span><span style="color:#f99157;">fun </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fun</span><span style="color:#5fb3b3;">), 
+</span><span style="color:#cccece;">}
+</span></pre>
+<ul>
+<li><code>map</code>/<code>and_then</code>: estos son iguales porque no puedes escaparte de una promesa.</li>
+<li><code>or_else</code>: toma la función proporcionada y la pasa al método <code>catch</code>, esto para imitar el comportamiento de un <code>else</code>.</li>
+<li><code>tap</code>: usa el método <code>then</code> para &quot;echarle un vistazo&quot; al valor dentro de la promesa. Este método es conviniente para colocar esas funciones &quot;impuras&quot; que tienen efecto sobre el mundo exterior.</li>
+<li><code>unwrap_or</code>: Esto devuelve la promesa para que puedan usar <code>await</code>. Si todo sale bien obtendrán el valor original de la promesa, sino devolverá el primer parámetro que fue proporcionado.</li>
+<li><code>filter</code>: este es un caso especial de <code>map</code>, es por eso que existe <code>filter_future</code>. </li>
+<li>Casi todos estos métodos devuelven un nuevo <code>Future</code> porque <code>promise.then</code> siempre devuelve una nueva promesa.</li>
+</ul>
+<p>Pero lo que hace que <code>Future</code> sea raro es lo que pasa dentro de <code>map</code>. ¿Recuerdan <code>map_future</code>?</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">map_future</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fun</span><span style="color:#5fb3b3;">) { </span><span style="color:#5f6364;">// `fun` es el callback proporcionado
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#5f6364;">/* Evaluemos el valor original de la promesa */
+
+    </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">promise_content </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">;
+
+    </span><span style="color:#5f6364;">// Necesitamos decidir si podemos confiar 
+    // en el valor original
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_content</span><span style="color:#5fb3b3;">).</span><span style="color:#cccece;">is_nothing</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reject</span><span style="color:#5fb3b3;">();
+      </span><span style="color:#c594c5;">return</span><span style="color:#5fb3b3;">;
+    }
+
+    </span><span style="color:#5f6364;">// Si es un Just obtenemos su contenido
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_content</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#cccece;">promise_content </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">();
+    }
+
+    </span><span style="color:#5f6364;">/* Evaluemos el valor que devuelve el callback */
+
+    // Usaremos Maybe otra vez 
+    // porque tengo problemas de confianza.
+    </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">Maybe</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">promise_content</span><span style="color:#5fb3b3;">));
+
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">is_just</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#5f6364;">// Si llegamos hasta aquí todo está bien.
+      </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">unwrap_or</span><span style="color:#5fb3b3;">();
+    }
+
+    </span><span style="color:#5f6364;">// en este punto debería revisar si result
+    // tiene un Future pero de ser así
+    // lo están usando mal, así que por ahora
+    // no hago nada.
+
+    // Algo anda muy mal.
+    </span><span style="color:#c594c5;">return </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reject</span><span style="color:#5fb3b3;">();
+  }
+}
+</span></pre>
+<p>Ahora <code>filter_future</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter_future</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">predicate_fun</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">val </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+    </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">predicate_fun</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">);
+
+    </span><span style="color:#5f6364;">// ¿Acaso devolviste una promesa?
+    </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">then</span><span style="color:#5fb3b3;">) {
+      </span><span style="color:#5f6364;">// Lo hiciste. Es por eso que no te pasan cosas buenas.
+ 
+      // veamos dentro de la promesa.
+      </span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">return_result </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">the_real_result </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">the_real_result 
+        </span><span style="color:#5fb3b3;">? </span><span style="color:#cccece;">val
+        </span><span style="color:#5fb3b3;">: </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reject</span><span style="color:#5fb3b3;">();
+
+      </span><span style="color:#5f6364;">// mantenemos la cadena viva.
+      </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">return_result</span><span style="color:#5fb3b3;">);
+    }
+
+    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">? </span><span style="color:#cccece;">val </span><span style="color:#5fb3b3;">: </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">reject</span><span style="color:#5fb3b3;">();
+  }
+}
+</span></pre>
+<p>Lo último que me gustaría hacer es crear una función que convierta un valor regular en un <code>Future</code>.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#fac863;">Future</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">from_val </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">val</span><span style="color:#5fb3b3;">) {
+  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">Future</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">resolve</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">val</span><span style="color:#5fb3b3;">));
+}
+</span></pre>
+<p>Ahora lo que tenemos que hacer para agregar soporte dentro de <code>Maybe</code> es esto.</p>
+<pre style="background-color:#2b2c2f;">
+<span style="color:#cccece;"> function Maybe(the_thing) {
+   if(the_thing === null 
+     || the_thing === undefined 
+     || the_thing.is_nothing
+   ) {
+     return Nothing();
+   }
+</span><span style="color:#5fb3b3;">-
+-</span><span style="color:#ec5f67;">  if(the_thing.is_just) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  if(the_thing.is_future || the_thing.is_just) {
+</span><span style="color:#cccece;">     return the_thing;
+    }
+
+    return Just(the_thing);
+ }
+</span></pre>
+<p>Pero la pregunta del millón sigue ahí. ¿Funciona?</p>
+<p>Hice una  &quot;<a href="https://github.com/VonHeikemen/maybe-type-in-js">versión para terminal</a>&quot; de esta aplicación. También modifiqué el ejemplo de codepen: agregué las funciones relacionadas con <code>Future</code>, el dialogo de confirmación ahora sí es un dialogo (<a href="https://github.hubspot.com/vex/">este</a>) y la función del evento 'submit' la marqué con <code>async</code> para poder usar <code>await</code>.</p>
+<p 
+  class="codepen" 
+  data-height="600" 
+  data-theme-id="dark" 
+  data-default-tab="js,result" 
+  data-user="VonHeikemen" 
+  data-slug-hash="oNNwagG" 
+  data-preview="true" 
+  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
+  data-pen-title="Maybe I will promise you a word">
+  <span>
+    See the Pen <a href="https://codepen.io/VonHeikemen/pen/oNNwagG">Maybe I will promise you a word</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
+  </span>
+</p>
+<h3 id="bonus-bonus-edit">Bonus bonus edit</h3>
+<p>Antes mencioné que haríamos trampa con esta implementación. <a href="https://codepen.io/VonHeikemen/pen/QWWYJwZ">Así sería</a> con una implementación más apegada a las ideas del paradigma funcional.</p>
+
+</div>
+
+        </div>
+
+    </body>
+
+</html>

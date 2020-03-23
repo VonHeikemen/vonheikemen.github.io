@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://vonheikemen.github.io/devlog/sitemap.xml

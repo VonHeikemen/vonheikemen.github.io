@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="/css/components/header.css">
   <link rel="stylesheet" href="/css/components/navigation.css">
   <link rel="stylesheet" href="/css/components/about.css">
-  <link rel="stylesheet" href="/css/components/projects.css">
+  <link rel="stylesheet" href="/css/components/contact.css">
   <link rel="stylesheet" href="/css/components/footer.css">
 </head>
 <body>
@@ -30,13 +30,13 @@
         </a>
       </li>
       <li class="nav__item">
-        <a class="nav__link" href="#projects">
-          Projects
+        <a class="nav__link" href="#contact">
+          Contact
         </a>
       </li>
       <li class="nav__item">
-        <a class="nav__link" href="#contact">
-          Contact
+        <a class="nav__link" href="/devlog">
+          Devlog
         </a>
       </li>
     </ul>
@@ -77,91 +77,73 @@
   
   <section style="display: none;" id="education"></section>
   
-  <section id="projects" class="section-container projects">
-    <h2 class="title">Projects</h2>
-    <ul class="projects__list">
-      <!-- Tribute-Page -->
-      <li class="card">
-        <div class="card__container">
-          <div class="card__image">
-            <img src="/images/tribute-page.png" alt="tribute page screenshot">
-          </div>
-          <div class="card__info">
-            <h3 class="card__title">Tribute Page</h3>
-            <p>
-              A project part of the FreeCodeCamp basic frontend projects. Focused on Lacey Sturm, american singer/songwriter and former lead vocalist of the hard rock band Flyleaf.
-            </p>
-            <a class="card__link" href="https://codepen.io/VonHeikemen/pen/WdmVPm">Link to project</a>
-          </div>
-        </div>
-      </li>
-
-      <!-- Node Chat App -->
-      <li class="card">
-        <div class="card__container">
-          <div class="card__image">
-            <img src="/images/node-chat-app.png" alt="node chat app screenshot">
-          </div>
-          <div class="card__info">
-            <h3 class="card__title">Node Chat App</h3>
-            <p>
-              A very basic chat application build with NodeJS and socket.io. You can visit the live demo <a class="card__link" href="https://salty-spire-72538.herokuapp.com/">here</a>
-            </p>
-            <a class="card__link" href="https://github.com/VonHeikemen/node-chat-app">Link to project</a>
-          </div>
-        </div>
-      </li>
-
-      <!-- Expensify -->
-      <li class="card">
-        <div class="card__container">
-          <div class="card__image">
-            <img src="/images/expensify-app.png" alt="expensify screenshot">
-          </div>
-          <div class="card__info">
-            <h3 class="card__title">Expensify</h3>
-            <p>
-              A React app create to track expenses. Build with React and Firebase. You can vist the live demo <a class="card__link" href="https://desolate-savannah-67115.herokuapp.com/login">here</a>
-            </p>
-            <a class="card__link" href="https://github.com/VonHeikemen/expensify-demo">Link to project</a>
-          </div>
-        </div>
-      </li>
-    </ul>
-  </section>
+  <section style="display: none;" id="projects"></section>
   
   <section style="display: none;" id="skills"></section>
 
-  <section style="display: none;" class="contact"></section>
+  <section id="contact" class="contact section-container">
+    <h2 class="title">Contact</h2>
+    <ul class="contact__list">
+      <li class="contact__container">
+        <a href="https://github.com/VonHeikemen/" class="contact__item">
+          <span class="contact__icon">
+            <i class="fa fa-github fa-4" aria-hidden="true"></i>
+          </span>
+          <h3 class="contact__name">Github</h3>
+        </a>
+      </li>
+      <li class="contact__container">
+        <a href="https://twitter.com/VonHeikemen_" class="contact__item">
+          <span class="contact__icon">
+            <i class="fa fa-twitter fa-4" aria-hidden="true"></i>
+          </span>
+          <h3 class="contact__name">Twitter</h3>
+        </a>
+      </li>
+      <li class="contact__container">
+        <a href="https://www.linkedin.com/in/heiker-curiel-609970121/?locale=en_US" class="contact__item">
+          <span class="contact__icon">
+            <i class="fa fa-linkedin-square fa-4" aria-hidden="true"></i>
+          </span>
+          <h3 class="contact__name">Linkedin</h3>
+        </a>
+      </li>
+      <li class="contact__container">
+        <a href="https://codepen.io/VonHeikemen/" class="contact__item">
+          <span  class="contact__icon">
+            <i class="fa fa-codepen fa-4" aria-hidden="true"></i>
+          </span>
+          <h3 class="contact__name">Codepen</h3>
+        </a>
+      </li>
+      <li class="contact__container">
+        <a href="https://stackblitz.com/@VonHeikemen" class="contact__item">
+          <span class="contact__icon">
+            <i class="fa fa-flash fa-4" aria-hidden="true"></i>
+          </span>
+          <h3 class="contact__name">Stackblitz</h3>
+        </a>
+      </li>
+      <li class="contact__container">
+        <a href="https://dev.to/vonheikemen" class="contact__item">
+          <span class="contact__icon">
+            <img class="img-dev" src="https://d2fltix0v2e0sb.cloudfront.net/dev-badge.svg" alt="Heiker's DEV Profile">
+          </span>
+          <h3 class="contact__name">Dev.to</h3>
+        </a>
+      </li>
+    </ul>
+  </section>
 
-  <footer id="contact" class="footer">
-    <p class="copyright">
-      Copyright © 2018 Heiker Curiel
-    </p>
+  <footer class="footer">
     <div class="footer__center">
       <a href="#home" class="footer__arrow">
         <i class="fa fa-chevron-up" aria-hidden="true"></i>
       </a>
     </div>
-    <div class="footer__list-container">
-      <ul class="footer__list">
-        <li class="footer__link">
-          <a class="footer__link-anchor" target="_blank" href="https://github.com/VonHeikemen/">
-            <i class="fa fa-github" aria-hidden="true"></i>
-          </a>
-        </li>
-        <li class="footer__link">
-          <a class="footer__link-anchor" target="_blank" href="https://twitter.com/VonHeikemen_">
-            <i class="fa fa-twitter" aria-hidden="true"></i>
-          </a>
-        </li>
-        <li class="footer__link">
-          <a class="footer__link-anchor" target="_blank" href="https://www.linkedin.com/in/heiker-curiel-609970121/?locale=en_US">
-            <i class="fa fa-linkedin-square" aria-hidden="true"></i>
-          </a>
-        </li>
-      </ul>
-    </div>
+    <p class="copyright">
+      Copyright © 2018-2020 Heiker Curiel
+    </p>
   </footer>
   
   <script src="/js/index.js"></script>
