@@ -1,394 +1,205 @@
-
+<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>Devlog | Un poco del paradigma funcional en tu javascript: Aplicación parcial</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,paradigma-funcional,aprendizaje,software,coding,development"><meta name=description content="Resolviendo el misterio de la función como primer parámetro"><link rel=canonical href=https://dev.to/vonheikemen/un-poco-del-paradigma-funcional-en-tu-javascript-aplicacion-parcial-41kl><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/es/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>Portfolio</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/tags/>Explorar tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/>Devlog in english</a></ul>© 2020 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Un poco del paradigma funcional en tu javascript: Aplicación parcial</h1><span class=post-date>2020-03-10
+| Originalmente publicado en
+<a href=https://dev.to/vonheikemen/un-poco-del-paradigma-funcional-en-tu-javascript-aplicacion-parcial-41kl>dev.to</a>
+| <a href=https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-partial-application/>Read in english</a></span><p>Hoy vamos a resolver un misterio, el misterio de porque algunas personas crean funciones que aceptan una (otra) función como primer parámetro. Ya deben estar pensando que la respuesta es aplicación parcial y tienen razón en cierta parte, pero la aplicación parcial sólo es el medio para un fin, la verdadera razón de esto es para hacer posible una "mejor" composición de funciones. Pero antes de adentrarnos en los detalles técnicos de la aplicación parcial vamos a explorar la manera en la que hacemos las cosas actualmente.<h2 id=como-hacemos-las-cosas>Como hacemos las cosas</h2><p>Cuando creamos una función usualmente ordenamos los parámetros basados en un sistema de prioridad/importancia, donde el más importante va primero. Como resultado, cuando trabajamos sobre un dato este es el primero en la lista, le siguen los parámetros de configuración y por último dejamos los parámetros opcionales que podemos omitir.<p>Pongamos a prueba esa teoría. Digamos que queremos crear una función que pueda extraer unas propiedades específicas de un objeto plano. Pensemos en lo que necesitamos. ¿El objeto, eso en lo primero que pensaron? Es natural, no queremos omitirlo por accidente cuando ejecutemos la función. Eso deja la lista de propiedades como último parámetro.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>let </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= {};
   
-
-
-
-  
-  
-  
-
-
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-      <!-- Enable responsiveness on mobile devices-->
-      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-
-      <title>Devlog</title>
-
-      <!-- CSS -->
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
-
-      
-
-      
-  <meta name="keywords" content="javascript, paradigma-funcional, aprendizaje, software, coding, development">
-
-  
-    <meta name="description" content="Resolviendo el misterio de la función como primer parámetro">
-  
-
-  
-    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;un-poco-del-paradigma-funcional-en-tu-javascript-aplicacion-parcial-41kl">
-  
-
-    </head>
-
-    
-    <body class="theme-base-custom ">
-        
-            <div class="sidebar">
-                <div class="container sidebar-sticky">
-                    <div class="sidebar-about">
-                        
-                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;"><h1>Devlog</h1></a>
-                            
-                        
-                    </div>
-
-                    <ul class="sidebar-nav">
-                        
-                        
-                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
-                        
-                        
-                        
-                        
-                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;tags&#x2F;">Explorar tags</a></li>
-                        
-                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;">Devlog in english</a></li>
-                        
-                    </ul>
-                    © 2020 Heiker Curiel
-                </div>
-            </div>
-        
-
-        <div class="content container">
-            
-
-
-
-<div class="post">
-  <h1 class="post-title">Un poco del paradigma funcional en tu javascript: Aplicación parcial</h1>
-  <span class="post-date">2020-03-10
-    
-    | Originalmente publicado en 
-    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;un-poco-del-paradigma-funcional-en-tu-javascript-aplicacion-parcial-41kl">
-      dev.to
-    </a>
-    
-    
-    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;web-development&#x2F;functional-programming-for-your-everyday-javascript-partial-application&#x2F;"> 
-        Read in english
-      </a>
-    
-  </span>
-  <p>Hoy vamos a resolver un misterio, el misterio de porque algunas personas crean funciones que aceptan una (otra) función como primer parámetro. Ya deben estar pensando que la respuesta es aplicación parcial y tienen razón en cierta parte, pero la aplicación parcial sólo es el medio para un fin, la verdadera razón de esto es para hacer posible una &quot;mejor&quot; composición de funciones. Pero antes de adentrarnos en los detalles técnicos de la aplicación parcial vamos a explorar la manera en la que hacemos las cosas actualmente.</p>
-<h2 id="como-hacemos-las-cosas">Como hacemos las cosas</h2>
-<p>Cuando creamos una función usualmente ordenamos los parámetros basados en un sistema de prioridad/importancia, donde el más importante va primero. Como resultado, cuando trabajamos sobre un dato este es el primero en la lista, le siguen los parámetros de configuración y por último dejamos los parámetros opcionales que podemos omitir.</p>
-<p>Pongamos a prueba esa teoría. Digamos que queremos crear una función que pueda extraer unas propiedades específicas de un objeto plano. Pensemos en lo que necesitamos. ¿El objeto, eso en lo primero que pensaron? Es natural, no queremos omitirlo por accidente cuando ejecutemos la función. Eso deja la lista de propiedades como último parámetro. </p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">obj</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">keys</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">let </span><span style="color:#cccece;">result </span><span style="color:#5fb3b3;">= {};
-  
-  </span><span style="color:#c594c5;">for</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">key of keys</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">] = </span><span style="color:#cccece;">obj</span><span style="color:#5fb3b3;">[</span><span style="color:#cccece;">key</span><span style="color:#5fb3b3;">];
+  </span><span style=color:#c594c5>for</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>key of keys</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>] = </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>];
   }
   
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">result</span><span style="color:#5fb3b3;">;
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>;
 }
-</span></pre>
-<blockquote>
-<p>Nota: No somos lo únicos que pensamos de esta manera, echen un vistazo a <a href="https://lodash.com/docs/#pick">pick de lodash</a></p>
-</blockquote>
-<p>Ahora digamos que tenemos un objeto <code>user</code> y queremos esconder cualquier información &quot;sensible&quot;. Lo haríamos de esta manera.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">user </span><span style="color:#5fb3b3;">= {
-  </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">7</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Tom</span><span style="color:#5fb3b3;">&quot;,
-  </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Keen</span><span style="color:#5fb3b3;">&quot;,
-  </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
-  </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">hudson</span><span style="color:#5fb3b3;">&quot;
+</span></pre><blockquote><p>Nota: No somos lo únicos que pensamos de esta manera, echen un vistazo a <a href=https://lodash.com/docs/#pick>pick de lodash</a></blockquote><p>Ahora digamos que tenemos un objeto <code>user</code> y queremos esconder cualquier información "sensible". Lo haríamos de esta manera.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>user </span><span style=color:#5fb3b3>= {
+  </span><span style=color:#cccece>id</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>7</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Tom</span><span style=color:#5fb3b3>&quot;,
+  </span><span style=color:#cccece>lastname</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Keen</span><span style=color:#5fb3b3>&quot;,
+  </span><span style=color:#cccece>email</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>noreply@example.com</span><span style=color:#5fb3b3>&quot;,
+  </span><span style=color:#cccece>password</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>hudson</span><span style=color:#5fb3b3>&quot;
 };
 
-</span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]); 
+</span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]); 
 
-</span><span style="color:#5f6364;">// { name: &quot;Tom&quot;, lastname: &quot;Keen&quot; }
-</span></pre>
-<p>Funciona bien, ¿Pero qué pasa cuando necesitamos trabajar con un arreglo de usuarios?</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">users </span><span style="color:#5fb3b3;">= [
+</span><span style=color:#5f6364>// { name: &quot;Tom&quot;, lastname: &quot;Keen&quot; }
+</span></pre><p>Funciona bien, ¿Pero qué pasa cuando necesitamos trabajar con un arreglo de usuarios?<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>users </span><span style=color:#5fb3b3>= [
   {
-    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">7</span><span style="color:#5fb3b3;">,
-    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Tom</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Keen</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">hudson</span><span style="color:#5fb3b3;">&quot;
+    </span><span style=color:#cccece>id</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>7</span><span style=color:#5fb3b3>,
+    </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Tom</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>lastname</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Keen</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>email</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>noreply@example.com</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>password</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>hudson</span><span style=color:#5fb3b3>&quot;
   },
   {
-    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">30</span><span style="color:#5fb3b3;">,
-    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Smokey</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Putnum</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">carnival</span><span style="color:#5fb3b3;">&quot;
+    </span><span style=color:#cccece>id</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>30</span><span style=color:#5fb3b3>,
+    </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Smokey</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>lastname</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Putnum</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>email</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>noreply@example.com</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>password</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>carnival</span><span style=color:#5fb3b3>&quot;
   },
   {
-    </span><span style="color:#cccece;">id</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">69</span><span style="color:#5fb3b3;">,
-    </span><span style="color:#cccece;">name</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Lady</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">lastname</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">Luck</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">email</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">noreply@example.com</span><span style="color:#5fb3b3;">&quot;,
-    </span><span style="color:#cccece;">password</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">norestforthewicked</span><span style="color:#5fb3b3;">&quot;
+    </span><span style=color:#cccece>id</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>69</span><span style=color:#5fb3b3>,
+    </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Lady</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>lastname</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Luck</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>email</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>noreply@example.com</span><span style=color:#5fb3b3>&quot;,
+    </span><span style=color:#cccece>password</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>norestforthewicked</span><span style=color:#5fb3b3>&quot;
   }
 ];
-</span></pre>
-<p>Nos vemos forzados a recorrer el arreglo y llamar la función.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre><p>Nos vemos forzados a recorrer el arreglo y llamar la función.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>user</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]);
 });
 
-</span><span style="color:#5f6364;">/*
+</span><span style=color:#5f6364>/*
 [
   {&quot;name&quot;: &quot;Tom&quot;, &quot;lastname&quot;: &quot;Keen&quot;},
   {&quot;name&quot;: &quot;Smokey&quot;, &quot;lastname&quot;: &quot;Putnum&quot;},
   {&quot;name&quot;: &quot;Lady&quot;, &quot;lastname&quot;: &quot;Luck&quot;}
 ]
 */
-</span></pre>
-<p>No está tan mal. ¿Saben qué? Esa función parece útil. Vamos ponerla en otro lugar y le daremos un nombre.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">public_info</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre><p>No está tan mal. ¿Saben qué? Esa función parece útil. Vamos ponerla en otro lugar y le daremos un nombre.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>public_info</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>user</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]);
 }
 
-</span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>¿Qué está pasando en realidad? Lo que estamos haciendo es vincular el segundo parámetro de la función con el valor <code>['name', 'lastname']</code> y obligamos a <code>pick</code> a esperar por el objeto <code>user</code> para ser ejecutado.</p>
-<p>Llevemos este ejemplo más allá. Vamos a fingir que <code>Async/Await</code> no existe y que el arreglo <code>users</code> viene de una promesa (de una instancia de <code>Promise</code>) tal vez de una petición http usando <code>fetch</code>. ¿Qué hacemos?</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+</span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>public_info</span><span style=color:#5fb3b3>);
+</span></pre><p>¿Qué está pasando en realidad? Lo que estamos haciendo es vincular el segundo parámetro de la función con el valor <code>['name', 'lastname']</code> y obligamos a <code>pick</code> a esperar por el objeto <code>user</code> para ser ejecutado.<p>Llevemos este ejemplo más allá. Vamos a fingir que <code>Async/Await</code> no existe y que el arreglo <code>users</code> viene de una promesa (de una instancia de <code>Promise</code>) tal vez de una petición http usando <code>fetch</code>. ¿Qué hacemos?<pre style=background-color:#2b2c2f>
+<span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>users</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>user</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#c594c5>return </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]);
   })
 });
-</span></pre>
-<p>Eso sí se ve mal. Tal vez una función con flechas puedan mejorar la situación.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;])));
-</span></pre>
-<p>¿Está mejor? Una pregunta para otro día. Pero ya nos preparamos para esto, tenemos la función <code>public_info</code>, vamos a usarla. </p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">));
-</span></pre>
-<p>Es aceptable, me gusta. Y si queremos podemos crear otra función que vincule <code>public_info</code> con <code>.map</code>.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">user_list</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+</span></pre><p>Eso sí se ve mal. Tal vez una función con flechas puedan mejorar la situación.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>users </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>user </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;])));
+</span></pre><p>¿Está mejor? Una pregunta para otro día. Pero ya nos preparamos para esto, tenemos la función <code>public_info</code>, vamos a usarla.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>users </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>public_info</span><span style=color:#5fb3b3>));
+</span></pre><p>Es aceptable, me gusta. Y si queremos podemos crear otra función que vincule <code>public_info</code> con <code>.map</code>.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>user_list</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>users</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>public_info</span><span style=color:#5fb3b3>);
 }
-</span></pre>
-<p>Ahora tenemos.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>Veamos cómo llegamos a este punto.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">obj</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">keys</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#5f6364;">// código...
-</span><span style="color:#5fb3b3;">}
+</span></pre><p>Ahora tenemos.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user_list</span><span style=color:#5fb3b3>);
+</span></pre><p>Veamos cómo llegamos a este punto.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#5f6364>// código...
+</span><span style=color:#5fb3b3>}
 
-</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">public_info</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">user</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
+</span><span style=color:#c594c5>function </span><span style=color:#69c>public_info</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>user</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]);
 }
 
-</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">user_list</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">users</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">users</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+</span><span style=color:#c594c5>function </span><span style=color:#69c>user_list</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>users</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>users</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>public_info</span><span style=color:#5fb3b3>);
 }
 
-</span><span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>¿Y si les digo que hay otra manera de crear <code>public_info</code> y <code>user_list</code>? ¿Y si se pudiera crear así?</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">public_info </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;]);
-</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">user_list </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">public_info</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user_list</span><span style=color:#5fb3b3>);
+</span></pre><p>¿Y si les digo que hay otra manera de crear <code>public_info</code> y <code>user_list</code>? ¿Y si se pudiera crear así?<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>public_info </span><span style=color:#5fb3b3>= </span><span style=color:#69c>pick</span><span style=color:#5fb3b3>([&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;]);
+</span><span style=color:#c594c5>const </span><span style=color:#cccece>user_list </span><span style=color:#5fb3b3>= </span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>public_info</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">user_list</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>O poner todo en una línea si eso prefieren.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">fetch</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">url</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">pick</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">name</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">lastname</span><span style="color:#5fb3b3;">&#39;])));
-</span></pre>
-<p>Podemos hacerlo pero primero tenemos que cambiar ligeramente la forma en la que pensamos en las funciones.</p>
-<h2 id="pensando-diferente">Pensando diferente</h2>
-<p>En lugar de pensar en prioridades deberíamos empezar a pensar en dependencias y datos. Al crear una función pensemos ¿qué parámetro es el que cambia con más frecuencia? Ese debería ser el último parámetro. </p>
-<p>Hagamos una función que tome los primeros elementos de algo. ¿Qué necesitamos? Necesitamos ese &quot;algo&quot; y también el necesitamos el número de elementos que vamos a tomar. De esos dos ¿cuál cambia con más frecuencia? Es el dato, ese &quot;algo&quot;.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">count</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">count</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>user_list</span><span style=color:#5fb3b3>);
+</span></pre><p>O poner todo en una línea si eso prefieren.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>fetch</span><span style=color:#5fb3b3>(</span><span style=color:#69c>url</span><span style=color:#5fb3b3>).</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#69c>pick</span><span style=color:#5fb3b3>([&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>lastname</span><span style=color:#5fb3b3>&#39;])));
+</span></pre><p>Podemos hacerlo pero primero tenemos que cambiar ligeramente la forma en la que pensamos en las funciones.<h2 id=pensando-diferente>Pensando diferente</h2><p>En lugar de pensar en prioridades deberíamos empezar a pensar en dependencias y datos. Al crear una función pensemos ¿qué parámetro es el que cambia con más frecuencia? Ese debería ser el último parámetro.<p>Hagamos una función que tome los primeros elementos de algo. ¿Qué necesitamos? Necesitamos ese "algo" y también el necesitamos el número de elementos que vamos a tomar. De esos dos ¿cuál cambia con más frecuencia? Es el dato, ese "algo".<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>take</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>count</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>count</span><span style=color:#5fb3b3>);
 }
-</span></pre>
-<p>En una situación normal esta es la forma de usarla.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">, [&#39;</span><span style="color:#99c794;">first</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">second</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">rest</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre><p>En una situación normal esta es la forma de usarla.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>take</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>2</span><span style=color:#5fb3b3>, [&#39;</span><span style=color:#99c794>first</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>second</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>rest</span><span style=color:#5fb3b3>&#39;]);
 
-</span><span style="color:#5f6364;">// [&quot;first&quot;, &quot;second&quot;]
-</span></pre>
-<p>Pero con un poco de magia (la cual será revelada pronto) podemos reusarla de la siguiente manera.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">first_two </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">take</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">);
+</span><span style=color:#5f6364>// [&quot;first&quot;, &quot;second&quot;]
+</span></pre><p>Pero con un poco de magia (la cual será revelada pronto) podemos reusarla de la siguiente manera.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>first_two </span><span style=color:#5fb3b3>= </span><span style=color:#69c>take</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>2</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">first_two</span><span style="color:#5fb3b3;">([&#39;</span><span style="color:#99c794;">first</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">second</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">rest</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Este patrón se vuelve más conveniente cuando hay funciones (callbacks) involucradas. Vamos a &quot;revertir&quot; los parámetros de <code>Array.filter</code> y veamos qué podemos hacer.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>first_two</span><span style=color:#5fb3b3>([&#39;</span><span style=color:#99c794>first</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>second</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>rest</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Este patrón se vuelve más conveniente cuando hay funciones (callbacks) involucradas. Vamos a "revertir" los parámetros de <code>Array.filter</code> y veamos qué podemos hacer.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>func</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>);
 }
-</span></pre>
-<p>Hagamos algo sencillo, vamos a excluir de un arreglo todos los valores que puedan ser interpretados como falsos.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
+</span></pre><p>Hagamos algo sencillo, vamos a excluir de un arreglo todos los valores que puedan ser interpretados como falsos.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>, [</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
 
-</span><span style="color:#5f6364;">// =&gt; [ true, &quot;that&quot; ]
-</span></pre>
-<p>Se ve bien, y puede ser incluso mejor se le añadimos algo de contexto.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span><span style=color:#5f6364>// =&gt; [ true, &quot;that&quot; ]
+</span></pre><p>Se ve bien, y puede ser incluso mejor se le añadimos algo de contexto.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Espero que a estas alturas puedan ver las posibilidades que este patrón puede ofrecer. Existen librerías (como <a href="https://ramdajs.com/docs/">Ramda</a>) que usan esta técnica para construir funciones complejas usando como bases funciones pequeñas de un sólo propósito.</p>
-<p>Ya basta de hablar, ahora veamos como podemos lograr implementar esto.</p>
-<h2 id="este-es-el-camino">Este es el camino</h2>
-<p>Como todo en javascript hay mil maneras de lograr la misma meta, algunas son más convenientes que otras, y en ocasiones se requiere de magia para implementarlo. Empecemos.</p>
-<h3 id="el-vinculo-magico-de-bind">El vínculo mágico de bind</h3>
-<p>Resulta que no necesitamos hacer nada extraordinario para vincular valores a los parámetros de una función porque cada una ya cuenta con el método <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">bind</a>. Puede que la sintaxis no parezca tan conveniente como la mostré en los ejemplo pero está bastante cerca. Sólo se debe tener en cuenta que el primer parámetro de <code>Function.bind</code> es el &quot;contexto&quot;, es decir el valor que tiene la palabra clave <code>this</code> dentro de una función. Este es su uso básico. </p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Espero que a estas alturas puedan ver las posibilidades que este patrón puede ofrecer. Existen librerías (como <a href=https://ramdajs.com/docs/>Ramda</a>) que usan esta técnica para construir funciones complejas usando como bases funciones pequeñas de un sólo propósito.<p>Ya basta de hablar, ahora veamos como podemos lograr implementar esto.<h2 id=este-es-el-camino>Este es el camino</h2><p>Como todo en javascript hay mil maneras de lograr la misma meta, algunas son más convenientes que otras, y en ocasiones se requiere de magia para implementarlo. Empecemos.<h3 id=el-vinculo-magico-de-bind>El vínculo mágico de bind</h3><p>Resulta que no necesitamos hacer nada extraordinario para vincular valores a los parámetros de una función porque cada una ya cuenta con el método <a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind>bind</a>. Puede que la sintaxis no parezca tan conveniente como la mostré en los ejemplo pero está bastante cerca. Sólo se debe tener en cuenta que el primer parámetro de <code>Function.bind</code> es el "contexto", es decir el valor que tiene la palabra clave <code>this</code> dentro de una función. Este es su uso básico.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>filter</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, </span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre><h3 id="la-magia-interior">La magia interior</h3>
-<p>Este requiere de un poco de trabajo e involucra otra palabra clave, <code>arguments</code>. Lo que haremos será aprovechar el hecho de que <code>arguments</code> es una estructura parecida a un arreglo que tiene una propiedad <code>.length</code> con la cual podremos contar el número de parámetros que la función ha recibido, si es menos de los que necesitamos devolveremos nuevamente la función. ¿Suena confuso?</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><h3 id=la-magia-interior>La magia interior</h3><p>Este requiere de un poco de trabajo e involucra otra palabra clave, <code>arguments</code>. Lo que haremos será aprovechar el hecho de que <code>arguments</code> es una estructura parecida a un arreglo que tiene una propiedad <code>.length</code> con la cual podremos contar el número de parámetros que la función ha recibido, si es menos de los que necesitamos devolveremos nuevamente la función. ¿Suena confuso?<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>func</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data</span><span style=color:#5fb3b3>) {
 
-  </span><span style="color:#5f6364;">// Aquí empezamos a contar.
-  </span><span style="color:#c594c5;">if</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#5f6364;">// si .length es 1 eso significa que tenemos `func`
+  </span><span style=color:#5f6364>// Aquí empezamos a contar.
+  </span><span style=color:#c594c5>if</span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#5f6364>// si .length es 1 eso significa que tenemos `func`
     // también significa que no tenemos `data`
     // asi que devolvemos una función que
     // recuerda el valor de `func` y espera por `data`
-    </span><span style="color:#c594c5;">return </span><span style="color:#f99157;">arg </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">arg</span><span style="color:#5fb3b3;">);
+    </span><span style=color:#c594c5>return </span><span style=color:#f99157>arg </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>arg</span><span style=color:#5fb3b3>);
   }
 
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>);
 }
-</span></pre>
-<p>Ahora es posible hacer esto.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span></pre><p>Ahora es posible hacer esto.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Y también.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>¿No es genial?</p>
-<h3 id="un-enfoque-simple">¿Un enfoque simple?</h3>
-<p>Y por supuesto que siempre tenemos la opción de implementar <code>bind</code> nosotros mismos. Con la ayuda del operador de propagación (los <code>...</code>) podemos recoger los argumentos por pasos y simplemente aplicarlos a la función cuando sea momento de llamarla.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, ...</span><span style="color:#f99157;">first_args</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">(...</span><span style="color:#f99157;">rest</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">func</span><span style="color:#5fb3b3;">(...</span><span style="color:#cccece;">first_args</span><span style="color:#5fb3b3;">, ...</span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Y también.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>, [</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>¿No es genial?<h3 id=un-enfoque-simple>¿Un enfoque simple?</h3><p>Y por supuesto que siempre tenemos la opción de implementar <code>bind</code> nosotros mismos. Con la ayuda del operador de propagación (los <code>...</code>) podemos recoger los argumentos por pasos y simplemente aplicarlos a la función cuando sea momento de llamarla.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>func</span><span style=color:#5fb3b3>, ...</span><span style=color:#f99157>first_args</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>(...</span><span style=color:#f99157>rest</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>func</span><span style=color:#5fb3b3>(...</span><span style=color:#cccece>first_args</span><span style=color:#5fb3b3>, ...</span><span style=color:#cccece>rest</span><span style=color:#5fb3b3>);
 }
-</span></pre>
-<p>El primer paso es obtener la función y recoger una lista de parámetros, luego devolvemos una función que recolecta otra lista de parámetros y finalmente llamamos la función <code>func</code> con todo lo que tenemos.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">, </span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span></pre><p>El primer paso es obtener la función y recoger una lista de parámetros, luego devolvemos una función que recolecta otra lista de parámetros y finalmente llamamos la función <code>func</code> con todo lo que tenemos.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>filter</span><span style=color:#5fb3b3>, </span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Lo interesante de esto es que si revierten el orden de <code>first_args</code> con <code>rest</code> pueden crear una función que vincula los argumentos en el orden opuesto.</p>
-<h3 id="no-mas-magia">No más magia</h3>
-<p>Con este pueda que tenga sentimientos encontrados pero la verdad es que esta la forma más simple.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Lo interesante de esto es que si revierten el orden de <code>first_args</code> con <code>rest</code> pueden crear una función que vincula los argumentos en el orden opuesto.<h3 id=no-mas-magia>No más magia</h3><p>Con este pueda que tenga sentimientos encontrados pero la verdad es que esta la forma más simple.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>func</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>data</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#c594c5>return </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>);
   }
 }
-</span></pre>
-<p>Lo que es equivalente a esto.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#6699cc;">filter </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">func </span><span style="color:#c594c5;">=&gt; </span><span style="color:#f99157;">data </span><span style="color:#c594c5;">=&gt; </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>La idea es tomar un parámetro a la vez en funciones separadas. Basicamente, sigan devolviendo funciones hasta que tengan todos los parámetros que necesitan. Esto es lo que algunos llaman &quot;currying&quot;. ¿Cómo se usa?</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span></pre><p>Lo que es equivalente a esto.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#69c>filter </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>func </span><span style=color:#c594c5>=&gt; </span><span style=color:#f99157>data </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>);
+</span></pre><p>La idea es tomar un parámetro a la vez en funciones separadas. Basicamente, sigan devolviendo funciones hasta que tengan todos los parámetros que necesitan. Esto es lo que algunos llaman "currying". ¿Cómo se usa?<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Ese es un caso. Este es el otro.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">filter </span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">) ([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>¿Ven ese par de paréntesis extra? Esa es la segunda función. Necesitan colocar un par por cada parámetro que tenga la función.</p>
-<h3 id="curry-automatico">Curry automático</h3>
-<p>Volviendo al tema de la magia, pueden &quot;automatizar&quot; el proceso de curry usando una función.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">arity</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length </span><span style="color:#5fb3b3;">=== </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#5f6364;">// Adivina cuantos parámetros se necesitan
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Ese es un caso. Este es el otro.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>filter </span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>) ([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>¿Ven ese par de paréntesis extra? Esa es la segunda función. Necesitan colocar un par por cada parámetro que tenga la función.<h3 id=curry-automatico>Curry automático</h3><p>Volviendo al tema de la magia, pueden "automatizar" el proceso de curry usando una función.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>curry</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>arity</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#5f6364>// Adivina cuantos parámetros se necesitan
     // Esto no funciona todo el tiempo.
-    </span><span style="color:#cccece;">arity </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length</span><span style="color:#5fb3b3;">;
+    </span><span style=color:#cccece>arity </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>fn</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length</span><span style=color:#5fb3b3>;
   }
 
-  </span><span style="color:#5f6364;">// Ignora `fn` y `arity`, pon el resto es `rest``
-  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">rest </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">Array</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">prototype</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">slice</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">call</span><span style="color:#5fb3b3;">(</span><span style="color:#ec5f67;">arguments</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">);
+  </span><span style=color:#5f6364>// Ignora `fn` y `arity`, pon el resto es `rest``
+  </span><span style=color:#c594c5>const </span><span style=color:#cccece>rest </span><span style=color:#5fb3b3>= </span><span style=color:#fac863>Array</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>prototype</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span style=color:#5fb3b3>.</span><span style=color:#69c>call</span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>2</span><span style=color:#5fb3b3>);
 
-  </span><span style="color:#5f6364;">// ¿Tenemos lo que necesitamos?
-  </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">arity </span><span style="color:#5fb3b3;">&lt;= </span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">length</span><span style="color:#5fb3b3;">) {
-    </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">apply</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">);
+  </span><span style=color:#5f6364>// ¿Tenemos lo que necesitamos?
+  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#cccece>arity </span><span style=color:#5fb3b3>&lt;= </span><span style=color:#cccece>rest</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length</span><span style=color:#5fb3b3>) {
+    </span><span style=color:#c594c5>return </span><span style=color:#cccece>fn</span><span style=color:#5fb3b3>.</span><span style=color:#69c>apply</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>fn</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>rest</span><span style=color:#5fb3b3>);
   }
 
-  </span><span style="color:#5f6364;">// Ejecuta `curry.bind` con `fn`, `arity` y `rest` como parámetros
+  </span><span style=color:#5f6364>// Ejecuta `curry.bind` con `fn`, `arity` y `rest` como parámetros
   // retorna una función que espera el resto
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">curry</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">bind</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">apply</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">curry</span><span style="color:#5fb3b3;">, [</span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">fn</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">arity</span><span style="color:#5fb3b3;">, ...</span><span style="color:#cccece;">rest</span><span style="color:#5fb3b3;">]);
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>curry</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>.</span><span style=color:#69c>apply</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>curry</span><span style=color:#5fb3b3>, [</span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>fn</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>arity</span><span style=color:#5fb3b3>, ...</span><span style=color:#cccece>rest</span><span style=color:#5fb3b3>]);
 }
-</span></pre>
-<p>Con esto ya pueden transformar funciones ya existentes o crear nuevas que soporten el &quot;curry&quot; desde el inicio.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">curried_filter </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">filter</span><span style="color:#5fb3b3;">);
+</span></pre><p>Con esto ya pueden transformar funciones ya existentes o crear nuevas que soporten el "curry" desde el inicio.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>curried_filter </span><span style=color:#5fb3b3>= </span><span style=color:#69c>curry</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>filter</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">exclude_falsey </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curried_filter</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">Boolean</span><span style="color:#5fb3b3;">);
+</span><span style=color:#c594c5>const </span><span style=color:#cccece>exclude_falsey </span><span style=color:#5fb3b3>= </span><span style=color:#69c>curried_filter</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Boolean</span><span style=color:#5fb3b3>);
 
-</span><span style="color:#6699cc;">exclude_falsey</span><span style="color:#5fb3b3;">([</span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">, &#39;&#39;, </span><span style="color:#f99157;">null</span><span style="color:#5fb3b3;">, &#39;</span><span style="color:#99c794;">that</span><span style="color:#5fb3b3;">&#39;]);
-</span></pre>
-<p>Ó.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#cccece;">filter </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">curry</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">function</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">func</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">) {
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">filter</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">func</span><span style="color:#5fb3b3;">); 
+</span><span style=color:#69c>exclude_falsey</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>true</span><span style=color:#5fb3b3>, &#39;&#39;, </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>that</span><span style=color:#5fb3b3>&#39;]);
+</span></pre><p>Ó.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#cccece>filter </span><span style=color:#5fb3b3>= </span><span style=color:#69c>curry</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>func</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data</span><span style=color:#5fb3b3>) {
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>func</span><span style=color:#5fb3b3>); 
 });
-</span></pre>
-<p>Eso es todo, amigos. Espero hayan disfrutado la lectura.</p>
-<h2 id="fuentes">Fuentes</h2>
-<ul>
-<li><a href="https://www.youtube.com/watch?v=m3svKOdZijA">Hey Underscore, You're Doing It Wrong! (video)</a></li>
-<li><a href="http://benalman.com/news/2012/09/partial-application-in-javascript/">Partial Application in JavaScript</a></li>
-</ul>
-
-</div>
-
-        </div>
-
-    </body>
-
-</html>
+</span></pre><p>Eso es todo, amigos. Espero hayan disfrutado la lectura.<h2 id=fuentes>Fuentes</h2><ul><li><a href="https://www.youtube.com/watch?v=m3svKOdZijA">Hey Underscore, You're Doing It Wrong! (video)</a><li><a href=http://benalman.com/news/2012/09/partial-application-in-javascript/>Partial Application in JavaScript</a></ul></div></div>

@@ -1,386 +1,338 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
-    <channel>
-        <title>Devlog</title>
-        <link>https://vonheikemen.github.io/devlog/</link>
-        <description></description>
-        <generator>Zola</generator>
-        <language>en</language>
-        <atom:link href="https://vonheikemen.github.io/devlog/tags/paradigma-reactivo/rss.xml" rel="self" type="application/rss+xml"/>
-        <lastBuildDate>Sun, 24 Nov 2019 00:00:00 +0000</lastBuildDate>
-        
-            <item>
-                <title>Observables hechos en casa</title>
-                <pubDate>Sun, 24 Nov 2019 00:00:00 +0000</pubDate>
-                <link>https://vonheikemen.github.io/devlog/es/web-development/homemade-observables/</link>
-                <guid>https://vonheikemen.github.io/devlog/es/web-development/homemade-observables/</guid>
-                <description>&lt;p&gt;En esta ocasión implementaremos nuestros propios observables. Al terminar espero que tengan un mejor entendimiento de cómo este patrón es usado en librerías como RxJS.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;los-observables&quot;&gt;Los Observables&lt;&#x2F;h2&gt;
-&lt;h3 id=&quot;que-son&quot;&gt;¿Qué son?&lt;&#x2F;h3&gt;
-&lt;p&gt;Empecemos con &lt;strong&gt;mi&lt;&#x2F;strong&gt; definición de observable.&lt;&#x2F;p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Un Observable es una función que sigue una convención y es usada para conectar una fuente que emite datos a un consumidor.&lt;&#x2F;p&gt;
-&lt;&#x2F;blockquote&gt;
-&lt;p&gt;En nuestro caso la fuente puede ser cualquier cosa produzca valores. Y, un consumidor es el que recibe datos.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;datos-curiosos&quot;&gt;Datos curiosos&lt;&#x2F;h3&gt;
-&lt;h4 id=&quot;los-observables-no-hacen-nada-por-si-solos&quot;&gt;Los Observables no hacen nada por sí solos&lt;&#x2F;h4&gt;
-&lt;p&gt;Quiero decir que estos no producen ningún efecto o comienzan a trabajar hasta que es absolutamente necesario. No hacen nada hasta que te suscribes a ellos.&lt;&#x2F;p&gt;
-&lt;h4 id=&quot;pueden-emitir-datos&quot;&gt;Pueden emitir datos&lt;&#x2F;h4&gt;
-&lt;p&gt;Dependendiendo de la fuente, pueden recibir un número infinito de valores.&lt;&#x2F;p&gt;
-&lt;h4 id=&quot;pueden-ser-sincronos-o-asincronos&quot;&gt;Pueden ser síncronos o asíncronos&lt;&#x2F;h4&gt;
-&lt;p&gt;Todo dependerá de su implementación. Se puede crear un observable que reciba valores de un evento que puede ocurrir en cualquier momento, también se pueden crear para procesar una colección de datos de manera síncrona.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;algunas-reglas&quot;&gt;Algunas reglas&lt;&#x2F;h3&gt;
-&lt;p&gt;Ya mencioné que se debe seguir una convención. Bueno, ahora vamos a definir algunas reglas arbitrarias que nuestra implementación va a seguir. Estas son importantes porque crearemos un pequeño ecosistema con nuestros observables.&lt;&#x2F;p&gt;
-&lt;ol&gt;
-&lt;li&gt;Deberán tener un método &lt;code&gt;subscribe&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;li&gt;Nuestro &amp;quot;constructor&amp;quot; de observables aceptará un parámetro, será el suscriptor (&lt;code&gt;subscriber&lt;&#x2F;code&gt;) el cual será una función.&lt;&#x2F;li&gt;
-&lt;li&gt;El suscriptor aceptará un parámetro, este será un objeto que llamaremos &lt;code&gt;observer&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;li&gt;El objeto &lt;code&gt;observer&lt;&#x2F;code&gt; puede implementar los siguientes métodos: &lt;code&gt;next&lt;&#x2F;code&gt;, &lt;code&gt;error&lt;&#x2F;code&gt; y &lt;code&gt;complete&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
-&lt;p&gt;Empecemos.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;el-codigo&quot;&gt;El código&lt;&#x2F;h3&gt;
-&lt;h3 id=&quot;constructor&quot;&gt;Constructor&lt;&#x2F;h3&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;subscriber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscriber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
-  };
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/paradigma-reactivo/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Sun, 24 Nov 2019 00:00:00 +0000</lastBuildDate><item><title>Observables hechos en casa</title><pubDate>Sun, 24 Nov 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/homemade-observables/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/homemade-observables/</guid><description>&lt;p>En esta ocasión implementaremos nuestros propios observables. Al terminar espero que tengan un mejor entendimiento de cómo este patrón es usado en librerías como RxJS.&lt;/p>
+&lt;h2 id="los-observables">Los Observables&lt;/h2>
+&lt;h3 id="que-son">¿Qué son?&lt;/h3>
+&lt;p>Empecemos con &lt;strong>mi&lt;/strong> definición de observable.&lt;/p>
+&lt;blockquote>
+&lt;p>Un Observable es una función que sigue una convención y es usada para conectar una fuente que emite datos a un consumidor.&lt;/p>
+&lt;/blockquote>
+&lt;p>En nuestro caso la fuente puede ser cualquier cosa produzca valores. Y, un consumidor es el que recibe datos.&lt;/p>
+&lt;h3 id="datos-curiosos">Datos curiosos&lt;/h3>
+&lt;h4 id="los-observables-no-hacen-nada-por-si-solos">Los Observables no hacen nada por sí solos&lt;/h4>
+&lt;p>Quiero decir que estos no producen ningún efecto o comienzan a trabajar hasta que es absolutamente necesario. No hacen nada hasta que te suscribes a ellos.&lt;/p>
+&lt;h4 id="pueden-emitir-datos">Pueden emitir datos&lt;/h4>
+&lt;p>Dependendiendo de la fuente, pueden recibir un número infinito de valores.&lt;/p>
+&lt;h4 id="pueden-ser-sincronos-o-asincronos">Pueden ser síncronos o asíncronos&lt;/h4>
+&lt;p>Todo dependerá de su implementación. Se puede crear un observable que reciba valores de un evento que puede ocurrir en cualquier momento, también se pueden crear para procesar una colección de datos de manera síncrona.&lt;/p>
+&lt;h3 id="algunas-reglas">Algunas reglas&lt;/h3>
+&lt;p>Ya mencioné que se debe seguir una convención. Bueno, ahora vamos a definir algunas reglas arbitrarias que nuestra implementación va a seguir. Estas son importantes porque crearemos un pequeño ecosistema con nuestros observables.&lt;/p>
+&lt;ol>
+&lt;li>Deberán tener un método &lt;code>subscribe&lt;/code>.&lt;/li>
+&lt;li>Nuestro &amp;quot;constructor&amp;quot; de observables aceptará un parámetro, será el suscriptor (&lt;code>subscriber&lt;/code>) el cual será una función.&lt;/li>
+&lt;li>El suscriptor aceptará un parámetro, este será un objeto que llamaremos &lt;code>observer&lt;/code>.&lt;/li>
+&lt;li>El objeto &lt;code>observer&lt;/code> puede implementar los siguientes métodos: &lt;code>next&lt;/code>, &lt;code>error&lt;/code> y &lt;code>complete&lt;/code>.&lt;/li>
+&lt;/ol>
+&lt;p>Empecemos.&lt;/p>
+&lt;h3 id="el-codigo">El código&lt;/h3>
+&lt;h3 id="constructor">Constructor&lt;/h3>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">subscriber&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">observer &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">subscriber&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">)
+};
 }
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; Se los juro, esto funciona
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Tal vez es menos mágico de lo que pensaron. Lo que vemos aquí es que el constructor &lt;strong&gt;Observable&lt;&#x2F;strong&gt; sólo es una forma de posponer el trabajo hasta que se ejecuta &lt;code&gt;subscribe&lt;&#x2F;code&gt;. La función &lt;code&gt;subscriber&lt;&#x2F;code&gt; es la que hace el trabajo pesado, eso es bueno porque podemos hacer lo que sea ahí, es lo que hace que nuestros observable sean útiles.&lt;&#x2F;p&gt;
-&lt;p&gt;Hasta ahora no he explicado el rol de &lt;code&gt;observer&lt;&#x2F;code&gt; o &lt;code&gt;subscriber&lt;&#x2F;code&gt;. Es mejor explicarlo con un ejemplo.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;un-ejemplo&quot;&gt;Un ejemplo&lt;&#x2F;h2&gt;
-&lt;p&gt;Digamos que queremos convertir un arreglo en un Observable. ¿Cómo lo hacemos?&lt;&#x2F;p&gt;
-&lt;p&gt;Pensemos en lo que sabemos hasta ahora:&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;Podemos colocar la lógica dentro de la función &lt;code&gt;subscriber&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;li&gt;Podemos contar con que nuestro objeto &lt;code&gt;observer&lt;&#x2F;code&gt; tendrá uno de estos tres métodos &lt;code&gt;next&lt;&#x2F;code&gt;, &lt;code&gt;error&lt;&#x2F;code&gt; y &lt;code&gt;complete&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;Podemos usar los métodos de &lt;code&gt;observer&lt;&#x2F;code&gt; como canales de cómunicación. La función &lt;code&gt;next&lt;&#x2F;code&gt; recibirá los valores que nos de la fuente. Utilizaremos &lt;code&gt;error&lt;&#x2F;code&gt; cuando algo salga mal, algo así como el método &lt;code&gt;catch&lt;&#x2F;code&gt; que tienen las promesas. Por último, utilizaremos &lt;code&gt;complete&lt;&#x2F;code&gt; cuando la fuente deje de producir valores.&lt;&#x2F;p&gt;
-&lt;p&gt;La función para convertir un arreglo a observable puede ser así.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fromArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;arr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;try &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;arr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;complete&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;();
-    } &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;catch &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;e&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-    }
-  });
+&lt;/span>&lt;span style="color:#5f6364;">// Se los juro, esto funciona
+&lt;/span>&lt;/pre>
+&lt;p>Tal vez es menos mágico de lo que pensaron. Lo que vemos aquí es que el constructor &lt;strong>Observable&lt;/strong> sólo es una forma de posponer el trabajo hasta que se ejecuta &lt;code>subscribe&lt;/code>. La función &lt;code>subscriber&lt;/code> es la que hace el trabajo pesado, eso es bueno porque podemos hacer lo que sea ahí, es lo que hace que nuestros observable sean útiles.&lt;/p>
+&lt;p>Hasta ahora no he explicado el rol de &lt;code>observer&lt;/code> o &lt;code>subscriber&lt;/code>. Es mejor explicarlo con un ejemplo.&lt;/p>
+&lt;h2 id="un-ejemplo">Un ejemplo&lt;/h2>
+&lt;p>Digamos que queremos convertir un arreglo en un Observable. ¿Cómo lo hacemos?&lt;/p>
+&lt;p>Pensemos en lo que sabemos hasta ahora:&lt;/p>
+&lt;ul>
+&lt;li>Podemos colocar la lógica dentro de la función &lt;code>subscriber&lt;/code>.&lt;/li>
+&lt;li>Podemos contar con que nuestro objeto &lt;code>observer&lt;/code> tendrá uno de estos tres métodos &lt;code>next&lt;/code>, &lt;code>error&lt;/code> y &lt;code>complete&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>Podemos usar los métodos de &lt;code>observer&lt;/code> como canales de cómunicación. La función &lt;code>next&lt;/code> recibirá los valores que nos de la fuente. Utilizaremos &lt;code>error&lt;/code> cuando algo salga mal, algo así como el método &lt;code>catch&lt;/code> que tienen las promesas. Por último, utilizaremos &lt;code>complete&lt;/code> cuando la fuente deje de producir valores.&lt;/p>
+&lt;p>La función para convertir un arreglo a observable puede ser así.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">fromArray&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">try &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">forEach&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">complete&lt;/span>&lt;span style="color:#5fb3b3;">();
+} &lt;/span>&lt;span style="color:#c594c5;">catch &lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">error&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">);
 }
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; Así la usamos
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;arrayStream &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fromArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;([&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;]);
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;arrayStream&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;err &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;err&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;complete&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: () &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;info&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Listo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
 });
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; Y ahora a ver qué pasa en la cónsola.
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;tengan-cuidado&quot;&gt;Tengan cuidado&lt;&#x2F;h3&gt;
-&lt;p&gt;Justo ahora nuestros observables básicamente son como un pueblo sin ley, podemos hacer todo tipo de cosas indebidas como seguir enviando valores después de llamar el método &lt;code&gt;complete&lt;&#x2F;code&gt;. En un mundo ideal nuestros observables deberían darnos algunas garantías. &lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;Los métodos del objeto &lt;code&gt;observer&lt;&#x2F;code&gt; deberían ser opcionales.&lt;&#x2F;li&gt;
-&lt;li&gt;Los métodos &lt;code&gt;complete&lt;&#x2F;code&gt; y &lt;code&gt;error&lt;&#x2F;code&gt; deberían llamar una función para dejar de observar, una función &lt;code&gt;unsubscribe&lt;&#x2F;code&gt; (si esta existe).&lt;&#x2F;li&gt;
-&lt;li&gt;Si ejecutas &lt;code&gt;unsubscribe&lt;&#x2F;code&gt; yo no podrás ejecutar los demás métodos.&lt;&#x2F;li&gt;
-&lt;li&gt;Si se ejecuta &lt;code&gt;complete&lt;&#x2F;code&gt; o &lt;code&gt;error&lt;&#x2F;code&gt; se dejarán de recibir valores.&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;h3 id=&quot;un-ejemplo-interactivo&quot;&gt;Un ejemplo interactivo&lt;&#x2F;h3&gt;
-&lt;p&gt;Ya podemos empezar a hacer cosas interesantes con lo que tenemos hasta ahora. En este ejemplo hice una función que nos permite crear un observable de un evento. &lt;&#x2F;p&gt;
-&lt;p 
-  class=&quot;codepen&quot; 
-  data-height=&quot;600&quot; 
-  data-theme-id=&quot;dark&quot; 
-  data-default-tab=&quot;js,result&quot; 
-  data-user=&quot;VonHeikemen&quot; 
-  data-slug-hash=&quot;wxNYPV&quot; 
-  data-preview=&quot;true&quot; 
-  style=&quot;height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;&quot; 
-  data-pen-title=&quot;Observables - basics&quot;&gt;
-  &lt;span&gt;
-    See the Pen &lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&#x2F;VonHeikemen&#x2F;pen&#x2F;wxNYPV&quot;&gt;Observables - basics&lt;&#x2F;a&gt; by Heiker (&lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&#x2F;VonHeikemen&quot;&gt;@VonHeikemen&lt;&#x2F;a&gt;) on &lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&quot;&gt;CodePen&lt;&#x2F;a&gt;.
-  &lt;&#x2F;span&gt;
-&lt;&#x2F;p&gt;
-&lt;script async src=&quot;https:&#x2F;&#x2F;static.codepen.io&#x2F;assets&#x2F;embed&#x2F;ei.js&quot;&gt;&lt;&#x2F;script&gt;
-&lt;h2 id=&quot;composicion&quot;&gt;Composición&lt;&#x2F;h2&gt;
-&lt;p&gt;Ahora que sabemos cómo crearlos veamos cómo podemos manipularlos para extender sus capacidades.&lt;&#x2F;p&gt;
-&lt;p&gt;Esta vez lo que haremos será crear funciones complementarias y modificar nuestra implementación.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;todo-esta-en-los-operadores&quot;&gt;Todo está en los operadores&lt;&#x2F;h3&gt;
-&lt;p&gt;Los operadores son funciones que nos permitirán agregar características a nuestros observables mediante una cadena de funciones. Cada una de estas funciones aceptará un observable como parámetro, lo convertirá en su fuente y devolverá un nuevo observable.&lt;&#x2F;p&gt;
-&lt;p&gt;Sigamos con la temática del arreglo y hagamos un operador &lt;strong&gt;map&lt;&#x2F;strong&gt; que intente imitar el comportamiento del método nativo map que tienen los arreglos. Nuestro operador hará lo siguiente: tomará un valor, aplicará una función sobre ese valor y emitirá el resultado.&lt;&#x2F;p&gt;
-&lt;p&gt;Hagamos el intento:&lt;&#x2F;p&gt;
-&lt;p&gt;Primer paso, vamos a recibir la función y la fuente de datos, luego devolveremos un observable.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; continuará
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;});
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Ahora viene lo interesante, la fuente que recibimos es un observable y eso significa que podemos suscribirnos para recibir valores.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#cccece;&quot;&gt; function map(transformFn, source$) {
-   return Observable(function(observer) {
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;    return source$.subscribe(function(value) {
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;      &#x2F;&#x2F; continuará
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;    });
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;   });
- }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Lo siguiente será pasar el resultado de la transformación a &lt;code&gt;observer&lt;&#x2F;code&gt; para que puedan &amp;quot;verlo&amp;quot; cuando se suscriban a este nuevo observable.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#cccece;&quot;&gt; function map(transformFn, source$) {
-   return Observable(function(observer) {
-     return source$.subscribe(function(value) {
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;      var newValue = transformFn(value);
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;      observer.next(newValue);
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;     });
-   });
- }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Hay otra forma de hacer esto. Si usamos funciones de una expresión (Arrow functions como se les conoce por ahí) sería algo así.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
-    ))
-  );
+&lt;/span>&lt;span style="color:#5f6364;">// Así la usamos
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">arrayStream &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">fromArray&lt;/span>&lt;span style="color:#5fb3b3;">([&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">4&lt;/span>&lt;span style="color:#5fb3b3;">]);
+&lt;/span>&lt;span style="color:#cccece;">arrayStream&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">({
+&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">error&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">err &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">error&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">err&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">complete&lt;/span>&lt;span style="color:#5fb3b3;">: () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">info&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">Listo&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+});
+&lt;/span>&lt;span style="color:#5f6364;">// Y ahora a ver qué pasa en la cónsola.
+&lt;/span>&lt;/pre>&lt;h3 id="tengan-cuidado">Tengan cuidado&lt;/h3>
+&lt;p>Justo ahora nuestros observables básicamente son como un pueblo sin ley, podemos hacer todo tipo de cosas indebidas como seguir enviando valores después de llamar el método &lt;code>complete&lt;/code>. En un mundo ideal nuestros observables deberían darnos algunas garantías. &lt;/p>
+&lt;ul>
+&lt;li>Los métodos del objeto &lt;code>observer&lt;/code> deberían ser opcionales.&lt;/li>
+&lt;li>Los métodos &lt;code>complete&lt;/code> y &lt;code>error&lt;/code> deberían llamar una función para dejar de observar, una función &lt;code>unsubscribe&lt;/code> (si esta existe).&lt;/li>
+&lt;li>Si ejecutas &lt;code>unsubscribe&lt;/code> yo no podrás ejecutar los demás métodos.&lt;/li>
+&lt;li>Si se ejecuta &lt;code>complete&lt;/code> o &lt;code>error&lt;/code> se dejarán de recibir valores.&lt;/li>
+&lt;/ul>
+&lt;h3 id="un-ejemplo-interactivo">Un ejemplo interactivo&lt;/h3>
+&lt;p>Ya podemos empezar a hacer cosas interesantes con lo que tenemos hasta ahora. En este ejemplo hice una función que nos permite crear un observable de un evento. &lt;/p>
+&lt;p
+class="codepen"
+data-height="600"
+data-theme-id="dark"
+data-default-tab="js,result"
+data-user="VonHeikemen"
+data-slug-hash="wxNYPV"
+data-preview="true"
+style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+data-pen-title="Observables - basics">
+&lt;span>
+See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables - basics&lt;/a> by Heiker (&lt;a href="https://codepen.io/VonHeikemen">@VonHeikemen&lt;/a>) on &lt;a href="https://codepen.io">CodePen&lt;/a>.
+&lt;/span>
+&lt;/p>
+&lt;script async src="https://static.codepen.io/assets/embed/ei.js">&lt;/script>
+&lt;h2 id="composicion">Composición&lt;/h2>
+&lt;p>Ahora que sabemos cómo crearlos veamos cómo podemos manipularlos para extender sus capacidades.&lt;/p>
+&lt;p>Esta vez lo que haremos será crear funciones complementarias y modificar nuestra implementación.&lt;/p>
+&lt;h3 id="todo-esta-en-los-operadores">Todo está en los operadores&lt;/h3>
+&lt;p>Los operadores son funciones que nos permitirán agregar características a nuestros observables mediante una cadena de funciones. Cada una de estas funciones aceptará un observable como parámetro, lo convertirá en su fuente y devolverá un nuevo observable.&lt;/p>
+&lt;p>Sigamos con la temática del arreglo y hagamos un operador &lt;strong>map&lt;/strong> que intente imitar el comportamiento del método nativo map que tienen los arreglos. Nuestro operador hará lo siguiente: tomará un valor, aplicará una función sobre ese valor y emitirá el resultado.&lt;/p>
+&lt;p>Hagamos el intento:&lt;/p>
+&lt;p>Primer paso, vamos a recibir la función y la fuente de datos, luego devolveremos un observable.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">source$&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// continuará
+&lt;/span>&lt;span style="color:#5fb3b3;">});
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Ya podemos empezar a usarlo pero justo ahora tendríamos que hacerlo de esta manera.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fromArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;arr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;arr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;forEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;complete&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;();
-  });
+&lt;/span>&lt;/pre>
+&lt;p>Ahora viene lo interesante, la fuente que recibimos es un observable y eso significa que podemos suscribirnos para recibir valores.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> function map(transformFn, source$) {
+return Observable(function(observer) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return source$.subscribe(function(value) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> // continuará
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> });
+&lt;/span>&lt;span style="color:#cccece;"> });
 }
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;thisArray &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;];
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;plusOne   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;array$    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;plusOne&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fromArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;thisArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;array$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Eso no es muy cómodo. Y si queremos seguir usando más funciones &lt;code&gt;map&lt;&#x2F;code&gt; tendríamos que &amp;quot;envolverlas&amp;quot;, no me parece bien. Nos ocuparemos de eso ahora.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;la-cadena&quot;&gt;La cadena&lt;&#x2F;h3&gt;
-&lt;p&gt;Crearemos otro método que nos permitirá usar una cadena de operadores que extenderan un observable fuente. Esta función tomará una lista de funciones, cada función en la lista usará el observable retornado por la anterior.&lt;&#x2F;p&gt;
-&lt;p&gt;Primero veamos como podría hacerse esto en una función aislada.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;pipe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;aFunctionArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;initialSource&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;reducerFn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;result&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-  };
-
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;finalResult &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;aFunctionArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;reduce&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;reducerFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;initialSource&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;finalResult&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
+&lt;/span>&lt;/pre>
+&lt;p>Lo siguiente será pasar el resultado de la transformación a &lt;code>observer&lt;/code> para que puedan &amp;quot;verlo&amp;quot; cuando se suscriban a este nuevo observable.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> function map(transformFn, source$) {
+return Observable(function(observer) {
+return source$.subscribe(function(value) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var newValue = transformFn(value);
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> observer.next(newValue);
+&lt;/span>&lt;span style="color:#cccece;"> });
+});
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Aquí usamos &lt;code&gt;reduce&lt;&#x2F;code&gt; para recorrer el arreglo de funciones y por cada elemento se ejecuta &lt;code&gt;reducerFn&lt;&#x2F;code&gt;. Dentro de &lt;code&gt;reducerFn&lt;&#x2F;code&gt; en el primer recorrido &lt;code&gt;source&lt;&#x2F;code&gt; tendrá el valor de &lt;code&gt;initialSource&lt;&#x2F;code&gt; y en el resto &lt;code&gt;source&lt;&#x2F;code&gt; será lo que &lt;code&gt;reducerFn&lt;&#x2F;code&gt; retorne. &lt;code&gt;finalResult&lt;&#x2F;code&gt; simplemente es el último resultado de &lt;code&gt;reducerFn&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;Con algunos ajustes a nuestro constructor podemos agregar esta función. También he reducido la implementación del método &lt;code&gt;pipe&lt;&#x2F;code&gt; con algo de ayuda.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;subscriber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observable &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscriber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;SafeObserver&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)),
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;pipe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;fns&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;fns&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;reduce&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-    }
-  }
-
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;; 
-}
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Aún tenemos que hacer una cosa para asegurarnos que los operadores sean compatibles con el método &lt;code&gt;pipe&lt;&#x2F;code&gt;. Justo ahora el operador &lt;code&gt;map&lt;&#x2F;code&gt; espera tanto &lt;code&gt;transformFn&lt;&#x2F;code&gt; como &lt;code&gt;source&lt;&#x2F;code&gt;, eso no funcionará cuando usemos &lt;code&gt;pipe&lt;&#x2F;code&gt;. Tendremos que dividirlo en dos funciones, una que reciba el parámetro inicial y otra que acepte la fuente. &lt;&#x2F;p&gt;
-&lt;p&gt;Tenemos opciones.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; Opción 1
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; En lugar de devolver el observable
-  &#x2F;&#x2F; regresamos una función que espera `source`
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
-    ))
-  );
-}
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; Opción 2
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;undefined&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; en caso de no recibir `source` 
-    &#x2F;&#x2F; devolvemos una función una que recuerde `transformFn` 
-    &#x2F;&#x2F; y que espere `source`    
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;placeholder &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;placeholder&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-  }
-
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; 
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;transformFn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
-    ))
-  );
-}
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Y ya finalmente podemos extender nuestros observables así.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;thisArray &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;3&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;];
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;plusOne   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;timesTwo  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;array$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fromArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;thisArray&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;pipe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;plusOne&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timesTwo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;num &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;`&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;number: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;num&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;}`),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; y otros...
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;array$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Estamos listos para crear más operadores.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;otro-ejercicio&quot;&gt;Otro ejercicio&lt;&#x2F;h2&gt;
-&lt;p&gt;Digamos que tenemos una función que muestra la hora en la cónsola cada segundo, y se detiene después de cinco segundos (sólo porque sí).&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;startTimer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;interval &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setInterval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;minutes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;Math&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;floor&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) % &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;toString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;padStart&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;seconds &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;Math&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;floor&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;% &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;toString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;padStart&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;minutes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;+ &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39; + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;seconds&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=== &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;00:05&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;clearInterval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;interval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-    }
-  }, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-}
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Ahora bien, esa función no tiene nada de malo. Digo, hace su trabajo, es predecible y todo lo que necesitas saber está a plena vista. Pero recien aprendimos algo nuevo y queremos aplicarlo. Convertiremos esto en un observable.&lt;&#x2F;p&gt;
-&lt;p&gt;Primero lo primero, vamos a extraer la lógica que maneja el formateo y el cálculo del tiempo.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;paddedNumber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;num&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;num&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;toString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;padStart&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;);
-}
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;readableTime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;time&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;minutes &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;Math&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;floor&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&#x2F; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) % &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;seconds &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;Math&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;floor&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;% &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;60&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
- 
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;paddedNumber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;minutes&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) + &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39; + &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;paddedNumber&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;seconds&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-}
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Veamos qué hacemos con el tiempo. &lt;code&gt;setInterval&lt;&#x2F;code&gt; es un buen candidato para convertirse una fuente, recibe un &amp;quot;callback&amp;quot; en el cual podemos producir valores y también tiene un mecanismo de &amp;quot;limpieza&amp;quot;. Es un buen observable.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;interval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;delay&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;counter   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;callback  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= () &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;counter&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;++);
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;_interval &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setInterval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;callback&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;delay&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-    
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setUnsubscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;clearInterval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;_interval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;));
-    
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;unsubscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-  });
-}
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Tenemos una forma reusable de crear y destruir un &lt;code&gt;interval&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;Puede que hayan notado que le pasamos un número a &lt;code&gt;observer&lt;&#x2F;code&gt;, no lo llamamos &amp;quot;segundos&amp;quot; porque &lt;code&gt;delay&lt;&#x2F;code&gt; puede ser cualquier número. Aquí no estamos siguiendo el tiempo, estamos contando las veces que &lt;code&gt;callback&lt;&#x2F;code&gt; es ejecutado. ¿Por qué? Porque queremos que nuestros constructores sean genéricos. Siempre podremos modificar su comportamiento con operadores.&lt;&#x2F;p&gt;
-&lt;p&gt;Así usamos nuestro nuevo constructor.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; fingiremos que las demás funciones están por aquí
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;interval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;pipe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;plusOne&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;readableTime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;/span>&lt;/pre>
+&lt;p>Hay otra forma de hacer esto. Si usamos funciones de una expresión (Arrow functions como se les conoce por ahí) sería algo así.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">source$&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt;
+&lt;/span>&lt;span style="color:#cccece;">source$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)
+))
 );
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;unsubscribe &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;timeString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-  
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=== &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;00:05&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;unsubscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;();
-  }
-});
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Está mejor. Pero ese &lt;code&gt;if&lt;&#x2F;code&gt; me molesta. Como que no debería estar ahí. ¿Saben que podemos hacer? Crear otro operador, uno que cancele la suscripción después de que &lt;code&gt;interval&lt;&#x2F;code&gt; emita cinco valores.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#cccece;&quot;&gt;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;take&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;total&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;source$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;Observable&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; tendremos nuestro propio contador porque no confío
-    &#x2F;&#x2F; en los valores que emiten otros observables
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;count &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;;
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;unsubscribeSource &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;source$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;count&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;++;
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; pasamos cada valor a `observer`
-      &#x2F;&#x2F; la función subscribe aún recibirá cada valor original
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;value&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;);
-      
-      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;count &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;=== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;total&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;) {
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; indicamos que el flujo a terminado y lo &amp;quot;destruimos&amp;quot;
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;observer&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;complete&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;();
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;unsubscribeSource&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;();
-      }
-    });
-  });
 }
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Ya tenemos un contador que se autodestruye. Finalmente.&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#2b2c2f;&quot;&gt;
-&lt;span style=&quot;color:#5f6364;&quot;&gt;&#x2F;&#x2F; las otras funciones siguen ahí
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time$ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;interval&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1000&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;pipe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;plusOne&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;readableTime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;take&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
-);
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;time$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;subscribe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;timeString &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#cccece;&quot;&gt;timeString&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;),
-  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;complete&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;: () &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;=&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#fac863;&quot;&gt;console&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;info&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Time&amp;#39;s up&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;quot;)
+&lt;/span>&lt;/pre>
+&lt;p>Ya podemos empezar a usarlo pero justo ahora tendríamos que hacerlo de esta manera.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">fromArray&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">forEach&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">complete&lt;/span>&lt;span style="color:#5fb3b3;">();
 });
-&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;patio-de-juegos&quot;&gt;Patio de juegos&lt;&#x2F;h2&gt;
-&lt;p&gt;Hice un par de ejemplos en codepen para poder hacer experimentos con estas cosas. &lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&#x2F;VonHeikemen&#x2F;pen&#x2F;OwQYxG&quot;&gt;Este de aquí&lt;&#x2F;a&gt; contiene todos el código relacionado con &lt;code&gt;Observable&lt;&#x2F;code&gt; y algo más.&lt;&#x2F;p&gt;
-&lt;p&gt;Y este de aquí es el del ejercicio.&lt;&#x2F;p&gt;
-&lt;p 
-  class=&quot;codepen&quot; 
-  data-height=&quot;600&quot; 
-  data-theme-id=&quot;dark&quot; 
-  data-default-tab=&quot;js,result&quot; 
-  data-user=&quot;VonHeikemen&quot; 
-  data-slug-hash=&quot;VGZXZa&quot; 
-  data-preview=&quot;true&quot; 
-  style=&quot;height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;&quot; 
-  data-pen-title=&quot;Observables - boring timer&quot;&gt;
-  &lt;span&gt;
-    See the Pen &lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&#x2F;VonHeikemen&#x2F;pen&#x2F;VGZXZa&quot;&gt;Observables - boring timer&lt;&#x2F;a&gt; by Heiker (&lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&#x2F;VonHeikemen&quot;&gt;@VonHeikemen&lt;&#x2F;a&gt;) on &lt;a href=&quot;https:&#x2F;&#x2F;codepen.io&quot;&gt;CodePen&lt;&#x2F;a&gt;.
-  &lt;&#x2F;span&gt;
-&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;conclusion&quot;&gt;Conclusión&lt;&#x2F;h2&gt;
-&lt;p&gt;Los Observables nos permiten hacer muchas cosas y con un algo de creatividad puedes convertir lo que sea en un observable. En serio, una promesa (Promise), una petición AJAX, un evento en el DOM, un arreglo... otro observable. Todo lo que se pueden imaginar puede ser una fuente de datos que pueden envolver en un observable. También nos dan habilidad de ensamblar soluciones utilizando funciones genéricas y otras más específicas.&lt;&#x2F;p&gt;
-&lt;p&gt;Aún así no son la solución perfecta para todo. Tendrán que decidir si la complejidad que traen vale la pena. Como en el ejemplo del intervalo, perdimos la simplicidad de &lt;code&gt;startTimer&lt;&#x2F;code&gt; por la &amp;quot;flexibilidad&amp;quot; de los observables.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;fuentes&quot;&gt;Fuentes&lt;&#x2F;h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;medium.com&#x2F;@benlesh&#x2F;learning-observable-by-building-observable-d5da57405d87&quot;&gt;Learning Observable By Building Observable&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;medium.com&#x2F;@kevinkreuzer&#x2F;observables-just-powerful-functions-a033c355b22c&quot;&gt;Observables, just powerful functions?&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;netbasal.com&#x2F;whos-afraid-of-observables-bde0dc4f48cc&quot;&gt;Who’s Afraid of Observables?&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;netbasal.com&#x2F;understanding-mergemap-and-switchmap-in-rxjs-13cf9c57c885&quot;&gt;Understanding mergeMap and switchMap in RxJS&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;netbasal.com&#x2F;javascript-observables-under-the-hood-2423f760584&quot;&gt;JavaScript — Observables Under The Hood&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;zenparsing&#x2F;zen-observable&quot;&gt;Github repository - zen-observable&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;dev.to&#x2F;supermanitu&#x2F;understanding-observables&quot;&gt;Understanding Observables&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-</description>
-            </item>
-        
-    </channel>
-</rss>
+}
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">thisArray &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">4&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#6699cc;">plusOne &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">num &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">array$ &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">plusOne&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#6699cc;">fromArray&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">thisArray&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;span style="color:#cccece;">array$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;/pre>
+&lt;p>Eso no es muy cómodo. Y si queremos seguir usando más funciones &lt;code>map&lt;/code> tendríamos que &amp;quot;envolverlas&amp;quot;, no me parece bien. Nos ocuparemos de eso ahora.&lt;/p>
+&lt;h3 id="la-cadena">La cadena&lt;/h3>
+&lt;p>Crearemos otro método que nos permitirá usar una cadena de operadores que extenderan un observable fuente. Esta función tomará una lista de funciones, cada función en la lista usará el observable retornado por la anterior.&lt;/p>
+&lt;p>Primero veamos como podría hacerse esto en una función aislada.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">aFunctionArray&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">initialSource&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#6699cc;">reducerFn &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">source&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">result &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">source&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">result&lt;/span>&lt;span style="color:#5fb3b3;">;
+};
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">finalResult &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">aFunctionArray&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">reducerFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">initialSource&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">finalResult&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+&lt;/span>&lt;/pre>
+&lt;p>Aquí usamos &lt;code>reduce&lt;/code> para recorrer el arreglo de funciones y por cada elemento se ejecuta &lt;code>reducerFn&lt;/code>. Dentro de &lt;code>reducerFn&lt;/code> en el primer recorrido &lt;code>source&lt;/code> tendrá el valor de &lt;code>initialSource&lt;/code> y en el resto &lt;code>source&lt;/code> será lo que &lt;code>reducerFn&lt;/code> retorne. &lt;code>finalResult&lt;/code> simplemente es el último resultado de &lt;code>reducerFn&lt;/code>.&lt;/p>
+&lt;p>Con algunos ajustes a nuestro constructor podemos agregar esta función. También he reducido la implementación del método &lt;code>pipe&lt;/code> con algo de ayuda.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">Observable &lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">subscriber&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">observable &lt;/span>&lt;span style="color:#5fb3b3;">= {
+&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">observer &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">subscriber&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">SafeObserver&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">)),
+&lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">fns&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">((&lt;/span>&lt;span style="color:#f99157;">source&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">) &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">source&lt;/span>&lt;span style="color:#5fb3b3;">), &lt;/span>&lt;span style="color:#cccece;">observable&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">observable&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+&lt;/span>&lt;/pre>
+&lt;p>Aún tenemos que hacer una cosa para asegurarnos que los operadores sean compatibles con el método &lt;code>pipe&lt;/code>. Justo ahora el operador &lt;code>map&lt;/code> espera tanto &lt;code>transformFn&lt;/code> como &lt;code>source&lt;/code>, eso no funcionará cuando usemos &lt;code>pipe&lt;/code>. Tendremos que dividirlo en dos funciones, una que reciba el parámetro inicial y otra que acepte la fuente. &lt;/p>
+&lt;p>Tenemos opciones.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5f6364;">// Opción 1
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// En lugar de devolver el observable
+// regresamos una función que espera `source`
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#f99157;">source$ &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt;
+&lt;/span>&lt;span style="color:#cccece;">source$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)
+))
+);
+}
+&lt;/span>&lt;span style="color:#5f6364;">// Opción 2
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">source$&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">source$ &lt;/span>&lt;span style="color:#5fb3b3;">=== &lt;/span>&lt;span style="color:#f99157;">undefined&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// en caso de no recibir `source`
+// devolvemos una función una que recuerde `transformFn`
+// y que espere `source`
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#f99157;">placeholder &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">placeholder&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt;
+&lt;/span>&lt;span style="color:#cccece;">source$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)
+))
+);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Y ya finalmente podemos extender nuestros observables así.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">thisArray &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">4&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#6699cc;">plusOne &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">num &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#6699cc;">timesTwo &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">num &lt;/span>&lt;span style="color:#5fb3b3;">* &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">array$ &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">fromArray&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">thisArray&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">plusOne&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timesTwo&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#5fb3b3;">`&lt;/span>&lt;span style="color:#99c794;">number: &lt;/span>&lt;span style="color:#5fb3b3;">${&lt;/span>&lt;span style="color:#cccece;">num&lt;/span>&lt;span style="color:#5fb3b3;">}`),
+&lt;/span>&lt;span style="color:#5f6364;">// y otros...
+&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#cccece;">array$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;/pre>
+&lt;p>Estamos listos para crear más operadores.&lt;/p>
+&lt;h2 id="otro-ejercicio">Otro ejercicio&lt;/h2>
+&lt;p>Digamos que tenemos una función que muestra la hora en la cónsola cada segundo, y se detiene después de cinco segundos (sólo porque sí).&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">startTimer&lt;/span>&lt;span style="color:#5fb3b3;">() {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">interval &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">setInterval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">() {
+&lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">minutes &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Math&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">floor&lt;/span>&lt;span style="color:#5fb3b3;">((&lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">/ &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">) % &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">toString&lt;/span>&lt;span style="color:#5fb3b3;">().&lt;/span>&lt;span style="color:#6699cc;">padStart&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">0&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">seconds &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Math&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">floor&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">% &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">toString&lt;/span>&lt;span style="color:#5fb3b3;">().&lt;/span>&lt;span style="color:#6699cc;">padStart&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">0&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">timeString &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">minutes &lt;/span>&lt;span style="color:#5fb3b3;">+ &amp;#39;&lt;/span>&lt;span style="color:#99c794;">:&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39; + &lt;/span>&lt;span style="color:#cccece;">seconds&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timeString&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timeString &lt;/span>&lt;span style="color:#5fb3b3;">=== &amp;#39;&lt;/span>&lt;span style="color:#99c794;">00:05&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) {
+&lt;/span>&lt;span style="color:#6699cc;">clearInterval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">interval&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}, &lt;/span>&lt;span style="color:#f99157;">1000&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Ahora bien, esa función no tiene nada de malo. Digo, hace su trabajo, es predecible y todo lo que necesitas saber está a plena vista. Pero recien aprendimos algo nuevo y queremos aplicarlo. Convertiremos esto en un observable.&lt;/p>
+&lt;p>Primero lo primero, vamos a extraer la lógica que maneja el formateo y el cálculo del tiempo.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">paddedNumber&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">num&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">num&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">toString&lt;/span>&lt;span style="color:#5fb3b3;">().&lt;/span>&lt;span style="color:#6699cc;">padStart&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">0&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+}
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">readableTime&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">time&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">minutes &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Math&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">floor&lt;/span>&lt;span style="color:#5fb3b3;">((&lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">/ &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">) % &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">seconds &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Math&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">floor&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">time &lt;/span>&lt;span style="color:#5fb3b3;">% &lt;/span>&lt;span style="color:#f99157;">60&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">paddedNumber&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">minutes&lt;/span>&lt;span style="color:#5fb3b3;">) + &amp;#39;&lt;/span>&lt;span style="color:#99c794;">:&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39; + &lt;/span>&lt;span style="color:#6699cc;">paddedNumber&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">seconds&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Veamos qué hacemos con el tiempo. &lt;code>setInterval&lt;/code> es un buen candidato para convertirse una fuente, recibe un &amp;quot;callback&amp;quot; en el cual podemos producir valores y también tiene un mecanismo de &amp;quot;limpieza&amp;quot;. Es un buen observable.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">interval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">delay&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">counter &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#6699cc;">callback &lt;/span>&lt;span style="color:#5fb3b3;">= () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">counter&lt;/span>&lt;span style="color:#5fb3b3;">++);
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">_interval &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">setInterval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">callback&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">delay&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">setUnsubscribe&lt;/span>&lt;span style="color:#5fb3b3;">(() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">clearInterval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">_interval&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">unsubscribe&lt;/span>&lt;span style="color:#5fb3b3;">;
+});
+}
+&lt;/span>&lt;/pre>
+&lt;p>Tenemos una forma reusable de crear y destruir un &lt;code>interval&lt;/code>.&lt;/p>
+&lt;p>Puede que hayan notado que le pasamos un número a &lt;code>observer&lt;/code>, no lo llamamos &amp;quot;segundos&amp;quot; porque &lt;code>delay&lt;/code> puede ser cualquier número. Aquí no estamos siguiendo el tiempo, estamos contando las veces que &lt;code>callback&lt;/code> es ejecutado. ¿Por qué? Porque queremos que nuestros constructores sean genéricos. Siempre podremos modificar su comportamiento con operadores.&lt;/p>
+&lt;p>Así usamos nuestro nuevo constructor.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5f6364;">// fingiremos que las demás funciones están por aquí
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">time$ &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">interval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">1000&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">plusOne&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">readableTime&lt;/span>&lt;span style="color:#5fb3b3;">)
+);
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">unsubscribe &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">time$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">timeString&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timeString&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timeString &lt;/span>&lt;span style="color:#5fb3b3;">=== &amp;#39;&lt;/span>&lt;span style="color:#99c794;">00:05&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) {
+&lt;/span>&lt;span style="color:#6699cc;">unsubscribe&lt;/span>&lt;span style="color:#5fb3b3;">();
+}
+});
+&lt;/span>&lt;/pre>
+&lt;p>Está mejor. Pero ese &lt;code>if&lt;/code> me molesta. Como que no debería estar ahí. ¿Saben que podemos hacer? Crear otro operador, uno que cancele la suscripción después de que &lt;code>interval&lt;/code> emita cinco valores.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">take&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">total&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#f99157;">source$ &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">Observable&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">observer&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// tendremos nuestro propio contador porque no confío
+// en los valores que emiten otros observables
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">count &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">unsubscribeSource &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">source$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#cccece;">count&lt;/span>&lt;span style="color:#5fb3b3;">++;
+&lt;/span>&lt;span style="color:#5f6364;">// pasamos cada valor a `observer`
+// la función subscribe aún recibirá cada valor original
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">if &lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">count &lt;/span>&lt;span style="color:#5fb3b3;">=== &lt;/span>&lt;span style="color:#cccece;">total&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// indicamos que el flujo a terminado y lo &amp;quot;destruimos&amp;quot;
+&lt;/span>&lt;span style="color:#cccece;">observer&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">complete&lt;/span>&lt;span style="color:#5fb3b3;">();
+&lt;/span>&lt;span style="color:#6699cc;">unsubscribeSource&lt;/span>&lt;span style="color:#5fb3b3;">();
+}
+});
+});
+}
+&lt;/span>&lt;/pre>
+&lt;p>Ya tenemos un contador que se autodestruye. Finalmente.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5f6364;">// las otras funciones siguen ahí
+&lt;/span>&lt;span style="color:#c594c5;">var &lt;/span>&lt;span style="color:#cccece;">time$ &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">interval&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">1000&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">plusOne&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">readableTime&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">take&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">5&lt;/span>&lt;span style="color:#5fb3b3;">)
+);
+&lt;/span>&lt;span style="color:#cccece;">time$&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">subscribe&lt;/span>&lt;span style="color:#5fb3b3;">({
+&lt;/span>&lt;span style="color:#6699cc;">next&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">timeString &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">timeString&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">complete&lt;/span>&lt;span style="color:#5fb3b3;">: () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">info&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;quot;&lt;/span>&lt;span style="color:#99c794;">Time&amp;#39;s up&lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot;)
+});
+&lt;/span>&lt;/pre>&lt;h2 id="patio-de-juegos">Patio de juegos&lt;/h2>
+&lt;p>Hice un par de ejemplos en codepen para poder hacer experimentos con estas cosas. &lt;a href="https://codepen.io/VonHeikemen/pen/OwQYxG">Este de aquí&lt;/a> contiene todos el código relacionado con &lt;code>Observable&lt;/code> y algo más.&lt;/p>
+&lt;p>Y este de aquí es el del ejercicio.&lt;/p>
+&lt;p
+class="codepen"
+data-height="600"
+data-theme-id="dark"
+data-default-tab="js,result"
+data-user="VonHeikemen"
+data-slug-hash="VGZXZa"
+data-preview="true"
+style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+data-pen-title="Observables - boring timer">
+&lt;span>
+See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/VGZXZa">Observables - boring timer&lt;/a> by Heiker (&lt;a href="https://codepen.io/VonHeikemen">@VonHeikemen&lt;/a>) on &lt;a href="https://codepen.io">CodePen&lt;/a>.
+&lt;/span>
+&lt;/p>
+&lt;h2 id="conclusion">Conclusión&lt;/h2>
+&lt;p>Los Observables nos permiten hacer muchas cosas y con un algo de creatividad puedes convertir lo que sea en un observable. En serio, una promesa (Promise), una petición AJAX, un evento en el DOM, un arreglo... otro observable. Todo lo que se pueden imaginar puede ser una fuente de datos que pueden envolver en un observable. También nos dan habilidad de ensamblar soluciones utilizando funciones genéricas y otras más específicas.&lt;/p>
+&lt;p>Aún así no son la solución perfecta para todo. Tendrán que decidir si la complejidad que traen vale la pena. Como en el ejemplo del intervalo, perdimos la simplicidad de &lt;code>startTimer&lt;/code> por la &amp;quot;flexibilidad&amp;quot; de los observables.&lt;/p>
+&lt;h2 id="fuentes">Fuentes&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://medium.com/@benlesh/learning-observable-by-building-observable-d5da57405d87">Learning Observable By Building Observable&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://medium.com/@kevinkreuzer/observables-just-powerful-functions-a033c355b22c">Observables, just powerful functions?&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://netbasal.com/whos-afraid-of-observables-bde0dc4f48cc">Who’s Afraid of Observables?&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://netbasal.com/understanding-mergemap-and-switchmap-in-rxjs-13cf9c57c885">Understanding mergeMap and switchMap in RxJS&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://netbasal.com/javascript-observables-under-the-hood-2423f760584">JavaScript — Observables Under The Hood&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/zenparsing/zen-observable">Github repository - zen-observable&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dev.to/supermanitu/understanding-observables">Understanding Observables&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

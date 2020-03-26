@@ -1,473 +1,329 @@
+<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>Devlog | Taking a look at finite state machines</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,learning,beginners,software,coding,development"><meta name=description content="Let's see if finite state machines are useful"><link rel=canonical href=https://dev.to/vonheikemen/taking-a-look-at-finite-state-machines-2g9i><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>Portfolio</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Taking a look at finite state machines</h1><span class=post-date>2019-11-07
+| Originally published at
+<a href=https://dev.to/vonheikemen/taking-a-look-at-finite-state-machines-2g9i>dev.to</a>
+| <a href=https://vonheikemen.github.io/devlog/es/web-development/taking-a-look-at-finite-state-machine/>Leer en español</a></span><h2 id=the-finite-who-what>The finite who-- what?</h2><p>It is a way of modeling the behavior of a system. The idea is that your "system" can only be in one state at any given time, and an input (or event) can trigger the transition to another state.<h2 id=what-kind-of-problems-does-it-solve>What kind of problems does it solve?</h2><p>Invalid state. How many times have you used a flag or attribute like "disabled" to prevent a user from doing something they shouldn't do? By setting the rules of our system we can avoid these kind of problems.<h2 id=how-does-that-look-like-in-javascript>How does that look like in javascript?</h2><p>I'm very glad you asked. The real reason I'm writing this is to show you a library that I saw the other day. We are going to use <a href=https://thisrobot.life/>robot3</a> to built a random quote machine.<p>We will make a card that displays a quote and below that we'll have a button that will fetch another quote.<p>We'll do it one step at a time. Let's first prepare the states.<p>Our card will be either <code>idle</code> or <code>loading</code>. Create a machine with that.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
+  </span><span style=color:#cccece>createMachine</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>interpret
+</span><span style=color:#5fb3b3>} </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>https://unpkg.com/robot3@0.2.9/machine.js</span><span style=color:#5fb3b3>&#39;;
 
-  
-
-
-
-  
-  
-  
-
-
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
-
-      <!-- Enable responsiveness on mobile devices-->
-      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
-
-      <title>Devlog</title>
-
-      <!-- CSS -->
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;print.css" media="print">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;poole.css">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;hyde.css">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;custom.css">
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
-
-      
-
-      
-  <meta name="keywords" content="javascript, learning, beginners, software, coding, development">
-
-  
-    <meta name="description" content="Let&#x27;s see if finite state machines are useful">
-  
-
-  
-    <link rel="canonical" href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;taking-a-look-at-finite-state-machines-2g9i">
-  
-
-    </head>
-
-    
-    <body class="theme-base-custom ">
-        
-            <div class="sidebar">
-                <div class="container sidebar-sticky">
-                    <div class="sidebar-about">
-                        
-                            <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;"><h1>Devlog</h1></a>
-                            
-                        
-                    </div>
-
-                    <ul class="sidebar-nav">
-                        
-                        
-                        <li class="sidebar-nav-item"><a href="&#x2F;">Portfolio</a></li>
-                        
-                        
-                        
-                        
-                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tags&#x2F;">Explore tags</a></li>
-                        
-                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;">Devlog en español</a></li>
-                        
-                    </ul>
-                    © 2020 Heiker Curiel
-                </div>
-            </div>
-        
-
-        <div class="content container">
-            
-
-
-
-<div class="post">
-  <h1 class="post-title">Taking a look at finite state machines</h1>
-  <span class="post-date">2019-11-07
-    
-    | Originally published at 
-    <a href="https:&#x2F;&#x2F;dev.to&#x2F;vonheikemen&#x2F;taking-a-look-at-finite-state-machines-2g9i">
-      dev.to
-    </a>
-    
-    
-    | <a href="https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;es&#x2F;web-development&#x2F;taking-a-look-at-finite-state-machine&#x2F;"> 
-        Leer en español
-      </a>
-    
-  </span>
-  <h2 id="the-finite-who-what">The finite who-- what?</h2>
-<p>It is a way of modeling the behavior of a system. The idea is that your &quot;system&quot; can only be in one state at any given time, and an input (or event) can trigger the transition to another state.</p>
-<h2 id="what-kind-of-problems-does-it-solve">What kind of problems does it solve?</h2>
-<p>Invalid state. How many times have you used a flag or attribute like &quot;disabled&quot; to prevent a user from doing something they shouldn't do? By setting the rules of our system we can avoid these kind of problems.</p>
-<h2 id="how-does-that-look-like-in-javascript">How does that look like in javascript?</h2>
-<p>I'm very glad you asked. The real reason I'm writing this is to show you a library that I saw the other day. We are going to use <a href="https://thisrobot.life/">robot3</a> to built a random quote machine.</p>
-<p>We will make a card that displays a quote and below that we'll have a button that will fetch another quote.</p>
-<p>We'll do it one step at a time. Let's first prepare the states. </p>
-<p>Our card will be either <code>idle</code> or <code>loading</code>. Create a machine with that.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">import </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#cccece;">createMachine</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">state</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">interpret
-</span><span style="color:#5fb3b3;">} </span><span style="color:#c594c5;">from </span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">https://unpkg.com/robot3@0.2.9/machine.js</span><span style="color:#5fb3b3;">&#39;;
-
-</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">mr_robot </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">createMachine</span><span style="color:#5fb3b3;">({
-  </span><span style="color:#6699cc;">idle</span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">state</span><span style="color:#5fb3b3;">(),
-  </span><span style="color:#6699cc;">loading</span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">state</span><span style="color:#5fb3b3;">()
+</span><span style=color:#c594c5>const </span><span style=color:#cccece>mr_robot </span><span style=color:#5fb3b3>= </span><span style=color:#69c>createMachine</span><span style=color:#5fb3b3>({
+  </span><span style=color:#69c>idle</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>(),
+  </span><span style=color:#69c>loading</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>()
 });
-</span></pre>
-<p>In here each <code>state</code> is a key in the &quot;setup object&quot; that we pass to <code>createMachine</code>, but also notice that it needs to be a <code>state</code> object, which we create with the <code>state</code> function.</p>
-<p>Now we need transitions. Our <code>idle</code> state will switch to <code>loading</code> if a <code>fetch</code> event happens, <code>loading</code> will go back to <code>idle</code> if a <code>done</code> is dispatched. </p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> import {
+</span></pre><p>In here each <code>state</code> is a key in the "setup object" that we pass to <code>createMachine</code>, but also notice that it needs to be a <code>state</code> object, which we create with the <code>state</code> function.<p>Now we need transitions. Our <code>idle</code> state will switch to <code>loading</code> if a <code>fetch</code> event happens, <code>loading</code> will go back to <code>idle</code> if a <code>done</code> is dispatched.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> import {
   createMachine,
   state,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> transition,
-</span><span style="color:#cccece;">  interpret
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794> transition,
+</span><span style=color:#cccece>  interpret
  } from &#39;https://unpkg.com/robot3@0.2.9/machine.js&#39;;
 
 const mr_robot = createMachine({
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  idle: state(),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  loading: state()
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
-</span><span style="color:#cccece;"> });
-</span></pre>
-<p><code>transition</code> is the thing that connects our states. It's first parameter is the name of the event that will trigger the transition, the second parameter is the &quot;destination&quot; state it will switch to. The rest of <code>transition</code>'s parameters can be a list of function that will be executed when this transition is triggered.</p>
-<p>Looks lovely, but uhm... how do we test it? The machine by itself doesn't do anything. We need to give our new machine to the <code>interpret</code> function which will give us a &quot;service&quot; that can dispatch events. To prove that we are actually doing something we'll also give a handler to <code>interpret</code>, it will be like a 'onchange', it will listen to state changes.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#6699cc;">handler </span><span style="color:#5fb3b3;">= ({ </span><span style="color:#f99157;">machine </span><span style="color:#5fb3b3;">}) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">machine</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">current</span><span style="color:#5fb3b3;">);
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  idle: state(),
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: state()
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
+</span><span style=color:#cccece> });
+</span></pre><p><code>transition</code> is the thing that connects our states. It's first parameter is the name of the event that will trigger the transition, the second parameter is the "destination" state it will switch to. The rest of <code>transition</code>'s parameters can be a list of function that will be executed when this transition is triggered.<p>Looks lovely, but uhm... how do we test it? The machine by itself doesn't do anything. We need to give our new machine to the <code>interpret</code> function which will give us a "service" that can dispatch events. To prove that we are actually doing something we'll also give a handler to <code>interpret</code>, it will be like a 'onchange', it will listen to state changes.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>);
 }
 
-</span><span style="color:#c594c5;">const </span><span style="color:#5fb3b3;">{ </span><span style="color:#cccece;">send </span><span style="color:#5fb3b3;">} = </span><span style="color:#6699cc;">interpret</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">mr_robot</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">handler</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>Now you can see if it's alive.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;);
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;);
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;);
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">done</span><span style="color:#5fb3b3;">&#39;);
+</span><span style=color:#c594c5>const </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>send </span><span style=color:#5fb3b3>} = </span><span style=color:#69c>interpret</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>mr_robot</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>handler</span><span style=color:#5fb3b3>);
+</span></pre><p>Now you can see if it's alive.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
 
-</span><span style="color:#5f6364;">// You should see in the console
+</span><span style=color:#5f6364>// You should see in the console
 // loading (3)
 // idle
-</span></pre>
-<p>Dispatching <code>fetch</code> will turn the current state to <code>loading</code> and <code>done</code> will get it back to <code>idle</code>. I see you're not impressed. That's fine. Let's try something, let's add another state <code>end</code> and make <code>loading</code> switch to that, then dispatch <code>done</code> and see what happens. </p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> const mr_robot = createMachine({
+</span></pre><p>Dispatching <code>fetch</code> will turn the current state to <code>loading</code> and <code>done</code> will get it back to <code>idle</code>. I see you're not impressed. That's fine. Let's try something, let's add another state <code>end</code> and make <code>loading</code> switch to that, then dispatch <code>done</code> and see what happens.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">   loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">   loading: state(transition(&#39;done&#39;, &#39;end&#39;)),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">   end: state()
-</span><span style="color:#cccece;"> });
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">done</span><span style="color:#5fb3b3;">&#39;);
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>   loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>   loading: state(transition(&#39;done&#39;, &#39;end&#39;)),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>   end: state()
+</span><span style=color:#cccece> });
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
 
-</span><span style="color:#5f6364;">// You should see in the console
+</span><span style=color:#5f6364>// You should see in the console
 // idle
-</span></pre>
-<p>Sending <code>done</code> while <code>idle</code> doesn't trigger a <code>loading</code> state, it stays in <code>idle</code> because that state doesn't have a <code>done</code> event. And now...</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#5f6364;">// We do the usual flow.
+</span></pre><p>Sending <code>done</code> while <code>idle</code> doesn't trigger a <code>loading</code> state, it stays in <code>idle</code> because that state doesn't have a <code>done</code> event. And now...<pre style=background-color:#2b2c2f>
+<span style=color:#5f6364>// We do the usual flow.
 
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;);
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">done</span><span style="color:#5fb3b3;">&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
 
-</span><span style="color:#5f6364;">// You should have
+</span><span style=color:#5f6364>// You should have
 // loading
 // end
 
 // Now try again `fetch`
-</span><span style="color:#6699cc;">send</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;);
+</span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
 
-</span><span style="color:#5f6364;">// You should have
+</span><span style=color:#5f6364>// You should have
 // end
-</span></pre>
-<p>If you send <code>fetch</code> (or any other event) while in <code>end</code> state will give you <code>end</code> every single time. Why? Because you can't go anywhere, <code>end</code> doesn't have transitions.</p>
-<p>I hope you see why this is useful. If not, I apologise for all the <code>console.log</code>ing.</p>
-<p>Going back to our current machine. This what we got so far.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> </span><span style="color:#c594c5;">import </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#cccece;">createMachine</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">state</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">transition</span><span style="color:#5fb3b3;">,
-  </span><span style="color:#cccece;">interpret
-</span><span style="color:#5fb3b3;">} </span><span style="color:#c594c5;">from </span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">https://unpkg.com/robot3@0.2.9/machine.js</span><span style="color:#5fb3b3;">&#39;;
+</span></pre><p>If you send <code>fetch</code> (or any other event) while in <code>end</code> state will give you <code>end</code> every single time. Why? Because you can't go anywhere, <code>end</code> doesn't have transitions.<p>I hope you see why this is useful. If not, I apologise for all the <code>console.log</code>ing.<p>Going back to our current machine. This what we got so far.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> </span><span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
+  </span><span style=color:#cccece>createMachine</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>transition</span><span style=color:#5fb3b3>,
+  </span><span style=color:#cccece>interpret
+</span><span style=color:#5fb3b3>} </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>https://unpkg.com/robot3@0.2.9/machine.js</span><span style=color:#5fb3b3>&#39;;
 
-</span><span style="color:#c594c5;">const </span><span style="color:#cccece;">mr_robot </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">createMachine</span><span style="color:#5fb3b3;">({
-  </span><span style="color:#6699cc;">idle</span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">state</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">transition</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">fetch</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">loading</span><span style="color:#5fb3b3;">&#39;)),
-  </span><span style="color:#6699cc;">loading</span><span style="color:#5fb3b3;">: </span><span style="color:#6699cc;">state</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">transition</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">done</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">idle</span><span style="color:#5fb3b3;">&#39;))
+</span><span style=color:#c594c5>const </span><span style=color:#cccece>mr_robot </span><span style=color:#5fb3b3>= </span><span style=color:#69c>createMachine</span><span style=color:#5fb3b3>({
+  </span><span style=color:#69c>idle</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>(</span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>loading</span><span style=color:#5fb3b3>&#39;)),
+  </span><span style=color:#69c>loading</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>(</span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;))
 });
 
-</span><span style="color:#c594c5;">const </span><span style="color:#6699cc;">handler </span><span style="color:#5fb3b3;">= ({ </span><span style="color:#f99157;">machine </span><span style="color:#5fb3b3;">}) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">machine</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">current</span><span style="color:#5fb3b3;">);
+</span><span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>);
 }
 
-</span><span style="color:#c594c5;">const </span><span style="color:#5fb3b3;">{ </span><span style="color:#cccece;">send </span><span style="color:#5fb3b3;">} = </span><span style="color:#6699cc;">interpret</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">mr_robot</span><span style="color:#5fb3b3;">, </span><span style="color:#cccece;">handler</span><span style="color:#5fb3b3;">);
-</span></pre>
-<p>But this is still not enough, now we need to get some data when we enter the <code>loading</code> state. Let's first fake our quote fetching function.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">get_quote</span><span style="color:#5fb3b3;">() {
-  </span><span style="color:#5f6364;">// make a random delay, 3 to 5 seconds.
-  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">delay </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">random_number</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">3</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">5</span><span style="color:#5fb3b3;">) * </span><span style="color:#f99157;">1000</span><span style="color:#5fb3b3;">;
+</span><span style=color:#c594c5>const </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>send </span><span style=color:#5fb3b3>} = </span><span style=color:#69c>interpret</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>mr_robot</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>handler</span><span style=color:#5fb3b3>);
+</span></pre><p>But this is still not enough, now we need to get some data when we enter the <code>loading</code> state. Let's first fake our quote fetching function.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>get_quote</span><span style=color:#5fb3b3>() {
+  </span><span style=color:#5f6364>// make a random delay, 3 to 5 seconds.
+  </span><span style=color:#c594c5>const </span><span style=color:#cccece>delay </span><span style=color:#5fb3b3>= </span><span style=color:#69c>random_number</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>3</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>5</span><span style=color:#5fb3b3>) * </span><span style=color:#f99157>1000</span><span style=color:#5fb3b3>;
 
-  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">promise </span><span style="color:#5fb3b3;">= new </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">res </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
-    </span><span style="color:#6699cc;">setTimeout</span><span style="color:#5fb3b3;">(() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">res</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">&lt;quote&gt;</span><span style="color:#5fb3b3;">&#39;), </span><span style="color:#cccece;">delay</span><span style="color:#5fb3b3;">);
+  </span><span style=color:#c594c5>const </span><span style=color:#cccece>promise </span><span style=color:#5fb3b3>= new </span><span style=color:#fac863>Promise</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>res </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+    </span><span style=color:#69c>setTimeout</span><span style=color:#5fb3b3>(() </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>res</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>&lt;quote&gt;</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#cccece>delay</span><span style=color:#5fb3b3>);
   });
   
-  </span><span style="color:#5f6364;">// sanity check
-  </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">then</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">res </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">res</span><span style="color:#5fb3b3;">), </span><span style="color:#cccece;">res</span><span style="color:#5fb3b3;">));
+  </span><span style=color:#5f6364>// sanity check
+  </span><span style=color:#cccece>promise</span><span style=color:#5fb3b3>.</span><span style=color:#69c>then</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>res </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>(</span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>res</span><span style=color:#5fb3b3>), </span><span style=color:#cccece>res</span><span style=color:#5fb3b3>));
 
-  </span><span style="color:#c594c5;">return </span><span style="color:#cccece;">promise</span><span style="color:#5fb3b3;">;
+  </span><span style=color:#c594c5>return </span><span style=color:#cccece>promise</span><span style=color:#5fb3b3>;
 }
-</span></pre>
-<p>To make it work with our state machine we will use a function called <code>invoke</code>, this utility calls an &quot;async function&quot; (a function that returns a promise) when you enter a <code>state</code> then when the promise resolves it sends a <code>done</code> event (if it fails it sends a <code>error</code> event).</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">  import {
+</span></pre><p>To make it work with our state machine we will use a function called <code>invoke</code>, this utility calls an "async function" (a function that returns a promise) when you enter a <code>state</code> then when the promise resolves it sends a <code>done</code> event (if it fails it sends a <code>error</code> event).<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>  import {
    createMachine,
    state,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  invoke,
-</span><span style="color:#cccece;">   transition,
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  invoke,
+</span><span style=color:#cccece>   transition,
    interpret
  } from &#39;https://unpkg.com/robot3@0.2.9/machine.js&#39;;
 
  const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  loading: state(transition(&#39;done&#39;, &#39;idle&#39;)),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)),
-</span><span style="color:#cccece;"> });
-</span></pre>
-<p>If you test <code>send('fetch')</code> you should see in the console.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">loading
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: state(transition(&#39;done&#39;, &#39;idle&#39;)),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)),
+</span><span style=color:#cccece> });
+</span></pre><p>If you test <code>send('fetch')</code> you should see in the console.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>loading
 
 // wait a few seconds...
 
 &lt;quote&gt;
 idle
-</span></pre>
-<p>By now I hope you're all wondering where do we actually keep the data? There is a handy feature in <code>createMachine</code> that let us define a &quot;context&quot; object that will be available to us in the function that we attach to our <code>transitions</code>.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#6699cc;">context </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">ev </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">({
-  </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">: {},
+</span></pre><p>By now I hope you're all wondering where do we actually keep the data? There is a handy feature in <code>createMachine</code> that let us define a "context" object that will be available to us in the function that we attach to our <code>transitions</code>.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#69c>context </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>ev </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({
+  </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>: {},
 });
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">  const mr_robot = createMachine({
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#cccece>  const mr_robot = createMachine({
     idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
     loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;"> });
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> }, context);
-</span></pre>
-<p>Next we'll use another utility. We will pass a third parameter to <code>loading</code>'s transition, a hook of some sort that will modify the context object. This utility is called <code>reduce</code> and it looks like this.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#6699cc;">reduce</span><span style="color:#5fb3b3;">((</span><span style="color:#f99157;">ctx</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">ev</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">({ ...</span><span style="color:#cccece;">ctx</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">data</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">data </span><span style="color:#5fb3b3;">}))
-</span></pre>
-<p>It takes the current context, a payload (here named <code>ev</code>) and whatever you return from it becomes your new context. We add that to the <code>loading</code> state.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">  import {
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67> });
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794> }, context);
+</span></pre><p>Next we'll use another utility. We will pass a third parameter to <code>loading</code>'s transition, a hook of some sort that will modify the context object. This utility is called <code>reduce</code> and it looks like this.<pre style=background-color:#2b2c2f>
+<span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>data </span><span style=color:#5fb3b3>}))
+</span></pre><p>It takes the current context, a payload (here named <code>ev</code>) and whatever you return from it becomes your new context. We add that to the <code>loading</code> state.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>  import {
    createMachine,
    state,
    invoke,
    transition,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  reduce,
-</span><span style="color:#cccece;">   interpret
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  reduce,
+</span><span style=color:#cccece>   interpret
  } from &#39;https://unpkg.com/robot3@0.2.9/machine.js&#39;;
 
  const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)), 
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  loading: invoke(
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    get_quote, 
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    transition(
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      &#39;done&#39;,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      &#39;idle&#39;,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      reduce((ctx, ev) =&gt; ({ ...ctx, data: ev.data }))
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    )
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  ),
-</span><span style="color:#cccece;"> }, context);
-</span></pre>
-<p>Sanity check time. How do we know that works? We modify <code>interpret</code>'s handler.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#6699cc;">handler </span><span style="color:#5fb3b3;">= ({ </span><span style="color:#f99157;">machine</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">context </span><span style="color:#5fb3b3;">}) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span style="color:#5fb3b3;">(</span><span style="color:#fac863;">JSON</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">stringify</span><span style="color:#5fb3b3;">({ 
-    </span><span style="color:#6699cc;">state</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">machine</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">current</span><span style="color:#5fb3b3;">,
-    </span><span style="color:#cccece;">context
-  </span><span style="color:#5fb3b3;">}));
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)), 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: invoke(
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    get_quote, 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    transition(
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>      &#39;done&#39;,
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>      &#39;idle&#39;,
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>      reduce((ctx, ev) =&gt; ({ ...ctx, data: ev.data }))
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    )
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  ),
+</span><span style=color:#cccece> }, context);
+</span></pre><p>Sanity check time. How do we know that works? We modify <code>interpret</code>'s handler.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>context </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>JSON</span><span style=color:#5fb3b3>.</span><span style=color:#69c>stringify</span><span style=color:#5fb3b3>({ 
+    </span><span style=color:#69c>state</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>,
+    </span><span style=color:#cccece>context
+  </span><span style=color:#5fb3b3>}));
 }
-</span></pre>
-<p>You should see this.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">{&#39;state&#39;:&#39;loading&#39;,&#39;context&#39;:{&#39;data&#39;:{}}}
+</span></pre><p>You should see this.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>{&#39;state&#39;:&#39;loading&#39;,&#39;context&#39;:{&#39;data&#39;:{}}}
 
 // wait a few seconds...
 
 {&#39;state&#39;:&#39;idle&#39;,&#39;context&#39;:{&#39;data&#39;:&#39;&lt;quote&gt;&#39;}}
-</span></pre>
-<p>We are ready. Let's show something in the browser.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">main </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">app</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card</span><span style="color:#5fb3b3;">&quot;&gt;
-  &lt;</span><span style="color:#eb606b;">section </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card__content</span><span style="color:#5fb3b3;">&quot;&gt;
-     &lt;</span><span style="color:#eb606b;">div </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card__body</span><span style="color:#5fb3b3;">&quot;&gt;
-        &lt;</span><span style="color:#eb606b;">div </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card__quote</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">
+</span></pre><p>We are ready. Let's show something in the browser.<pre style=background-color:#2b2c2f>
+<span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>main </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>app</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>&quot;&gt;
+  &lt;</span><span style=color:#eb606b>section </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__content</span><span style=color:#5fb3b3>&quot;&gt;
+     &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__body</span><span style=color:#5fb3b3>&quot;&gt;
+        &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__quote</span><span style=color:#5fb3b3>&quot;&gt;</span><span style=color:#cccece>
           quote
-        </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
+        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>&gt;
 
-        &lt;</span><span style="color:#eb606b;">div </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card__author</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">
+        &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__author</span><span style=color:#5fb3b3>&quot;&gt;</span><span style=color:#cccece>
           -- author
-        </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
-      &lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt;
-      &lt;</span><span style="color:#eb606b;">div </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">card__footer</span><span style="color:#5fb3b3;">&quot;&gt;
-        &lt;</span><span style="color:#eb606b;">button </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">load_btn</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">btn btn--new</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">
+        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>&gt;
+      &lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>&gt;
+      &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__footer</span><span style=color:#5fb3b3>&quot;&gt;
+        &lt;</span><span style=color:#eb606b>button </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>load_btn</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>btn btn--new</span><span style=color:#5fb3b3>&quot;&gt;</span><span style=color:#cccece>
           More
-        </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">button</span><span style="color:#5fb3b3;">&gt;
-        &lt;</span><span style="color:#eb606b;">a </span><span style="color:#bb80b3;">href</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">#</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">class</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">btn btn--tweet</span><span style="color:#5fb3b3;">&quot;&gt;</span><span style="color:#cccece;">
+        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>button</span><span style=color:#5fb3b3>&gt;
+        &lt;</span><span style=color:#eb606b>a </span><span style=color:#bb80b3>href</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>#</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>target</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>_blank</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>btn btn--tweet</span><span style=color:#5fb3b3>&quot;&gt;</span><span style=color:#cccece>
           Tweet
-        </span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">a</span><span style="color:#5fb3b3;">&gt;
-      &lt;/</span><span style="color:#eb606b;">div</span><span style="color:#5fb3b3;">&gt; 
-  &lt;/</span><span style="color:#eb606b;">section</span><span style="color:#5fb3b3;">&gt; 
-&lt;/</span><span style="color:#eb606b;">main</span><span style="color:#5fb3b3;">&gt;
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#eb606b;">body </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">flex</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">justify-content</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">center</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">align-items</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">center</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">min-height</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">95vh</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">background</span><span style="color:#5fb3b3;">: #ddd;
-  </span><span style="color:#fac863;">font-size</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">1em</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">color</span><span style="color:#5fb3b3;">: #212121;
+        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>a</span><span style=color:#5fb3b3>&gt;
+      &lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>&gt; 
+  &lt;/</span><span style=color:#eb606b>section</span><span style=color:#5fb3b3>&gt; 
+&lt;/</span><span style=color:#eb606b>main</span><span style=color:#5fb3b3>&gt;
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#eb606b>body </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>flex</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>justify-content</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>align-items</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>min-height</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>95vh</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>background</span><span style=color:#5fb3b3>: #ddd;
+  </span><span style=color:#fac863>font-size</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>1em</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>color</span><span style=color:#5fb3b3>: #212121;
 }
 
-.</span><span style="color:#bb80b3;">card </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">width</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">600px</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">background</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">white</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">box-shadow</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0 2px 5px 0 </span><span style="color:#6699cc;">rgba</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0.16</span><span style="color:#5fb3b3;">)</span><span style="color:#cccece;">, </span><span style="color:#f99157;">0 2px 10px 0 </span><span style="color:#6699cc;">rgba</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">0.12</span><span style="color:#5fb3b3;">);
+.</span><span style=color:#bb80b3>card </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>width</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>600px</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>background</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>white</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>box-shadow</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0 2px 5px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0.16</span><span style=color:#5fb3b3>)</span><span style=color:#cccece>, </span><span style=color:#f99157>0 2px 10px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0.12</span><span style=color:#5fb3b3>);
 }
 
-.</span><span style="color:#bb80b3;">card__content </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">color</span><span style="color:#5fb3b3;">: #212121;
-  </span><span style="color:#fac863;">padding</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">20px</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>card__content </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>color</span><span style=color:#5fb3b3>: #212121;
+  </span><span style=color:#fac863>padding</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>20px</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">card__content--loader </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">height</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">95px</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">flex</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">align-items</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">center</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">justify-content</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">center
-</span><span style="color:#5fb3b3;">}
+.</span><span style=color:#bb80b3>card__content--loader </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>height</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>95px</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>flex</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>align-items</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>justify-content</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center
+</span><span style=color:#5fb3b3>}
 
-.</span><span style="color:#bb80b3;">card__body </span><span style="color:#5fb3b3;">{
- </span><span style="color:#fac863;">padding-bottom</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">15px</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>card__body </span><span style=color:#5fb3b3>{
+ </span><span style=color:#fac863>padding-bottom</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>15px</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">card__author </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">padding-top</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">10px</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">font-style</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">italic</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>card__author </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>padding-top</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>10px</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>font-style</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>italic</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">card__footer </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">width</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">100%</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">flex</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">justify-content</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">space-between</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>card__footer </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>width</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>100%</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>flex</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>justify-content</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>space-between</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">btn </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">color</span><span style="color:#5fb3b3;">: #fff;
-  </span><span style="color:#fac863;">cursor</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">pointer</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">margin-top</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">10px</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">margin-left</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">10px</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">border-radius</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0.4rem</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">text-decoration</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">none</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">inline-block</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#fac863;">padding</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">.3rem .9rem</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>btn </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>color</span><span style=color:#5fb3b3>: #fff;
+  </span><span style=color:#fac863>cursor</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>pointer</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>margin-top</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>10px</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>margin-left</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>10px</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>border-radius</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.4rem</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>text-decoration</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>inline-block</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>padding</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>.3rem .9rem</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">btn--new </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #2093be;
-  </span><span style="color:#fac863;">border</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0.1rem solid </span><span style="color:#5fb3b3;">#2093be;
+.</span><span style=color:#bb80b3>btn--new </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>background-color</span><span style=color:#5fb3b3>: #2093be;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#2093be;
   
 }
 
-.</span><span style="color:#bb80b3;">btn--tweet </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">background-color</span><span style="color:#5fb3b3;">: #0074d9;
-  </span><span style="color:#fac863;">border</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0.1rem solid </span><span style="color:#5fb3b3;">#0074d9;
+.</span><span style=color:#bb80b3>btn--tweet </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>background-color</span><span style=color:#5fb3b3>: #0074d9;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#0074d9;
 }
 
-.</span><span style="color:#bb80b3;">btn</span><span style="color:#5fb3b3;">:</span><span style="color:#cccece;">hover </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">background</span><span style="color:#5fb3b3;">: #3cb0fd;
-  </span><span style="color:#fac863;">border</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">0.1rem solid </span><span style="color:#5fb3b3;">#3cb0fd;
-  </span><span style="color:#fac863;">text-decoration</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">none</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>btn</span><span style=color:#5fb3b3>:</span><span style=color:#cccece>hover </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>background</span><span style=color:#5fb3b3>: #3cb0fd;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#3cb0fd;
+  </span><span style=color:#fac863>text-decoration</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
 }
 
-.</span><span style="color:#bb80b3;">hide </span><span style="color:#5fb3b3;">{
-  </span><span style="color:#fac863;">display</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">none</span><span style="color:#5fb3b3;">;
+.</span><span style=color:#bb80b3>hide </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
 }
-</span></pre>
-<p>Now the last piece of the puzzle, the side effects. We need to attach another function to our transitions so we can update the DOM. We could use <code>reduce</code> again but is just rude to have side effects on something called <code>reduce</code> (just don't) We will bring another utility made for that, <code>action</code>.</p>
-<p>But first we must prepare. Update the context object with the necesary dependencies. (This step is not necesary, this is just me being allergic to global variables)</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> const context = ev =&gt; ({
+</span></pre><p>Now the last piece of the puzzle, the side effects. We need to attach another function to our transitions so we can update the DOM. We could use <code>reduce</code> again but is just rude to have side effects on something called <code>reduce</code> (just don't) We will bring another utility made for that, <code>action</code>.<p>But first we must prepare. Update the context object with the necesary dependencies. (This step is not necesary, this is just me being allergic to global variables)<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> const context = ev =&gt; ({
    data: {},
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  dom: {
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    quote: document.querySelector(&#39;.card__quote&#39;),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    author: document.querySelector(&#39;.card__author&#39;),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    load_btn: window.load_btn,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    tweet_btn: document.querySelector(&#39;.btn--tweet&#39;),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    card: window.card
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  }
-</span><span style="color:#cccece;"> });
-</span></pre>
-<p>Create the side effects. At this point you should make sure that <code>get_quote</code> actually returns an object with a <code>quote</code> and <code>author</code> property.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">update_card</span><span style="color:#5fb3b3;">({ </span><span style="color:#f99157;">dom</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data </span><span style="color:#5fb3b3;">}) {
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">load_btn</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">textContent </span><span style="color:#5fb3b3;">= &#39;</span><span style="color:#99c794;">More</span><span style="color:#5fb3b3;">&#39;;
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">quote</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">textContent </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">quote</span><span style="color:#5fb3b3;">;
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">author</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">textContent </span><span style="color:#5fb3b3;">= </span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">author</span><span style="color:#5fb3b3;">;
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  dom: {
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    quote: document.querySelector(&#39;.card__quote&#39;),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    author: document.querySelector(&#39;.card__author&#39;),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    load_btn: window.load_btn,
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    tweet_btn: document.querySelector(&#39;.btn--tweet&#39;),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    card: window.card
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  }
+</span><span style=color:#cccece> });
+</span></pre><p>Create the side effects. At this point you should make sure that <code>get_quote</code> actually returns an object with a <code>quote</code> and <code>author</code> property.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>update_card</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data </span><span style=color:#5fb3b3>}) {
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>load_btn</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>More</span><span style=color:#5fb3b3>&#39;;
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>quote</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>quote</span><span style=color:#5fb3b3>;
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>author</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>author</span><span style=color:#5fb3b3>;
 
-  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">web_intent </span><span style="color:#5fb3b3;">= &#39;</span><span style="color:#99c794;">https://twitter.com/intent/tweet?text=</span><span style="color:#5fb3b3;">&#39;;
-  </span><span style="color:#c594c5;">const </span><span style="color:#cccece;">tweet </span><span style="color:#5fb3b3;">= `${</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">quote</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> -- </span><span style="color:#5fb3b3;">${</span><span style="color:#cccece;">data</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">author</span><span style="color:#5fb3b3;">}`;
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">tweet_btn</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">setAttribute</span><span style="color:#5fb3b3;">(
-    &#39;</span><span style="color:#99c794;">href</span><span style="color:#5fb3b3;">&#39;, </span><span style="color:#cccece;">web_intent </span><span style="color:#5fb3b3;">+ </span><span style="color:#6699cc;">encodeURIComponent</span><span style="color:#5fb3b3;">(</span><span style="color:#cccece;">tweet</span><span style="color:#5fb3b3;">)
+  </span><span style=color:#c594c5>const </span><span style=color:#cccece>web_intent </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>https://twitter.com/intent/tweet?text=</span><span style=color:#5fb3b3>&#39;;
+  </span><span style=color:#c594c5>const </span><span style=color:#cccece>tweet </span><span style=color:#5fb3b3>= `${</span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>quote</span><span style=color:#5fb3b3>}</span><span style=color:#99c794> -- </span><span style=color:#5fb3b3>${</span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>author</span><span style=color:#5fb3b3>}`;
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#69c>tweet_btn</span><span style=color:#5fb3b3>.</span><span style=color:#69c>setAttribute</span><span style=color:#5fb3b3>(
+    &#39;</span><span style=color:#99c794>href</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>web_intent </span><span style=color:#5fb3b3>+ </span><span style=color:#69c>encodeURIComponent</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>tweet</span><span style=color:#5fb3b3>)
   );
 }
 
-</span><span style="color:#c594c5;">function </span><span style="color:#6699cc;">show_loading</span><span style="color:#5fb3b3;">({ </span><span style="color:#f99157;">dom </span><span style="color:#5fb3b3;">}) {
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">load_btn</span><span style="color:#5fb3b3;">.</span><span style="color:#cccece;">textContent </span><span style="color:#5fb3b3;">= &#39;</span><span style="color:#99c794;">Loading...</span><span style="color:#5fb3b3;">&#39;;
+</span><span style=color:#c594c5>function </span><span style=color:#69c>show_loading</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom </span><span style=color:#5fb3b3>}) {
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>load_btn</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>Loading...</span><span style=color:#5fb3b3>&#39;;
 }
-</span></pre>
-<p>Put everything together.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;">  import {
+</span></pre><p>Put everything together.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece>  import {
    createMachine,
    state,
    invoke,
    transition,
    reduce,
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  action,
-</span><span style="color:#cccece;">   interpret
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  action,
+</span><span style=color:#cccece>   interpret
  } from &#39;https://unpkg.com/robot3@0.2.9/machine.js&#39;;
 
  const mr_robot = createMachine({
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
-</span><span style="color:#cccece;">   loading: invoke(
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
+</span><span style=color:#cccece>   loading: invoke(
      get_quote, 
      transition(
        &#39;done&#39;,
        &#39;idle&#39;,
        reduce((ctx, ev) =&gt; ({ ...ctx, data: ev.data })),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">      action(update_card)
-</span><span style="color:#cccece;">     )
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>      action(update_card)
+</span><span style=color:#cccece>     )
    ),
  }, context);
-</span></pre>
-<p>By now everything kinda works but it looks bad when it loads for the first time. Let's make another loader, one that hides the card while we fetch the first quote.</p>
-<p>Let's start with the HTML.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> &lt;main id=&quot;app&quot; class=&quot;card&quot;&gt;
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  &lt;section id=&quot;card&quot; class=&quot;card__content&quot;&gt;
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  &lt;section class=&quot;card__content card__content--loader&quot;&gt; 
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    &lt;p&gt;Loading&lt;/p&gt; 
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  &lt;/section&gt;
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  &lt;section id=&quot;card&quot; class=&quot;hide card__content&quot;&gt;
-</span><span style="color:#cccece;">     &lt;div class=&quot;card__body&quot;&gt;
+</span></pre><p>By now everything kinda works but it looks bad when it loads for the first time. Let's make another loader, one that hides the card while we fetch the first quote.<p>Let's start with the HTML.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> &lt;main id=&quot;app&quot; class=&quot;card&quot;&gt;
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  &lt;section id=&quot;card&quot; class=&quot;card__content&quot;&gt;
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;section class=&quot;card__content card__content--loader&quot;&gt; 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    &lt;p&gt;Loading&lt;/p&gt; 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;/section&gt;
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;section id=&quot;card&quot; class=&quot;hide card__content&quot;&gt;
+</span><span style=color:#cccece>     &lt;div class=&quot;card__body&quot;&gt;
        &lt;div class=&quot;card__quote&quot;&gt;
          quote
        &lt;/div&gt;
@@ -486,105 +342,67 @@ idle
      &lt;/div&gt; 
    &lt;/section&gt; 
  &lt;/main&gt;
-</span></pre>
-<p>We'll make another state, <code>empty</code>. We can reuse our original <code>loading</code> state for this. Make a factory function that returns the loading transition.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">const </span><span style="color:#6699cc;">load_quote </span><span style="color:#5fb3b3;">= (...</span><span style="color:#f99157;">args</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt;
-  </span><span style="color:#6699cc;">invoke</span><span style="color:#5fb3b3;">(
-    </span><span style="color:#cccece;">get_quote</span><span style="color:#5fb3b3;">,
-    </span><span style="color:#6699cc;">transition</span><span style="color:#5fb3b3;">(
-      &#39;</span><span style="color:#99c794;">done</span><span style="color:#5fb3b3;">&#39;,
-      &#39;</span><span style="color:#99c794;">idle</span><span style="color:#5fb3b3;">&#39;,
-      </span><span style="color:#6699cc;">reduce</span><span style="color:#5fb3b3;">((</span><span style="color:#f99157;">ctx</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">ev</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">({ ...</span><span style="color:#cccece;">ctx</span><span style="color:#5fb3b3;">, </span><span style="color:#6699cc;">data</span><span style="color:#5fb3b3;">: </span><span style="color:#cccece;">ev</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">data </span><span style="color:#5fb3b3;">})),
-      ...</span><span style="color:#cccece;">args
-    </span><span style="color:#5fb3b3;">),
-    </span><span style="color:#6699cc;">transition</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">error</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">idle</span><span style="color:#5fb3b3;">&#39;)
+</span></pre><p>We'll make another state, <code>empty</code>. We can reuse our original <code>loading</code> state for this. Make a factory function that returns the loading transition.<pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>const </span><span style=color:#69c>load_quote </span><span style=color:#5fb3b3>= (...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt;
+  </span><span style=color:#69c>invoke</span><span style=color:#5fb3b3>(
+    </span><span style=color:#cccece>get_quote</span><span style=color:#5fb3b3>,
+    </span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(
+      &#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;,
+      &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;,
+      </span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>data </span><span style=color:#5fb3b3>})),
+      ...</span><span style=color:#cccece>args
+    </span><span style=color:#5fb3b3>),
+    </span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>error</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;)
   );
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> const mr_robot = createMachine({
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#cccece> const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  loading: invoke(
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    get_quote, 
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    transition(
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">      &#39;done&#39;,
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">      &#39;idle&#39;,
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">      reduce((ctx, ev) =&gt; ({ ...ctx, data: ev.data })),
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">      action(update_card)
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    )
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  ),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  loading: load_quote(action(update_card))
-</span><span style="color:#cccece;"> }, context);
-</span></pre>
-<p>Now we use this to hide the first loader and show the quote when it's ready.</p>
-<pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> const context = ev =&gt; ({
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: invoke(
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    get_quote, 
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    transition(
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>      &#39;done&#39;,
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>      &#39;idle&#39;,
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>      reduce((ctx, ev) =&gt; ({ ...ctx, data: ev.data })),
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>      action(update_card)
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    )
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  ),
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: load_quote(action(update_card))
+</span><span style=color:#cccece> }, context);
+</span></pre><p>Now we use this to hide the first loader and show the quote when it's ready.<pre style=background-color:#2b2c2f>
+<span style=color:#cccece> const context = ev =&gt; ({
    data: {},
    dom: {
      quote: document.querySelector(&#39;.card__quote&#39;),
      author: document.querySelector(&#39;.card__author&#39;),
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    loader: document.querySelector(&#39;.card__content--loader&#39;),
-</span><span style="color:#cccece;">     load_btn: window.load_btn,
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    loader: document.querySelector(&#39;.card__content--loader&#39;),
+</span><span style=color:#cccece>     load_btn: window.load_btn,
      tweet_btn: document.querySelector(&#39;.btn--tweet&#39;),
      card: window.card
    }
  });
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#c594c5;">function </span><span style="color:#6699cc;">hide_loader</span><span style="color:#5fb3b3;">({ </span><span style="color:#f99157;">dom </span><span style="color:#5fb3b3;">}) {
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">loader</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">classList</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">add</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">hide</span><span style="color:#5fb3b3;">&#39;);
-  </span><span style="color:#cccece;">dom</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">card</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">classList</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">remove</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">hide</span><span style="color:#5fb3b3;">&#39;);
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#c594c5>function </span><span style=color:#69c>hide_loader</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom </span><span style=color:#5fb3b3>}) {
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#69c>loader</span><span style=color:#5fb3b3>.</span><span style=color:#69c>classList</span><span style=color:#5fb3b3>.</span><span style=color:#69c>add</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>hide</span><span style=color:#5fb3b3>&#39;);
+  </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#69c>card</span><span style=color:#5fb3b3>.</span><span style=color:#69c>classList</span><span style=color:#5fb3b3>.</span><span style=color:#69c>remove</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>hide</span><span style=color:#5fb3b3>&#39;);
 }
-</span></pre><pre style="background-color:#2b2c2f;">
-<span style="color:#cccece;"> const mr_robot = createMachine({
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">  empty: load_quote(action(update_card), action(hide_loader)),
-</span><span style="color:#cccece;">   idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
+</span></pre><pre style=background-color:#2b2c2f>
+<span style=color:#cccece> const mr_robot = createMachine({
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  empty: load_quote(action(update_card), action(hide_loader)),
+</span><span style=color:#cccece>   idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
    loading: load_quote(action(update_card))
  }, context);
-</span><span style="color:#5fb3b3;">-
--</span><span style="color:#ec5f67;"> const handler = ({ machine, context }) =&gt; {
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  console.log(JSON.stringify({ 
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    state: machine.current,
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">    context
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;">  }));
-</span><span style="color:#5fb3b3;">-</span><span style="color:#ec5f67;"> }
-</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;"> const handler = () =&gt; {};
-</span><span style="color:#cccece;">
+</span><span style=color:#5fb3b3>-
+-</span><span style=color:#ec5f67> const handler = ({ machine, context }) =&gt; {
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  console.log(JSON.stringify({ 
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    state: machine.current,
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    context
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  }));
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67> }
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794> const handler = () =&gt; {};
+</span><span style=color:#cccece>
  const { send } = interpret(mr_robot, handler);
-</span><span style="color:#5fb3b3;">+
-+</span><span style="color:#99c794;"> const fetch_quote = () =&gt; send(&#39;fetch&#39;);
-</span><span style="color:#5fb3b3;">+
-+</span><span style="color:#99c794;"> window.load_btn.addEventListener(&#39;click&#39;, fetch_quote);
-</span></pre>
-<p>Let's see it work.</p>
-<p 
-  class="codepen" 
-  data-height="600" 
-  data-theme-id="dark" 
-  data-default-tab="js,result" 
-  data-user="VonHeikemen" 
-  data-slug-hash="OJJvQzR" 
-  data-preview="true" 
-  style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;" 
-  data-pen-title="Finite Random Quote Machine">
-  <span>
-    See the Pen <a href="https://codepen.io/VonHeikemen/pen/OJJvQzR">Finite Random Quote Machine</a> by Heiker (<a href="https://codepen.io/VonHeikemen">@VonHeikemen</a>) on <a href="https://codepen.io">CodePen</a>.
-  </span>
-</p>
-<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
-<h2 id="so-is-this-state-machine-thing-helpful">So is this state machine thing helpful?</h2>
-<p>I hope so. Did you notice we made a bunch of test and created the blueprint of the quote machine even before writing any HTML? I think that's cool. </p>
-<p>Did you try to click the 'loading' button while loading? Did it triggered a bunch of call to <code>get_quote</code>? That is because we made (sort of) impossible that a <code>fetch</code> event can happen during <code>loading</code>. </p>
-<p>Not only that, the behavior of the machine is and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.</p>
-<h2 id="want-to-know-more">Want to know more?</h2>
-<ul>
-<li><a href="https://xstate.js.org/docs/about/concepts.html">XState (concepts)</a></li>
-<li><a href="https://thisrobot.life/">robot3 - docs</a></li>
-<li><a href="https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/">Understanding State Machines</a></li>
-</ul>
-
-</div>
-
-        </div>
-
-    </body>
-
-</html>
+</span><span style=color:#5fb3b3>+
++</span><span style=color:#99c794> const fetch_quote = () =&gt; send(&#39;fetch&#39;);
+</span><span style=color:#5fb3b3>+
++</span><span style=color:#99c794> window.load_btn.addEventListener(&#39;click&#39;, fetch_quote);
+</span></pre><p>Let's see it work.<p class=codepen data-height=600 data-theme-id=dark data-default-tab=js,result data-user=VonHeikemen data-slug-hash=OJJvQzR data-preview=true style="height:600px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid;margin:1em 0;padding:1em" data-pen-title="Finite Random Quote Machine"><span>See the Pen <a href=https://codepen.io/VonHeikemen/pen/OJJvQzR>Finite Random Quote Machine</a> by Heiker (<a href=https://codepen.io/VonHeikemen>@VonHeikemen</a>) on <a href=https://codepen.io>CodePen</a>.</span></p><script async src=https://static.codepen.io/assets/embed/ei.js></script><h2 id=so-is-this-state-machine-thing-helpful>So is this state machine thing helpful?</h2><p>I hope so. Did you notice we made a bunch of test and created the blueprint of the quote machine even before writing any HTML? I think that's cool.<p>Did you try to click the 'loading' button while loading? Did it triggered a bunch of call to <code>get_quote</code>? That is because we made (sort of) impossible that a <code>fetch</code> event can happen during <code>loading</code>.<p>Not only that, the behavior of the machine is and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.<h2 id=want-to-know-more>Want to know more?</h2><ul><li><a href=https://xstate.js.org/docs/about/concepts.html>XState (concepts)</a><li><a href=https://thisrobot.life/>robot3 - docs</a><li><a href=https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/>Understanding State Machines</a></ul></div></div>
