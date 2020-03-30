@@ -1,4 +1,541 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/functional-programming/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Sun, 16 Feb 2020 00:00:00 +0000</lastBuildDate><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those term that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/functional-programming/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Mon, 30 Mar 2020 00:00:00 +0000</lastBuildDate><item><title>Functional programming for your everyday javascript: Composition techniques</title><pubDate>Mon, 30 Mar 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-composition-techniques/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-composition-techniques/</guid><description>&lt;p>Today we are going to talk about function composition. The art of creating big things with &amp;quot;simple&amp;quot; pieces. It will be even better if you don't know anything about functional programming, this will be an introduction to common concepts and patterns used in that paradigm that can be implemented in javascript. What I'm about to show you is not a magical formula to make your code more readable or bug free, that's not how any of this works. I do believe that it can help solve some problems, but in order to do that in the best way you need to keep a few things in mind. So, before I show you any implementation we are going to talk about some concepts and a little bit about philosophy. &lt;/p>
+&lt;h2 id="what-you-need-to-know">What you need to know&lt;/h2>
+&lt;h3 id="what-is-function-composition">What is function composition?&lt;/h3>
+&lt;p>It's a mechanism that allows us to combine two or more function into a new function.&lt;/p>
+&lt;p>It looks like a simple idea, haven't we all at some point in our lives combined a couple of functions? But do we really think about composition when we create them? What will help us make functions already designed to be combined?&lt;/p>
+&lt;h3 id="philosophy">Philosophy&lt;/h3>
+&lt;p>Function composition is more efective if you follow certain principles.&lt;/p>
+&lt;ul>
+&lt;li>The function should only have one purpose, one responsability.&lt;/li>
+&lt;li>Always think the returned value will be consumed by another function.&lt;/li>
+&lt;/ul>
+&lt;p>You've probably heard this before, it's a fragment of the &lt;a href="https://en.wikipedia.org/wiki/Unix_philosophy#Origin">unix philosophy&lt;/a>. Ever wondered how come &lt;code>bash&lt;/code>, despite having a weird syntax and many limitations, is so popular? Those two principle are a big part. A lot of the software designed for that environment is specially made to be a reusable component, and when you &amp;quot;connect&amp;quot; two or more the result is another program that can be conected with other unknown programs.&lt;/p>
+&lt;p>For some it might seem silly or even excessive to have many little functions that do just one thing, specially if what they do looks useless, but I can prove to you that every function can be valuable in the right context.&lt;/p>
+&lt;p>I'll try to setup a situation where we can put in practice these principles.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: I apologize in advance for the bad use of &lt;code>cat&lt;/code> and &lt;code>grep&lt;/code>, I'll do it just to prove a point about composition.&lt;/p>
+&lt;/blockquote>
+&lt;p>Say that we want to extract the value of variable named &lt;code>HOST&lt;/code> that's inside a &lt;code>.env&lt;/code> file. Let's try to do this in &lt;code>bash&lt;/code>.&lt;/p>
+&lt;p>This is the file.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">ENV=development
+HOST=http://locahost:5000
+&lt;/span>&lt;/pre>
+&lt;p>To show the content of the file in the screen we use &lt;code>cat&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cat .env
+&lt;/span>&lt;/pre>
+&lt;p>To filter that content and search the line we want we use &lt;code>grep&lt;/code>, provide the pattern of the thing we want and the content of the file.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cat .env &lt;/span>&lt;span style="color:#5fb3b3;">| &lt;/span>&lt;span style="color:#6699cc;">grep &lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot;&lt;/span>&lt;span style="color:#99c794;">HOST=.*&lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot;
+&lt;/span>&lt;/pre>
+&lt;p>To get the value we use &lt;code>cut&lt;/code>, this is going to take the result provided by &lt;code>grep&lt;/code> and it's going to divide it using a delimiter, then it will give us the section of the string we tell it.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cat .env &lt;/span>&lt;span style="color:#5fb3b3;">| &lt;/span>&lt;span style="color:#6699cc;">grep &lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot;&lt;/span>&lt;span style="color:#99c794;">HOST=.*&lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot; | &lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;"> --&lt;/span>&lt;span style="color:#f99157;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">=&amp;quot;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot; --&lt;/span>&lt;span style="color:#f99157;">fields&lt;/span>&lt;span style="color:#5fb3b3;">=&lt;/span>&lt;span style="color:#6699cc;">2
+&lt;/span>&lt;/pre>
+&lt;p>That should give us.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">http://locahost:5000
+&lt;/span>&lt;/pre>
+&lt;p>If we put that chain of commands in a script or a function inside our &lt;code>.bashrc&lt;/code> we will efectively have a command that can be used in the same way by yet other commands that we don't even know about. That is the kind of flexibility and power that we want to have.&lt;/p>
+&lt;p>I hope by now you know what kind of things you need to consider when you create a function but there is just one more thing I would like to tell you.&lt;/p>
+&lt;h3 id="functions-are-things">Functions are things&lt;/h3>
+&lt;p>Let's turn around and put our attention on javascript. Have you ever heard the phrase &amp;quot;first-class function&amp;quot;? It means that functions can be treated just like any other value. Let's compare with arrays.&lt;/p>
+&lt;ul>
+&lt;li>You can assign them to variables&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">numbers &lt;/span>&lt;span style="color:#5fb3b3;">= [&amp;#39;&lt;/span>&lt;span style="color:#99c794;">99&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">104&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;];
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">repeat_twice &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">str&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">str&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">repeat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">);
+};
+&lt;/span>&lt;/pre>
+&lt;ul>
+&lt;li>Pass them around as arguments to a function&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">array&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">array&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">fn&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">repeat_twice&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">numbers&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;ul>
+&lt;li>Return them from other functions&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">unary&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arg&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">arg&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">safer_parseint &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">unary&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">parseInt&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">safer_parseint&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">numbers&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>Why am I showing you this? You have to be aware of this particular thing about javascript because we are going to create many helper functions, like &lt;code>unary&lt;/code>, that manipulate other functions. It may take a while to get use to the idea of treating functions like data but it's something you should definitely put in practice, is just one those patterns that you see a lot in functional programming.&lt;/p>
+&lt;h2 id="composition-in-practice">Composition in practice&lt;/h2>
+&lt;p>Let's get back to our example with the &lt;code>.env&lt;/code>. We'll recreate what we did with &lt;code>bash&lt;/code>. First we'll take a very direct approach, then we'll explore the flaws of our implementation and try to fix them.&lt;/p>
+&lt;p>So, we've done this before, we know what to do. Let's start by creating a function for each step.&lt;/p>
+&lt;ul>
+&lt;li>Get the content of the file.&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">fs &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">require&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">fs&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">get_env&lt;/span>&lt;span style="color:#5fb3b3;">() {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">fs&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">readFileSync&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">utf-8&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+}
+&lt;/span>&lt;/pre>
+&lt;ul>
+&lt;li>Filter the content based on a pattern.&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">content&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">exp &lt;/span>&lt;span style="color:#5fb3b3;">= new &lt;/span>&lt;span style="color:#fac863;">RegExp&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">lines &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">content&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">split&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;\n&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">lines&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">find&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">line &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">exp&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">test&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">line&lt;/span>&lt;span style="color:#5fb3b3;">));
+}
+&lt;/span>&lt;/pre>
+&lt;ul>
+&lt;li>Get the value.&lt;/li>
+&lt;/ul>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">str&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">str&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">split&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)[&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">];
+}
+&lt;/span>&lt;/pre>
+&lt;p>We're ready. Let's see what we can do to make these functions work together.&lt;/p>
+&lt;h3 id="natural-composition">Natural composition&lt;/h3>
+&lt;p>I've already mentioned that our first try would be direct, the functions are ready and now the only thing we need to do is execute them in sequence.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">get_env&lt;/span>&lt;span style="color:#5fb3b3;">()));
+&lt;/span>&lt;/pre>
+&lt;p>This is the perfect setup for function composition, the output of a function becomes the input of the next one, which is the same thing the &lt;code>|&lt;/code> symbol does in &lt;code>bash&lt;/code>. But unlike &lt;code>bash&lt;/code>, in here the data flow goes from right to left.&lt;/p>
+&lt;p>Now let's imagine that we have two more functions that do something with the value of &lt;code>HOST&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">test&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">ping&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">get_env&lt;/span>&lt;span style="color:#5fb3b3;">()))));
+&lt;/span>&lt;/pre>
+&lt;p>Okay, now things are starting to get a little awkward, it's still on a manageable level but the amount of parenthesis in it bothers me. This would be the perfect time to put all those things in a function and group them in a more readable way but let's not do that yet, first we get help.&lt;/p>
+&lt;h3 id="automatic-composition">Automatic composition&lt;/h3>
+&lt;p>This is where our new found knowledge about functions starts being useful. To solve our parenthesis problem we are going to &amp;quot;automate&amp;quot; the function calls, we'll make a function that takes a list of functions, calls them one by one and makes sure the output of one becomes the input of the next. &lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">compose&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">fns&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return function &lt;/span>&lt;span style="color:#6699cc;">_composed&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">args&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// Index of the last function
+&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">last &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#cccece;">length &lt;/span>&lt;span style="color:#5fb3b3;">- &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#5f6364;">// Call the last function
+// with arguments of `_composed`
+&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">current_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#cccece;">last&lt;/span>&lt;span style="color:#5fb3b3;">--](...&lt;/span>&lt;span style="color:#cccece;">args&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// loop through the rest in the opposite direction
+&lt;/span>&lt;span style="color:#c594c5;">for &lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">i &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">last&lt;/span>&lt;span style="color:#5fb3b3;">; &lt;/span>&lt;span style="color:#cccece;">i &lt;/span>&lt;span style="color:#5fb3b3;">&amp;gt;= &lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">; &lt;/span>&lt;span style="color:#cccece;">i&lt;/span>&lt;span style="color:#5fb3b3;">--) {
+&lt;/span>&lt;span style="color:#cccece;">current_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#cccece;">i&lt;/span>&lt;span style="color:#5fb3b3;">](&lt;/span>&lt;span style="color:#cccece;">current_value&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">current_value&lt;/span>&lt;span style="color:#5fb3b3;">;
+};
+}
+&lt;/span>&lt;/pre>
+&lt;p>Now we can do this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">compose&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">get_env&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// get_host is `_composed`
+&lt;/span>&lt;span style="color:#6699cc;">get_host&lt;/span>&lt;span style="color:#5fb3b3;">();
+&lt;/span>&lt;/pre>
+&lt;p>Our parenthesis problem is gone, we can add more functions without hurting the readability.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">compose&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#cccece;">test&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#cccece;">ping&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#cccece;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#cccece;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#cccece;">get_env
+&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#6699cc;">get_host&lt;/span>&lt;span style="color:#5fb3b3;">();
+&lt;/span>&lt;/pre>
+&lt;p>Just like in our first try, in here the data flows from right to left. If you want to flip the order you'd do it like this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">fns&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return function &lt;/span>&lt;span style="color:#6699cc;">_piped&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">args&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// call the first function
+// with the arguments of `_piped`
+&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">current_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">](...&lt;/span>&lt;span style="color:#cccece;">args&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// loop through the rest in the original order
+&lt;/span>&lt;span style="color:#c594c5;">for &lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">i &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">; &lt;/span>&lt;span style="color:#cccece;">i &lt;/span>&lt;span style="color:#5fb3b3;">&amp;lt; &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#cccece;">length&lt;/span>&lt;span style="color:#5fb3b3;">; &lt;/span>&lt;span style="color:#cccece;">i&lt;/span>&lt;span style="color:#5fb3b3;">++) {
+&lt;/span>&lt;span style="color:#cccece;">current_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">fns&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#cccece;">i&lt;/span>&lt;span style="color:#5fb3b3;">](&lt;/span>&lt;span style="color:#cccece;">current_value&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">current_value&lt;/span>&lt;span style="color:#5fb3b3;">;
+};
+}
+&lt;/span>&lt;/pre>
+&lt;p>Behold.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">get_env&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">search_host&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#6699cc;">get_host&lt;/span>&lt;span style="color:#5fb3b3;">();
+&lt;/span>&lt;/pre>
+&lt;p>All of this is great, but like I said before what we got here is the perfect setup. Our composition can only handle functions that take one parameter, and doesn't support flow control. That's not a bad thing, we should design our code so we can make this kind of composition more common but as we all know...&lt;/p>
+&lt;h3 id="it-s-not-always-easy">It's not always easy&lt;/h3>
+&lt;p>Even in our example the only reason we were able to compose those functions was because we included everything we needed inside in the code, and we completely ignored the error handling. But not all is lost, there are ways to get over the limitations.&lt;/p>
+&lt;p>Before we move on I would like to change the example code, I'll make it look more like the &lt;code>bash&lt;/code> implementation.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">fs &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">require&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">fs&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">fs&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">readFileSync&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">utf-8&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+}
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">pattern&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">content&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">exp &lt;/span>&lt;span style="color:#5fb3b3;">= new &lt;/span>&lt;span style="color:#fac863;">RegExp&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">pattern&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">lines &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">content&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">split&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;\n&amp;#39;);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">lines&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">find&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">line &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">exp&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">test&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">line&lt;/span>&lt;span style="color:#5fb3b3;">));
+}
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#f99157;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">fields &lt;/span>&lt;span style="color:#5fb3b3;">}, &lt;/span>&lt;span style="color:#f99157;">str&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">str&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">split&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">)[&lt;/span>&lt;span style="color:#cccece;">fields &lt;/span>&lt;span style="color:#5fb3b3;">- &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">];
+}
+&lt;/span>&lt;/pre>
+&lt;p>They are not exactly like their &lt;code>bash&lt;/code> counterparts but they do the job. But now if we wanted to put them together it would have to be like this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({&lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">}, &lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)));
+&lt;/span>&lt;/pre>
+&lt;p>It works but I'd say that is barely acceptable, I can still understand what is going on but I wouldn't want to add a single thing to that chain. If we want to use &lt;code>pipe&lt;/code> we'll have to overcome our first obstacle.&lt;/p>
+&lt;h4 id="functions-with-multiple-inputs">Functions with multiple inputs&lt;/h4>
+&lt;p>The solution to this is &lt;strong>partial application&lt;/strong> and lucky for us javascript has a great support for the things we want to do. Our goal is simple, we are going to pass some of the parameters a function needs but without calling it. We want to be able to do this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;),
+&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">})
+);
+&lt;/span>&lt;span style="color:#6699cc;">get_host&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;/pre>
+&lt;p>To make this possible we are going to rely on a technique called &lt;strong>currying&lt;/strong>, this consists on turning a multiple parameter function into several one parameter functions. The way we do this is by taking one parameter at a time, just keep returning functions until we get everything we need. We will do this to &lt;code>grep&lt;/code> and &lt;code>cut&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> function grep(pattern, content) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> function grep(pattern) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return function(content) {
+&lt;/span>&lt;span style="color:#cccece;"> const exp = new RegExp(pattern);
+const lines = content.split(&amp;#39;\n&amp;#39;);
+return lines.find(line =&amp;gt; exp.test(line));
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> }
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> function cut({ delimiter, fields }, str) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> function cut({ delimiter, fields }) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return function(str) {
+&lt;/span>&lt;span style="color:#cccece;"> return str.split(delimiter)[fields - 1];
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> }
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;/pre>
+&lt;p>In situations where is not possible to make a normal function support currying we can use the &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind">bind&lt;/a> method in the &lt;code>Function&lt;/code> prototype.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#cccece;">grep&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">bind&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">null&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;),
+&lt;/span>&lt;span style="color:#cccece;">cut&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">bind&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">null&lt;/span>&lt;span style="color:#5fb3b3;">, { &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">})
+);
+&lt;/span>&lt;/pre>
+&lt;p>Lastly, if everything else looks too complex you always have the possibility to create an arrow function inline.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#f99157;">content &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#cccece;">content&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#f99157;">str &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">}, &lt;/span>&lt;span style="color:#cccece;">str&lt;/span>&lt;span style="color:#5fb3b3;">)
+);
+&lt;/span>&lt;/pre>
+&lt;p>That should be enough to solve any kind of problem you face when you deal with multiple parameters. Let's move on.&lt;/p>
+&lt;h4 id="functions-with-multiple-outputs">Functions with multiple outputs&lt;/h4>
+&lt;p>Multiple outputs? I mean functions whose return value can have more than one type. This happens when we have functions that respond differently depending on how we use them or in what context. We have that kind of functions in our example. Let's take a look at &lt;code>cat&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">fs&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">readFileSync&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">utf-8&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Inside &lt;code>cat&lt;/code> we have &lt;code>readFileSync&lt;/code>, that's the one that reads the file in our system, an action that can fail for many reasons. It means that &lt;code>cat&lt;/code> can return a &lt;code>String&lt;/code> if everything goes well but can also throw an error if anything goes wrong. We need to handle both cases.&lt;/p>
+&lt;p>Unfortunately for us exceptions are not the only thing we need to worry about, we also need to deal with the absence of values. In &lt;code>grep&lt;/code> we have this line.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">lines&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">find&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">line &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">exp&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">test&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">line&lt;/span>&lt;span style="color:#5fb3b3;">));
+&lt;/span>&lt;/pre>
+&lt;p>The &lt;code>find&lt;/code> method is the one that evaluates each line of the file. As you can imagine that can fail, maybe it just doesn't find what we are looking for. Unlike &lt;code>readFileSync&lt;/code>, &lt;code>find&lt;/code> doesn't throw an error, it just returns &lt;code>undefined&lt;/code>. It's not like &lt;code>undefined&lt;/code> is bad, it's that we don't have any use for it. Assuming that the result will always be a &lt;code>String&lt;/code> is what can cause an error.&lt;/p>
+&lt;p>How do we handle all this?&lt;/p>
+&lt;p>&lt;strong>Functors&lt;/strong> &amp;amp;&amp;amp; &lt;strong>Monads&lt;/strong> (sorry for the big words). Giving an appropiate explanation of those two would take too much time so we are just going to focus on the practical aspects. For the time being you can think of them as data types that need to obey some laws (you can find some of them here: &lt;a href="https://github.com/fantasyland/fantasy-land#fantasy-land-specification">Fantasy land&lt;/a>).&lt;/p>
+&lt;p>Where do we start? With functors.&lt;/p>
+&lt;ul>
+&lt;li>Functors&lt;/li>
+&lt;/ul>
+&lt;p>Let's create a data type that is capable of calling a function in the right context at the right time. You have seen one before: arrays. Try this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">add_one &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">num &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">number &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">empty &lt;/span>&lt;span style="color:#5fb3b3;">= [];
+&lt;/span>&lt;span style="color:#cccece;">number&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">add_one&lt;/span>&lt;span style="color:#5fb3b3;">); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [42]
+&lt;/span>&lt;span style="color:#cccece;">empty&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">add_one&lt;/span>&lt;span style="color:#5fb3b3;">); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; []
+&lt;/span>&lt;/pre>
+&lt;p>See? &lt;code>map&lt;/code> called &lt;code>add_one&lt;/code> just once, on the &lt;code>number&lt;/code> array. It didn't do anything on the &lt;code>empty&lt;/code> array, didn't halt the execution of the script by throwing an error, it just returned an array. That's the behavior that we want.&lt;/p>
+&lt;p>We will make that on our own. Let's create a data type called &lt;code>Result&lt;/code>, it will represent an action that may or may not be successful. It will have a &lt;code>map&lt;/code> method that will only execute the provided callback when the action had the expected outcome.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">Result &lt;/span>&lt;span style="color:#5fb3b3;">= {};
+&lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Ok &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">fn &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Ok&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)),
+};
+}
+&lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Err &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">: () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Err&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">),
+};
+}
+&lt;/span>&lt;/pre>
+&lt;p>We have our functor but now you might be wondering is that it? How does that help? We are taking it one step at a time. Let's use it with &lt;code>cat&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">try &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Ok&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">fs&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">readFileSync&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">filepath&lt;/span>&lt;span style="color:#5fb3b3;">, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">utf-8&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;));
+} &lt;/span>&lt;span style="color:#c594c5;">catch&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Err&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>What do we gain with this? Give it a chance.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;).&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>You still have the same question on your mind, I can see it. Now try to add the other functions.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: I'm going to assume that you can use currying to achieve partial application.&lt;/p>
+&lt;/blockquote>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">}))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>See that? That chain of &lt;code>map&lt;/code>s looks a lot like &lt;code>compose&lt;/code> or &lt;code>pipe&lt;/code>. We did it, we got our composition back, and now with error handling (kinda).&lt;/p>
+&lt;p>I want to do something. That pattern, the one with the &lt;code>try/catch&lt;/code>, I want to put that in a function.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">make_safe &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return function&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">args&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">try &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Ok&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#cccece;">args&lt;/span>&lt;span style="color:#5fb3b3;">));
+} &lt;/span>&lt;span style="color:#c594c5;">catch&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Err&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>Now we can transform &lt;code>cat&lt;/code> without even touching its code.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">safer_cat &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">make_safe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">}))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>You may want to do something in case something goes wrong, right? Let's make that possible.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> const Result = {};
+Result.Ok = function(value) {
+return {
+map: fn =&amp;gt; Result.Ok(fn(value)),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> catchMap: () =&amp;gt; Result.Ok(value),
+&lt;/span>&lt;span style="color:#cccece;"> };
+}
+Result.Err = function(value) {
+return {
+map: () =&amp;gt; Result.Err(value),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> catchMap: fn =&amp;gt; Result.Err(fn(value)),
+&lt;/span>&lt;span style="color:#cccece;"> };
+}
+&lt;/span>&lt;/pre>
+&lt;p>Now we can make mistakes and be confident we are doing something about it.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">safer_cat &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">make_safe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">show_error &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">e &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">error&lt;/span>&lt;span style="color:#5fb3b3;">(`&lt;/span>&lt;span style="color:#99c794;">Whoops:&lt;/span>&lt;span style="color:#5fb3b3;">\n${&lt;/span>&lt;span style="color:#cccece;">e&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">message&lt;/span>&lt;span style="color:#5fb3b3;">}`);
+&lt;/span>&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">what?&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">}))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">show_error&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>Yes, I know, all of this is cute and useful but at some point you'll want to take the value out of the &lt;code>Result&lt;/code>. I get it, javascript is not a language where this pattern is a common thing, you may want to go &amp;quot;back to normal&amp;quot;. Let's add a function that can let us extract the value out in either case.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> const Result = {};
+Result.Ok = function(value) {
+return {
+map: fn =&amp;gt; Result.Ok(fn(value)),
+catchMap: () =&amp;gt; Result.Ok(value),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> cata: (error, success) =&amp;gt; success(value)
+&lt;/span>&lt;span style="color:#cccece;"> };
+}
+Result.Err = function(value) {
+return {
+map: () =&amp;gt; Result.Err(value),
+catchMap: fn =&amp;gt; Result.Err(fn(value)),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> cata: (error, success) =&amp;gt; error(value)
+&lt;/span>&lt;span style="color:#cccece;"> };
+}
+&lt;/span>&lt;/pre>
+&lt;p>With this we can choose what to do at the end of every action.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">constant &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">arg &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#5fb3b3;">() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">arg&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">identity &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">arg &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">arg&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">what?&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2 &lt;/span>&lt;span style="color:#5fb3b3;">}))
+.&lt;/span>&lt;span style="color:#6699cc;">cata&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">constant&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;quot;&lt;/span>&lt;span style="color:#99c794;">This ain&amp;#39;t right&lt;/span>&lt;span style="color:#5fb3b3;">&amp;quot;), &lt;/span>&lt;span style="color:#cccece;">identity&lt;/span>&lt;span style="color:#5fb3b3;">)
+&lt;/span>&lt;span style="color:#5f6364;">// ....
+&lt;/span>&lt;/pre>
+&lt;blockquote>
+&lt;p>Note: If you're asking why &lt;code>cata&lt;/code>, it comes from &lt;strong>catamorphism&lt;/strong>, another one of those terms people use in functional programming.&lt;/p>
+&lt;/blockquote>
+&lt;p>Now let's create a data type that can handle the problem we have with &lt;code>grep&lt;/code>. In this case what we want to do is handle the absence of a value.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">Maybe &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value &lt;/span>&lt;span style="color:#5fb3b3;">== &lt;/span>&lt;span style="color:#f99157;">null&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Nothing&lt;/span>&lt;span style="color:#5fb3b3;">();
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Just&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Just &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">value&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">fn &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Just&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)),
+&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">: () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Just&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">cata&lt;/span>&lt;span style="color:#5fb3b3;">: (&lt;/span>&lt;span style="color:#f99157;">nothing&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">just&lt;/span>&lt;span style="color:#5fb3b3;">) &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">just&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">)
+};
+}
+&lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Nothing &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">() {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">: () &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">Nothing&lt;/span>&lt;span style="color:#5fb3b3;">(),
+&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">fn &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(),
+&lt;/span>&lt;span style="color:#6699cc;">cata&lt;/span>&lt;span style="color:#5fb3b3;">: (&lt;/span>&lt;span style="color:#f99157;">nothing&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">just&lt;/span>&lt;span style="color:#5fb3b3;">) &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">nothing&lt;/span>&lt;span style="color:#5fb3b3;">()
+};
+}
+&lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#c594c5;">function&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">fn&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return function&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#f99157;">args&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">fn&lt;/span>&lt;span style="color:#5fb3b3;">(...&lt;/span>&lt;span style="color:#cccece;">args&lt;/span>&lt;span style="color:#5fb3b3;">));
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>We're going to use it to wrap &lt;code>grep&lt;/code> with a &lt;code>Maybe&lt;/code>, to test this we'll use the original &lt;code>cat&lt;/code> to take the content from the file.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">maybe_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;));
+&lt;/span>&lt;span style="color:#6699cc;">maybe_host&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">(() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">Nothing()&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;));
+&lt;/span>&lt;/pre>
+&lt;p>That should show &lt;code>http://localhost:5000&lt;/code>. And if we change the pattern &lt;code>^HOST=&lt;/code> it should show &lt;code>Nothing()&lt;/code>.&lt;/p>
+&lt;p>So, we created safer versions of &lt;code>cat&lt;/code> and &lt;code>grep&lt;/code> but you should see what happens when they get together.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">maybe_host&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">res &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#cccece;">res &lt;/span>&lt;span style="color:#5fb3b3;">}));
+.&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">(() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">what?&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+&lt;/span>&lt;/pre>
+&lt;p>You get this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">{
+res: {
+map: [Function: map],
+catchMap: [Function: catchMap],
+cata: [Function: cata]
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>Wait, what's happening? Well, we have a &lt;code>Maybe&lt;/code> trapped inside a &lt;code>Result&lt;/code>. Maybe you didn't see that one coming but other people did, and they have the solution.&lt;/p>
+&lt;ul>
+&lt;li>Monads&lt;/li>
+&lt;/ul>
+&lt;p>It turns out that monads are functors with extra powers. The thing we care about right now is that they solve the nesting issue. Let's make some adjustments.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> Result.Ok = function(value) {
+return {
+map: fn =&amp;gt; Result.Ok(fn(value)),
+catchMap: () =&amp;gt; Result.Ok(value),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> flatMap: fn =&amp;gt; fn(value),
+&lt;/span>&lt;span style="color:#cccece;"> cata: (error, success) =&amp;gt; success(value)
+};
+}
+Result.Err = function(value) {
+return {
+map: () =&amp;gt; Result.Err(value),
+catchMap: fn =&amp;gt; Result.Err(fn(value)),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> flatMap: () =&amp;gt; Result.Err(value),
+&lt;/span>&lt;span style="color:#cccece;"> cata: (error, success) =&amp;gt; error(value)
+};
+}
+&lt;/span>&lt;/pre>&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> Maybe.Just = function(value) {
+return {
+map: fn =&amp;gt; Maybe.Just(fn(value)),
+catchMap: () =&amp;gt; Maybe.Just(value),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> flatMap: fn =&amp;gt; fn(value),
+&lt;/span>&lt;span style="color:#cccece;"> cata: (nothing, just) =&amp;gt; just(value),
+};
+}
+Maybe.Nothing = function() {
+return {
+map: () =&amp;gt; Maybe.Nothing(),
+catchMap: fn =&amp;gt; fn(),
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> flatMap: () =&amp;gt; Maybe.Nothing(),
+&lt;/span>&lt;span style="color:#cccece;"> cata: (nothing, just) =&amp;gt; nothing(),
+};
+}
+&lt;/span>&lt;/pre>
+&lt;p>The &lt;code>flatMap&lt;/code> method behaves just like &lt;code>map&lt;/code> but with the added benefit that it lets us get rid of those extra &amp;quot;layers&amp;quot; that mess around with our composition. Make sure to use &lt;code>flatMap&lt;/code> with functions that return other monads because this is not the safest implementation.&lt;/p>
+&lt;blockquote>
+&lt;p>Note: Yes, arrays are also monads. They have a &lt;code>map&lt;/code> method and &lt;code>flatMap&lt;/code> method and they obey all the laws.&lt;/p>
+&lt;/blockquote>
+&lt;p>Let's test &lt;code>maybe_host&lt;/code> again.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> &lt;/span>&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">flatMap&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">maybe_host&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">res &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">({ &lt;/span>&lt;span style="color:#cccece;">res &lt;/span>&lt;span style="color:#5fb3b3;">}));
+.&lt;/span>&lt;span style="color:#6699cc;">catchMap&lt;/span>&lt;span style="color:#5fb3b3;">(() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">what?&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;))
+&lt;/span>&lt;/pre>
+&lt;p>That should give us.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">{ res: &amp;#39;HOST=http://localhost:5000&amp;#39; }
+&lt;/span>&lt;/pre>
+&lt;p>We're ready to compose everything back together.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">safer_cat &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">make_safe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">maybe_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;));
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({&lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">}));
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+.&lt;/span>&lt;span style="color:#6699cc;">flatMap&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">maybe_host&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">flatMap&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">)
+.&lt;/span>&lt;span style="color:#6699cc;">cata&lt;/span>&lt;span style="color:#5fb3b3;">(
+() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;&lt;/span>&lt;span style="color:#99c794;">http://127.0.0.1:3000&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;,
+&lt;/span>&lt;span style="color:#f99157;">host &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">host
+&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// ....
+&lt;/span>&lt;/pre>
+&lt;p>And if we want to use &lt;code>pipe&lt;/code> or &lt;code>compose&lt;/code>?&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">chain &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">fn &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#f99157;">m &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">m&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">flatMap&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">fn&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">unwrap_or &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">fallback &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#f99157;">fm &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt;
+&lt;/span>&lt;span style="color:#cccece;">fm&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">cata&lt;/span>&lt;span style="color:#5fb3b3;">(() &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">fallback&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">value&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">safer_cat &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Result&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">make_safe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">cat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">maybe_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">grep&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">^HOST=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;));
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">wrap_fun&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">cut&lt;/span>&lt;span style="color:#5fb3b3;">({&lt;/span>&lt;span style="color:#6699cc;">delimiter&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">=&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &lt;/span>&lt;span style="color:#6699cc;">fields&lt;/span>&lt;span style="color:#5fb3b3;">: &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">}));
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">get_host &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">pipe&lt;/span>&lt;span style="color:#5fb3b3;">(
+&lt;/span>&lt;span style="color:#cccece;">safer_cat&lt;/span>&lt;span style="color:#5fb3b3;">,
+&lt;/span>&lt;span style="color:#6699cc;">chain&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">maybe_host&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">chain&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">get_value&lt;/span>&lt;span style="color:#5fb3b3;">),
+&lt;/span>&lt;span style="color:#6699cc;">unwrap_or&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">http://127.0.0.1:3000&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;)
+);
+&lt;/span>&lt;span style="color:#6699cc;">get_host&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">.env&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;/pre>
+&lt;p>You can check out the whole code here: &lt;a href="https://gist.github.com/VonHeikemen/0e6d4950bfe91229ee06eee2e3c74515">link&lt;/a>.&lt;/p>
+&lt;h2 id="still-want-to-learn-more">Still want to learn more?&lt;/h2>
+&lt;p>There are many things that I didn't mention because it would take too much time but if you want to learn more about it, I have prepare some material.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-partial-application/">Partial application&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/">The power of map (more about functors)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-using-a-maybe/">Using a Maybe&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/dealing-with-side-effects-and-pure-functions-in-javascript/">Pure functions and side effects&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="conclusion">Conclusion&lt;/h2>
+&lt;p>A lot of people talk about the nice things about composition, how it makes code more declarative and clean, but they never show you the tough parts. I hope I've done that, show the tough parts and how to overcome them. Composing functions it's truly an art, it takes practice and time to get use to some ideas (like the idea of functions being things).&lt;/p>
+&lt;h2 id="sources">Sources&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=vDe-4o8Uwl8">The Power of Composition (video)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=SfWR3dKnFIo">Oh Composable World! (video)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=7BsfMMYvGaU">Mary had a little lambda (video)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dev.to/joelnet/functional-javascript---functors-monads-and-promises-1pol">Functional JavaScript - Functors, Monads, and Promises&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those term that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
 &lt;h2 id="what-is-a-functor">What is a functor?&lt;/h2>
 &lt;p>I'm convinced that the term is dificult to understand because one, you need to some other terms in order to get the whole picture and two, the theory behind it doesn't really translate very well in code. Let's start with the abstract.&lt;/p>
 &lt;p>You can think of them as a relation that exist between two sets of values. Bear with me, this will make sense in a second. Say we have two arrays.&lt;/p>
