@@ -535,20 +535,20 @@ catchMap: fn =&amp;gt; fn(),
 &lt;li>&lt;a href="https://www.youtube.com/watch?v=SfWR3dKnFIo">Oh Composable World! (video)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://www.youtube.com/watch?v=7BsfMMYvGaU">Mary had a little lambda (video)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://dev.to/joelnet/functional-javascript---functors-monads-and-promises-1pol">Functional JavaScript - Functors, Monads, and Promises&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those term that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
-&lt;h2 id="what-is-a-functor">What is a functor?&lt;/h2>
-&lt;p>I'm convinced that the term is dificult to understand because one, you need to some other terms in order to get the whole picture and two, the theory behind it doesn't really translate very well in code. Let's start with the abstract.&lt;/p>
-&lt;p>You can think of them as a relation that exist between two sets of values. Bear with me, this will make sense in a second. Say we have two arrays.&lt;/p>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those terms that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
+&lt;h2 id="seriously-what-is-a-functor">Seriously, what is a functor?&lt;/h2>
+&lt;p>I'm convinced that the term is difficult to understand because one, you need to some other terms in order to get the whole picture and two, the theory behind it doesn't really translate very well in code. But it wouldn't hurt to have at least a clue of what they are.&lt;/p>
+&lt;p>You can think of them as a relation that exist between two sets of values. I know it's vague, this will make sense in a second. Say we have two arrays.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">favorite_numbers &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">69&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">73&lt;/span>&lt;span style="color:#5fb3b3;">];
 &lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">increased_numbers &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">43&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">70&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">74&lt;/span>&lt;span style="color:#5fb3b3;">];
 &lt;/span>&lt;/pre>
-&lt;p>Nice, we have a set &lt;code>favorite_numbers&lt;/code> and a set &lt;code>increased_numbers&lt;/code>, they are two separate arrays in diferent variables but we all know that there is a connection between those two, but more importantly we can express that connection with code. Imagine that the array &lt;code>increased_numbers&lt;/code> doesn't exist but we still need those numbers, to make them appear again all we need is our good old friend &lt;code>map&lt;/code>.&lt;/p>
+&lt;p>Nice, we have a set &lt;code>favorite_numbers&lt;/code> and a set &lt;code>increased_numbers&lt;/code>, they are two separate arrays in different variables but we all know that there is a connection between those two, but more importantly we can express that connection with code. Imagine that the array &lt;code>increased_numbers&lt;/code> doesn't exist but we still need those numbers, to make them appear again all we need is our good old friend &lt;code>map&lt;/code>.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">increased_numbers &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">favorite_numbers&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#cccece;">num &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">);
 &lt;/span>&lt;/pre>
 &lt;p>&lt;code>map&lt;/code> will go through every number, increase it and put it in a new array which brings &lt;code>increased_numbers&lt;/code> back into existence. Even though &lt;code>increased_numbers&lt;/code> is something we made, we didn't create it out nowhere, we didn't magically invent &lt;code>43&lt;/code>, &lt;code>70&lt;/code> and &lt;code>74&lt;/code>. All we did was describe a relation between those numbers and our &lt;code>favorite_numbers&lt;/code>.&lt;/p>
-&lt;p>Is that the whole history? Are functors just arrays? The answer to that is a big no. Arrays are just a freakishly convenient way to ilustrate a common use of functors. This leaves a question in the air.&lt;/p>
+&lt;p>So, is that the whole history? Are functors just arrays? The answer to that is a big no. Arrays are just a freakishly convenient way to illustrate a common use of functors. This leaves a question in the air.&lt;/p>
 &lt;h2 id="how-do-you-recognize-them">How do you recognize them?&lt;/h2>
 &lt;p>I often hear other people describing functors as boxes. I for one don't think they're wrong because using a container data structure is one of easiest ways to implement a functor. The box analogy is specially funny 'cause in javascript we use brackets to create arrays, so you can actually create a functor by putting a value in a box. See.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
@@ -577,7 +577,7 @@ catchMap: fn =&amp;gt; fn(),
 &lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">,&lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">,&lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">].&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">identity&lt;/span>&lt;span style="color:#5fb3b3;">); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [1,2,3]
 &lt;/span>&lt;/pre>
 &lt;p>Why is this important? What does this tell us?&lt;/p>
-&lt;p>Valid questions. This tells us that the &lt;code>map&lt;/code> function must preserve the shape of the data structure. In our example, if we map an array of three elements we must recieve a new array of three elements. If we had an array of a hundred elements, using &lt;code>.map(identity)&lt;/code> should return an array of a hundred elements. You get the point.&lt;/p>
+&lt;p>Valid questions. This tells us that the &lt;code>map&lt;/code> function must preserve the shape of the data structure. In our example, if we map an array of three elements we must receive a new array of three elements. If we had an array of a hundred elements, using &lt;code>.map(identity)&lt;/code> should return an array of a hundred elements. You get the point.&lt;/p>
 &lt;h4 id="composition">Composition&lt;/h4>
 &lt;p>Given two functions &lt;code>fx&lt;/code> and &lt;code>gx&lt;/code> the following must be true.&lt;/p>
 &lt;p>&lt;code>value.map(fx).map(gx)&lt;/code> and &lt;code>value.map(arg =&amp;gt; gx(fx(arg)))&lt;/code> must be equivalent.&lt;/p>
@@ -592,7 +592,7 @@ catchMap: fn =&amp;gt; fn(),
 [&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">].&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">add_one&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">times_two&lt;/span>&lt;span style="color:#5fb3b3;">); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [4]
 &lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">].&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">times_two&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">add_one&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">num&lt;/span>&lt;span style="color:#5fb3b3;">))); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [4]
 &lt;/span>&lt;/pre>
-&lt;p>If you know how &lt;code>Array.map&lt;/code> works this feels like 'well duh!'. This actually gives you chance to optimize your code for readability or performance. In the case of arrays, multiple calls to &lt;code>map&lt;/code> can have a big impact on performance when the number of elements in the list grows.&lt;/p>
+&lt;p>If you know how &lt;code>Array.map&lt;/code> works this feels like 'well duh!'. This actually gives you a chance to optimize your code for readability or performance. In the case of arrays, multiple calls to &lt;code>map&lt;/code> can have a big impact on performance when the number of elements in the list grows.&lt;/p>
 &lt;p>And that's it. Those two rules are all you need to know to spot a functor.&lt;/p>
 &lt;h2 id="does-it-always-has-to-be-map">Does it always has to be .map?&lt;/h2>
 &lt;p>I guess by now you wish to know what other things out there follow those rules that I just mentioned, if not I'll tell you anyway. There is another popular structure that also follows the rules and that is &lt;code>Promise&lt;/code>. Let's see.&lt;/p>
@@ -610,7 +610,7 @@ catchMap: fn =&amp;gt; fn(),
 &lt;/span>&lt;span style="color:#fac863;">Promise&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">resolve&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">).&lt;/span>&lt;span style="color:#6699cc;">then&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">num &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#6699cc;">times_two&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">add_one&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">num&lt;/span>&lt;span style="color:#5fb3b3;">))); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; 4
 &lt;/span>&lt;/pre>
 &lt;p>To be fair, &lt;code>Promise.then&lt;/code> behaves more like &lt;code>Array.flatMap&lt;/code> than &lt;code>Array.map&lt;/code> but we will ignore that.&lt;/p>
-&lt;p>Fine, we have &lt;code>Array&lt;/code> and we have &lt;code>Promise&lt;/code> both are containers of some sort and both have methods that follow the rules. But what if they didn't have those methods, what if &lt;code>Array.map&lt;/code> didn't exists? Would that mean that &lt;code>Array&lt;/code> is no longer a functor? Do we lose all the benefits?&lt;/p>
+&lt;p>Fine, we have &lt;code>Array&lt;/code> and we have &lt;code>Promise&lt;/code> both are containers of some sort and both have methods that follow the rules. But what if they didn't have those methods, what if &lt;code>Array.map&lt;/code> didn't exist? Would that mean that &lt;code>Array&lt;/code> is no longer a functor? Do we lose all the benefits?&lt;/p>
 &lt;p>Let's take a step back. If &lt;code>Array.map&lt;/code> doesn't exists then &lt;code>Array&lt;/code> is no longer a functor? I don't know, I'm not an FP lawyer. Do we lose all the benefits? No, we could still treat arrays as functors, we just lose the super convenient &lt;code>.map&lt;/code> syntax. We can create our own &lt;code>map&lt;/code> outside of the structure.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">List &lt;/span>&lt;span style="color:#5fb3b3;">= {
@@ -896,7 +896,7 @@ idle: state(transition(&amp;#39;fetch&amp;#39;, &amp;#39;loading&amp;#39;)),
 // end
 &lt;/span>&lt;/pre>
 &lt;p>If you send &lt;code>fetch&lt;/code> (or any other event) while in &lt;code>end&lt;/code> state will give you &lt;code>end&lt;/code> every single time. Why? Because you can't go anywhere, &lt;code>end&lt;/code> doesn't have transitions.&lt;/p>
-&lt;p>I hope you see why this is useful. If not, I apologise for all the &lt;code>console.log&lt;/code>ing.&lt;/p>
+&lt;p>I hope you see why this is useful. If not, I apologize for all the &lt;code>console.log&lt;/code>ing.&lt;/p>
 &lt;p>Going back to our current machine. This what we got so far.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> &lt;/span>&lt;span style="color:#c594c5;">import &lt;/span>&lt;span style="color:#5fb3b3;">{
@@ -1090,7 +1090,7 @@ Tweet
 }
 &lt;/span>&lt;/pre>
 &lt;p>Now the last piece of the puzzle, the side effects. We need to attach another function to our transitions so we can update the DOM. We could use &lt;code>reduce&lt;/code> again but is just rude to have side effects on something called &lt;code>reduce&lt;/code> (just don't) We will bring another utility made for that, &lt;code>action&lt;/code>.&lt;/p>
-&lt;p>But first we must prepare. Update the context object with the necesary dependencies. (This step is not necesary, this is just me being allergic to global variables)&lt;/p>
+&lt;p>But first we must prepare. Update the context object with the necessary dependencies. (This step is not necessary, this is just me being allergic to global variables)&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> const context = ev =&amp;gt; ({
 data: {},
@@ -1258,14 +1258,14 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/OJJvQzR">Finite Rando
 &lt;h2 id="so-is-this-state-machine-thing-helpful">So is this state machine thing helpful?&lt;/h2>
 &lt;p>I hope so. Did you notice we made a bunch of test and created the blueprint of the quote machine even before writing any HTML? I think that's cool. &lt;/p>
 &lt;p>Did you try to click the 'loading' button while loading? Did it triggered a bunch of call to &lt;code>get_quote&lt;/code>? That is because we made (sort of) impossible that a &lt;code>fetch&lt;/code> event can happen during &lt;code>loading&lt;/code>. &lt;/p>
-&lt;p>Not only that, the behavior of the machine is and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.&lt;/p>
+&lt;p>Not only that, the behavior of the machine and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.&lt;/p>
 &lt;h2 id="want-to-know-more">Want to know more?&lt;/h2>
 &lt;ul>
 &lt;li>&lt;a href="https://xstate.js.org/docs/about/concepts.html">XState (concepts)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://thisrobot.life/">robot3 - docs&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/">Understanding State Machines&lt;/a>&lt;/li>
 &lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Using a Maybe</title><pubDate>Mon, 28 Oct 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-using-a-maybe/</link><guid>https://vonheikemen.github.io/devlog/web-development/functional-programming-for-your-everyday-javascript-using-a-maybe/</guid><description>&lt;p>Have you ever heard about monads and how great they are? Maybe you have but you still don't get it. Well... I'm not here to tell you what they are, I won't try to sell them to you either, what I will do is show you an example of how would it be if you use them in your javascripts.&lt;/p>
-&lt;p>We'll do something fun, lets solve a fairly trivial problem in an innecessary complicated way. &lt;/p>
+&lt;p>We'll do something fun, lets solve a fairly trivial problem in an unnecessary complicated way. &lt;/p>
 &lt;p>Suppose that we have a dictionary stored in a json file or a plain js object.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5fb3b3;">{
@@ -1325,7 +1325,7 @@ Having a pH less than 7, or being sour, or having the strength to neutralize alk
 &lt;p>So we are going to hide an &lt;code>if&lt;/code> statement (or maybe a couple), if the value we evaluate is undefined-ish we return a wrapper that will know how to behave no matter what happens.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// maybe.js
-// (I would like to apologise for the many `thing`s you&amp;#39;ll see)
+// (I would like to apologize for the many `thing`s you&amp;#39;ll see)
 &lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">Maybe&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">the_thing&lt;/span>&lt;span style="color:#5fb3b3;">) {
 &lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">the_thing &lt;/span>&lt;span style="color:#5fb3b3;">=== &lt;/span>&lt;span style="color:#f99157;">null
 &lt;/span>&lt;span style="color:#5fb3b3;">|| &lt;/span>&lt;span style="color:#cccece;">the_thing &lt;/span>&lt;span style="color:#5fb3b3;">=== &lt;/span>&lt;span style="color:#f99157;">undefined
@@ -1340,7 +1340,7 @@ Having a pH less than 7, or being sour, or having the strength to neutralize alk
 &lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#6699cc;">Just&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">the_thing&lt;/span>&lt;span style="color:#5fb3b3;">);
 }
 &lt;/span>&lt;/pre>
-&lt;p>This wrappers are not going to be your standard by the book &lt;code>Maybe&lt;/code> you see in a proper functional programming language. We will cheat a little in the name of convinience and side effects. Also their methods will be named after the methods in the Option type you find in Rust (I like those names better). Here is where the magic happens.&lt;/p>
+&lt;p>This wrappers are not going to be your standard by the book &lt;code>Maybe&lt;/code> you see in a proper functional programming language. We will cheat a little in the name of convenience and side effects. Also their methods will be named after the methods in the Option type you find in Rust (I like those names better). Here is where the magic happens.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// maybe.js
 // I lied, there will be a lot of cheating and `fun`s.
@@ -1519,7 +1519,7 @@ An event that happens suddenly or by chance without an apparent cause.&lt;/p>
 &lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> .filter(confirm_word)
 &lt;/span>&lt;span style="color:#cccece;"> .map(search);
 &lt;/span>&lt;/pre>
-&lt;p>Something bugs me. I search &amp;quot;accu&amp;quot;, the dialog pops in, I confirm the suggestion and the results appears. But &amp;quot;accu&amp;quot; it's still there in the input, it's awkard. Lets update the input with the right word.&lt;/p>
+&lt;p>Something bugs me. I search &amp;quot;accu&amp;quot;, the dialog pops in, I confirm the suggestion and the results appears. But &amp;quot;accu&amp;quot; it's still there in the input, it's awkward. Lets update the input with the right word.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">update_input &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#f99157;">val &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#fac863;">window&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#cccece;">search_form&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">].&lt;/span>&lt;span style="color:#f99157;">value &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">val&lt;/span>&lt;span style="color:#5fb3b3;">;
 &lt;/span>&lt;/pre>&lt;pre style="background-color:#2b2c2f;">
@@ -1699,13 +1699,13 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/oNNwagG">Maybe I will
 &lt;p>In our case a data source is something that produces values. And, a consumer is something that receives values from a data source.&lt;/p>
 &lt;h3 id="fun-facts">Fun facts&lt;/h3>
 &lt;h4 id="observables-are-lazy">Observables are lazy&lt;/h4>
-&lt;p>That means that they would not do any kind of work until it's absolutly necessary. Nothing will happen until you subscribe to them.&lt;/p>
+&lt;p>That means that they would not do any kind of work until it's absolutely necessary. Nothing will happen until you subscribe to them.&lt;/p>
 &lt;h4 id="they-can-emit-multiple-values">They can emit multiple values&lt;/h4>
 &lt;p>Depending on the data source you can receive a finite number of values or an infinite stream of values.&lt;/p>
 &lt;h4 id="they-can-be-synchronous-or-asynchronous">They can be synchronous or asynchronous&lt;/h4>
 &lt;p>It all depends on their internal implementation. You can setup an observable that process some stream of data in a synchronous way or create one from an event that can happen over time.&lt;/p>
 &lt;h3 id="some-rules">Some rules&lt;/h3>
-&lt;p>Remember when I said that observables follow a convention? Well, we are going to make our own arbitrary rules that our implementation will follow. This are important because we are going to build a little ecosystem around our observables.&lt;/p>
+&lt;p>Remember when I said that observables follow a convention? Well, we are going to make our own arbitrary rules that our implementation will follow. These will be important because we are going to build a little ecosystem around our observables.&lt;/p>
 &lt;p>Here we go:&lt;/p>
 &lt;ol>
 &lt;li>An observable instance will have a &lt;code>subscribe&lt;/code> method.&lt;/li>
@@ -1783,8 +1783,8 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 &lt;h2 id="it-all-starts-with-operators">It all starts with operators&lt;/h2>
 &lt;p>This time we'll create some utility functions, and tweak a little bit our current Observable implementation, in order to create more flexible features with them.&lt;/p>
 &lt;p>Operators are functions that allow us to extend the behavior of an observable with a chain of functions. Each of this functions can take an observable as a data source and returns a new observable.&lt;/p>
-&lt;p>Lets keep the array theme in here and create a &lt;strong>map&lt;/strong> operator that emulates the native map function of the Array prototype, but for observables. Our operator will do this: take a value, apply to the value a function that will perform some transformation and return a new value.&lt;/p>
-&lt;p>Lets give a try:&lt;/p>
+&lt;p>Lets keep the array theme in here and create a &lt;strong>map&lt;/strong> operator that emulates the native map function of the Array prototype, but for observables. Our operator will do this: take a value, apply a function that will perform some transformation and return a new value.&lt;/p>
+&lt;p>Lets give it a try:&lt;/p>
 &lt;p>First step, get the transform function and the data source, then return a new observable that we can use.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">source$&lt;/span>&lt;span style="color:#5fb3b3;">) {
@@ -1871,7 +1871,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 &lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">observable&lt;/span>&lt;span style="color:#5fb3b3;">;
 }
 &lt;/span>&lt;/pre>
-&lt;p>One last thing that we need to do is make sure our operators are compatible with this new pipe function. For example, our current &lt;strong>map&lt;/strong> operator expects both &lt;strong>transformFn&lt;/strong> and &lt;strong>source&lt;/strong> at the same time. That just won't happen inside pipe. Will have to split it into two functions, one that will take the initial necesary parameters to make it work and another one that takes the source observable.&lt;/p>
+&lt;p>We need to do one more thing to make sure our operators are compatible with this new pipe function. For example, our current &lt;strong>map&lt;/strong> operator expects both &lt;strong>transformFn&lt;/strong> and &lt;strong>source&lt;/strong> at the same time. That just won't happen inside pipe. Will have to split it into two functions, one that will take the initial necessary parameters to make it work and another one that takes the source observable.&lt;/p>
 &lt;p>There are a couple of ways we can do this.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// Option 1
@@ -1955,7 +1955,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 }
 &lt;/span>&lt;/pre>
 &lt;p>This is amazing, we now have really reusable way to set and destroy an interval.&lt;/p>
-&lt;p>You may have notice that we are passing a number to the observer, we are not calling it &lt;em>seconds&lt;/em> because the &lt;strong>delay&lt;/strong> can be any arbitrary number. In here we're not keeping track of the time, we are merely counting how many times the callback has been executed. Why? Because we want to make every observable factory as generic as posible. We can always modify the value that it emits by using operators.&lt;/p>
+&lt;p>You may have notice that we are passing a number to the observer, we are not calling it &lt;em>seconds&lt;/em> because the &lt;strong>delay&lt;/strong> can be any arbitrary number. In here we're not keeping track of the time, we are merely counting how many times the callback has been executed. Why? Because we want to make every observable factory as generic as possible. We can always modify the value that it emits by using operators.&lt;/p>
 &lt;p>This how we could use our new interval function.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// pretend we have our helper functions in scope.
@@ -1970,7 +1970,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 }
 });
 &lt;/span>&lt;/pre>
-&lt;p>Thats better. But that &lt;em>if&lt;/em> bothers me. I feel like that behavior doesn't belong in there. You know what? I'll make an operator that can unsubcribe to the interval after it emits five values.&lt;/p>
+&lt;p>That's better. But that &lt;em>if&lt;/em> bothers me. I feel like that behavior doesn't belong in there. You know what? I'll make an operator that can unsubscribe to the interval after it emits five values.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// I&amp;#39;ll named &amp;quot;take&amp;quot; because naming is hard.
 // Also, that is how is called in other libraries.
@@ -2024,8 +2024,8 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/VGZXZa">Observables -
 &lt;/p>
 &lt;h2 id="conclusion">Conclusion&lt;/h2>
 &lt;p>Observables are a powerful thing, with a little bit of creativity you can turn anything you want into an observable. Really. A promise, an AJAX request, a DOM event, an array, a time interval and anything you can imagine can be a source of data that can be wrapped in an observable.&lt;/p>
-&lt;p>They are a powerful abstraction. They can let you processs streams of data one chunk at a time. Not only that, but also let you piece together solutions that can be compose by generic functions and custom functions specific to the problem at hand. &lt;/p>
-&lt;p>Fair warning though. They are not the ultimate solution to every problem. You'll have to decide if the complexity of it is worth it. Like in the exercise, we lose the simplicity of the &lt;em>startTimer&lt;/em> in order to gain some flexibility (that we could've achieve some other way).&lt;/p>
+&lt;p>They are a powerful abstraction. They can let you process streams of data one chunk at a time. Not only that, but also let you piece together solutions that can be compose by generic functions and custom functions specific to the problem at hand. &lt;/p>
+&lt;p>Fair warning though. They are not the ultimate solution to every problem. You'll have to decide if the complexity is worth it. Like in the exercise, we lose the simplicity of the &lt;em>startTimer&lt;/em> in order to gain some flexibility (that we could've achieve some other way).&lt;/p>
 &lt;h2 id="sources">Sources&lt;/h2>
 &lt;ul>
 &lt;li>&lt;a href="https://medium.com/@benlesh/learning-observable-by-building-observable-d5da57405d87">Learning Observable By Building Observable&lt;/a>&lt;/li>

@@ -8,13 +8,13 @@
 &lt;p>In our case a data source is something that produces values. And, a consumer is something that receives values from a data source.&lt;/p>
 &lt;h3 id="fun-facts">Fun facts&lt;/h3>
 &lt;h4 id="observables-are-lazy">Observables are lazy&lt;/h4>
-&lt;p>That means that they would not do any kind of work until it's absolutly necessary. Nothing will happen until you subscribe to them.&lt;/p>
+&lt;p>That means that they would not do any kind of work until it's absolutely necessary. Nothing will happen until you subscribe to them.&lt;/p>
 &lt;h4 id="they-can-emit-multiple-values">They can emit multiple values&lt;/h4>
 &lt;p>Depending on the data source you can receive a finite number of values or an infinite stream of values.&lt;/p>
 &lt;h4 id="they-can-be-synchronous-or-asynchronous">They can be synchronous or asynchronous&lt;/h4>
 &lt;p>It all depends on their internal implementation. You can setup an observable that process some stream of data in a synchronous way or create one from an event that can happen over time.&lt;/p>
 &lt;h3 id="some-rules">Some rules&lt;/h3>
-&lt;p>Remember when I said that observables follow a convention? Well, we are going to make our own arbitrary rules that our implementation will follow. This are important because we are going to build a little ecosystem around our observables.&lt;/p>
+&lt;p>Remember when I said that observables follow a convention? Well, we are going to make our own arbitrary rules that our implementation will follow. These will be important because we are going to build a little ecosystem around our observables.&lt;/p>
 &lt;p>Here we go:&lt;/p>
 &lt;ol>
 &lt;li>An observable instance will have a &lt;code>subscribe&lt;/code> method.&lt;/li>
@@ -92,8 +92,8 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 &lt;h2 id="it-all-starts-with-operators">It all starts with operators&lt;/h2>
 &lt;p>This time we'll create some utility functions, and tweak a little bit our current Observable implementation, in order to create more flexible features with them.&lt;/p>
 &lt;p>Operators are functions that allow us to extend the behavior of an observable with a chain of functions. Each of this functions can take an observable as a data source and returns a new observable.&lt;/p>
-&lt;p>Lets keep the array theme in here and create a &lt;strong>map&lt;/strong> operator that emulates the native map function of the Array prototype, but for observables. Our operator will do this: take a value, apply to the value a function that will perform some transformation and return a new value.&lt;/p>
-&lt;p>Lets give a try:&lt;/p>
+&lt;p>Lets keep the array theme in here and create a &lt;strong>map&lt;/strong> operator that emulates the native map function of the Array prototype, but for observables. Our operator will do this: take a value, apply a function that will perform some transformation and return a new value.&lt;/p>
+&lt;p>Lets give it a try:&lt;/p>
 &lt;p>First step, get the transform function and the data source, then return a new observable that we can use.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">transformFn&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">source$&lt;/span>&lt;span style="color:#5fb3b3;">) {
@@ -180,7 +180,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 &lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">observable&lt;/span>&lt;span style="color:#5fb3b3;">;
 }
 &lt;/span>&lt;/pre>
-&lt;p>One last thing that we need to do is make sure our operators are compatible with this new pipe function. For example, our current &lt;strong>map&lt;/strong> operator expects both &lt;strong>transformFn&lt;/strong> and &lt;strong>source&lt;/strong> at the same time. That just won't happen inside pipe. Will have to split it into two functions, one that will take the initial necesary parameters to make it work and another one that takes the source observable.&lt;/p>
+&lt;p>We need to do one more thing to make sure our operators are compatible with this new pipe function. For example, our current &lt;strong>map&lt;/strong> operator expects both &lt;strong>transformFn&lt;/strong> and &lt;strong>source&lt;/strong> at the same time. That just won't happen inside pipe. Will have to split it into two functions, one that will take the initial necessary parameters to make it work and another one that takes the source observable.&lt;/p>
 &lt;p>There are a couple of ways we can do this.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// Option 1
@@ -264,7 +264,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 }
 &lt;/span>&lt;/pre>
 &lt;p>This is amazing, we now have really reusable way to set and destroy an interval.&lt;/p>
-&lt;p>You may have notice that we are passing a number to the observer, we are not calling it &lt;em>seconds&lt;/em> because the &lt;strong>delay&lt;/strong> can be any arbitrary number. In here we're not keeping track of the time, we are merely counting how many times the callback has been executed. Why? Because we want to make every observable factory as generic as posible. We can always modify the value that it emits by using operators.&lt;/p>
+&lt;p>You may have notice that we are passing a number to the observer, we are not calling it &lt;em>seconds&lt;/em> because the &lt;strong>delay&lt;/strong> can be any arbitrary number. In here we're not keeping track of the time, we are merely counting how many times the callback has been executed. Why? Because we want to make every observable factory as generic as possible. We can always modify the value that it emits by using operators.&lt;/p>
 &lt;p>This how we could use our new interval function.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// pretend we have our helper functions in scope.
@@ -279,7 +279,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/wxNYPV">Observables -
 }
 });
 &lt;/span>&lt;/pre>
-&lt;p>Thats better. But that &lt;em>if&lt;/em> bothers me. I feel like that behavior doesn't belong in there. You know what? I'll make an operator that can unsubcribe to the interval after it emits five values.&lt;/p>
+&lt;p>That's better. But that &lt;em>if&lt;/em> bothers me. I feel like that behavior doesn't belong in there. You know what? I'll make an operator that can unsubscribe to the interval after it emits five values.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5f6364;">// I&amp;#39;ll named &amp;quot;take&amp;quot; because naming is hard.
 // Also, that is how is called in other libraries.
@@ -333,8 +333,8 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/VGZXZa">Observables -
 &lt;/p>
 &lt;h2 id="conclusion">Conclusion&lt;/h2>
 &lt;p>Observables are a powerful thing, with a little bit of creativity you can turn anything you want into an observable. Really. A promise, an AJAX request, a DOM event, an array, a time interval and anything you can imagine can be a source of data that can be wrapped in an observable.&lt;/p>
-&lt;p>They are a powerful abstraction. They can let you processs streams of data one chunk at a time. Not only that, but also let you piece together solutions that can be compose by generic functions and custom functions specific to the problem at hand. &lt;/p>
-&lt;p>Fair warning though. They are not the ultimate solution to every problem. You'll have to decide if the complexity of it is worth it. Like in the exercise, we lose the simplicity of the &lt;em>startTimer&lt;/em> in order to gain some flexibility (that we could've achieve some other way).&lt;/p>
+&lt;p>They are a powerful abstraction. They can let you process streams of data one chunk at a time. Not only that, but also let you piece together solutions that can be compose by generic functions and custom functions specific to the problem at hand. &lt;/p>
+&lt;p>Fair warning though. They are not the ultimate solution to every problem. You'll have to decide if the complexity is worth it. Like in the exercise, we lose the simplicity of the &lt;em>startTimer&lt;/em> in order to gain some flexibility (that we could've achieve some other way).&lt;/p>
 &lt;h2 id="sources">Sources&lt;/h2>
 &lt;ul>
 &lt;li>&lt;a href="https://medium.com/@benlesh/learning-observable-by-building-observable-d5da57405d87">Learning Observable By Building Observable&lt;/a>&lt;/li>

@@ -79,7 +79,7 @@ idle: state(transition(&amp;#39;fetch&amp;#39;, &amp;#39;loading&amp;#39;)),
 // end
 &lt;/span>&lt;/pre>
 &lt;p>If you send &lt;code>fetch&lt;/code> (or any other event) while in &lt;code>end&lt;/code> state will give you &lt;code>end&lt;/code> every single time. Why? Because you can't go anywhere, &lt;code>end&lt;/code> doesn't have transitions.&lt;/p>
-&lt;p>I hope you see why this is useful. If not, I apologise for all the &lt;code>console.log&lt;/code>ing.&lt;/p>
+&lt;p>I hope you see why this is useful. If not, I apologize for all the &lt;code>console.log&lt;/code>ing.&lt;/p>
 &lt;p>Going back to our current machine. This what we got so far.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> &lt;/span>&lt;span style="color:#c594c5;">import &lt;/span>&lt;span style="color:#5fb3b3;">{
@@ -273,7 +273,7 @@ Tweet
 }
 &lt;/span>&lt;/pre>
 &lt;p>Now the last piece of the puzzle, the side effects. We need to attach another function to our transitions so we can update the DOM. We could use &lt;code>reduce&lt;/code> again but is just rude to have side effects on something called &lt;code>reduce&lt;/code> (just don't) We will bring another utility made for that, &lt;code>action&lt;/code>.&lt;/p>
-&lt;p>But first we must prepare. Update the context object with the necesary dependencies. (This step is not necesary, this is just me being allergic to global variables)&lt;/p>
+&lt;p>But first we must prepare. Update the context object with the necessary dependencies. (This step is not necessary, this is just me being allergic to global variables)&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> const context = ev =&amp;gt; ({
 data: {},
@@ -441,7 +441,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/OJJvQzR">Finite Rando
 &lt;h2 id="so-is-this-state-machine-thing-helpful">So is this state machine thing helpful?&lt;/h2>
 &lt;p>I hope so. Did you notice we made a bunch of test and created the blueprint of the quote machine even before writing any HTML? I think that's cool. &lt;/p>
 &lt;p>Did you try to click the 'loading' button while loading? Did it triggered a bunch of call to &lt;code>get_quote&lt;/code>? That is because we made (sort of) impossible that a &lt;code>fetch&lt;/code> event can happen during &lt;code>loading&lt;/code>. &lt;/p>
-&lt;p>Not only that, the behavior of the machine is and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.&lt;/p>
+&lt;p>Not only that, the behavior of the machine and the effects on the outside world are separated. Depending on how you like to write code that may be a good or a bad thing.&lt;/p>
 &lt;h2 id="want-to-know-more">Want to know more?&lt;/h2>
 &lt;ul>
 &lt;li>&lt;a href="https://xstate.js.org/docs/about/concepts.html">XState (concepts)&lt;/a>&lt;/li>
