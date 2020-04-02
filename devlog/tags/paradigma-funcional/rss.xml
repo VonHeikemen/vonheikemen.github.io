@@ -570,7 +570,7 @@ catchMap: fn =&amp;gt; fn(),
 &lt;p>Hay muchas cosas que no mencioné para no tomar mucho de su tiempo. Si quieren indagar un poco más aquí les dejo más material que he preparado.&lt;/p>
 &lt;ul>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/fp-in-js/partial-application/">Aplicacion parcial&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/fp-in-js/the-power-of-map/">El poder de map (más sobre functors)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/fp-in-js/the-power-of-map/">Más sobre Functors&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/fp-in-js/using-a-maybe/">Usando un Maybe&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/fp-in-js/dealing-with-side-effects-and-pure-functions/">Funciones puras y efectos&lt;/a>&lt;/li>
 &lt;/ul>
