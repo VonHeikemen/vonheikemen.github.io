@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/javascript/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Mon, 30 Mar 2020 00:00:00 +0000</lastBuildDate><item><title>Functional programming for your everyday javascript: Composition techniques</title><pubDate>Mon, 30 Mar 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/composition-techniques/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/composition-techniques/</guid><description>&lt;p>Today we are going to talk about function composition. The art of creating big things with &amp;quot;simple&amp;quot; pieces. It will be even better if you don't know anything about functional programming, this will be an introduction to common concepts and patterns used in that paradigm that can be implemented in javascript. What I'm about to show you is not a magical formula to make your code more readable or bug free, that's not how any of this works. I do believe that it can help solve some problems, but in order to do that in the best way you need to keep a few things in mind. So, before I show you any implementation we are going to talk about some concepts and a little bit about philosophy. &lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/javascript/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Thu, 02 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Pure functions and why they are a good idea</title><pubDate>Thu, 02 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</guid><description>&lt;p>When we talk about functional programming very few things can be as important as pure functions. People who write code in this style make a considerable effort to contain as much logic as they can in pure functions, I'll try to explain some of the reasons behind this. But, first things first...&lt;/p>
+&lt;h2 id="what-s-a-pure-function">What's a pure function?&lt;/h2>
+&lt;p>A function whose output is only determined by its input and has no observable effect on the outside world (has no side effects).&lt;/p>
+&lt;h3 id="benefits">Benefits&lt;/h3>
+&lt;p>I want to focus on the benefits they provide to us humans who read and interpret code in our minds.&lt;/p>
+&lt;ul>
+&lt;li>They are predictable&lt;/li>
+&lt;/ul>
+&lt;p>Given the same inputs, it always produces the same output. This is one of the most relevant properties they have, and to me is the most important. It gives us the ability to test with relative ease how effective is our solution. &lt;/p>
+&lt;p>Say that we have a function that transforms every letter in a string to uppercase. What do we need to prove that it works? The function, some input data and the expected output.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">to_uppercase&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) == &amp;#39;&lt;/span>&lt;span style="color:#99c794;">HELLO&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;;
+&lt;/span>&lt;/pre>
+&lt;p>There is no need to emulate an entire environment or to use special tools, we just compare the result with the expected output. This gives us confidence in what we create, because we can prove with certainty that it works appropriately.&lt;/p>
+&lt;ul>
+&lt;li>Comprehension&lt;/li>
+&lt;/ul>
+&lt;p>When it comes to code we spend more time reading and analyzing than writing it. Communication is one aspect that we always need to consider. In theory, a pure function would need the least amount of context in order to understand its behavior because everything you need to know about it is (or at least it should) in the body and its arguments.&lt;/p>
+&lt;p>Another property that pure function have is &lt;strong>referential transparency&lt;/strong>, this means that we can replace a function call with its return value.&lt;/p>
+&lt;p>For example, this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">to_uppercase&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hi&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) + &amp;#39;&lt;/span>&lt;span style="color:#99c794;">, user&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;;
+&lt;/span>&lt;/pre>
+&lt;p>Can be replaced by this.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5fb3b3;">&amp;#39;&lt;/span>&lt;span style="color:#99c794;">HI, user&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;;
+&lt;/span>&lt;/pre>
+&lt;p>It means that when you understand what a pure function does you can mentally replace the function call with the return value.&lt;/p>
+&lt;ul>
+&lt;li>Composition&lt;/li>
+&lt;/ul>
+&lt;p>If you have created a pure function there is a very strong chance that what you have is an independent component that can be reused in different contexts. Being independent and reusable makes them the perfect candidates to be combined with other components. Think about it, if you combine a pure function with another into a new function, it results in yet another pure function. This is one powerful feature allows you to create complex procedures by composing &amp;quot;simple&amp;quot; pieces.&lt;/p>
+&lt;h2 id="further-reading">Further reading&lt;/h2>
+&lt;p>As good as pure functions are at some point you need to abandon the idea of purity and cause some effect on the outside world (show something on the screen, make an HTTP request, etc..) Because of that I have prepared more material with more details about this topic.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/">Composition techniques&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/">Dealing with side effects and pure functions in javascript &lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="sources">Sources&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=qtsbZarFzm8&amp;amp;feature=youtu.be">Functional Programming in JS: What? Why? How? (video)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://codewords.recurse.com/issues/one/an-introduction-to-functional-programming">An introduction to functional programming&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/getify/Functional-Light-JS/blob/master/manuscript/ch5.md/#chapter-5-reducing-side-effects">Functional-Light JavaScript - Chapter 5: Reducing Side Effects&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Composition techniques</title><pubDate>Mon, 30 Mar 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/</guid><description>&lt;p>Today we are going to talk about function composition. The art of creating big things with &amp;quot;simple&amp;quot; pieces. It will be even better if you don't know anything about functional programming, this will be an introduction to common concepts and patterns used in that paradigm that can be implemented in javascript. What I'm about to show you is not a magical formula to make your code more readable or bug free, that's not how any of this works. I do believe that it can help solve some problems, but in order to do that in the best way you need to keep a few things in mind. So, before I show you any implementation we are going to talk about some concepts and a little bit about philosophy. &lt;/p>
 &lt;h2 id="what-you-need-to-know">What you need to know&lt;/h2>
 &lt;h3 id="what-is-function-composition">What is function composition?&lt;/h3>
 &lt;p>It's a mechanism that allows us to combine two or more function into a new function.&lt;/p>
@@ -522,10 +569,10 @@ catchMap: fn =&amp;gt; fn(),
 &lt;h2 id="still-want-to-learn-more">Still want to learn more?&lt;/h2>
 &lt;p>There are many things that I didn't mention because it would take too much time but if you want to learn more about it, I have prepare some material.&lt;/p>
 &lt;ul>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/fp-in-js/partial-application/">Partial application&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/fp-in-js/the-power-of-map/">About Functors&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/fp-in-js/using-a-maybe/">Using a Maybe&lt;/a>&lt;/li>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/fp-in-js/dealing-with-side-effects-and-pure-functions/">Pure functions and side effects&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/">Partial application&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/the-power-of-map/">About Functors&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/">Using a Maybe&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/">Pure functions and side effects&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h2 id="conclusion">Conclusion&lt;/h2>
 &lt;p>A lot of people talk about the nice things about composition, how it makes code more declarative and clean, but they never show you the tough parts. I hope I've done that, show the tough parts and how to overcome them. Composing functions it's truly an art, it takes practice and time to get use to some ideas (like the idea of functions being things).&lt;/p>
@@ -535,7 +582,7 @@ catchMap: fn =&amp;gt; fn(),
 &lt;li>&lt;a href="https://www.youtube.com/watch?v=SfWR3dKnFIo">Oh Composable World! (video)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://www.youtube.com/watch?v=7BsfMMYvGaU">Mary had a little lambda (video)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://dev.to/joelnet/functional-javascript---functors-monads-and-promises-1pol">Functional JavaScript - Functors, Monads, and Promises&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Partial application</title><pubDate>Tue, 10 Mar 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/partial-application/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/partial-application/</guid><description>&lt;p>Today we are here to solve a mystery, the mystery of why some people choose to create functions that take a callback as the first argument. You might be thinking that the answer is partial application and you would be half right, but partial application is just the means to an end, the real reason to do such a thing is to enable a &amp;quot;better&amp;quot; function composition. But before we get into details of partial application let's explore how we do things now.&lt;/p>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Partial application</title><pubDate>Tue, 10 Mar 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/</guid><description>&lt;p>Today we are here to solve a mystery, the mystery of why some people choose to create functions that take a callback as the first argument. You might be thinking that the answer is partial application and you would be half right, but partial application is just the means to an end, the real reason to do such a thing is to enable a &amp;quot;better&amp;quot; function composition. But before we get into details of partial application let's explore how we do things now.&lt;/p>
 &lt;h2 id="how-we-do-things">How we do things&lt;/h2>
 &lt;p>When we create a function we usually sort the arguments by some kind of importance/priority level, where the most important goes first. As a result, when we create a function that works on a piece of data it becomes the first thing on the list, it's followed by less important configuration arguments and the last thing are optional arguments that we can omit. &lt;/p>
 &lt;p>Say that we want to create a function that picks specific properties from a plain object. Let's think of what we need. The object, that was your first thought? It's natural, you don't want to omit it by accident when you call the function. That leaves the keys that we are going to choose as the last argument.&lt;/p>
@@ -802,7 +849,7 @@ catchMap: fn =&amp;gt; fn(),
 &lt;ul>
 &lt;li>&lt;a href="https://www.youtube.com/watch?v=m3svKOdZijA">Hey Underscore, You're Doing It Wrong! (video)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="http://benalman.com/news/2012/09/partial-application-in-javascript/">Partial Application in JavaScript&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those terms that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: The power of map</title><pubDate>Sun, 16 Feb 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/the-power-of-map/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/the-power-of-map/</guid><description>&lt;p>This time we are going to take a look inside the world of &lt;code>functors&lt;/code> and what makes them so special. Functors is one of those terms that you hear every now and then when people talk about functional programming but when the time comes to explain it they either bombard you with more abstract terms or tell you just the details you need to know. Since I have no knowledge of category theory I'm not going to pretend that I know exactly what a functor is, I'm just going show enough for you to know how you can spot them in the wild and how you can use them to your advantage.&lt;/p>
 &lt;h2 id="seriously-what-is-a-functor">Seriously, what is a functor?&lt;/h2>
 &lt;p>I'm convinced that the term is difficult to understand because one, you need to some other terms in order to get the whole picture and two, the theory behind it doesn't really translate very well in code. But it wouldn't hurt to have at least a clue of what they are.&lt;/p>
 &lt;p>You can think of them as a relation that exist between two sets of values. I know it's vague, this will make sense in a second. Say we have two arrays.&lt;/p>
@@ -1056,7 +1103,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/dyoMJRw">an fmap exam
 &lt;h3 id="more-examples">More examples&lt;/h3>
 &lt;p>I think by now you understand really well what functors do, but if you still want to see more examples you can check out this articles. &lt;/p>
 &lt;ul>
-&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/fp-in-js/using-a-maybe/">Handling the absence of a value&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/">Handling the absence of a value&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">Handling side effects&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h2 id="conclusion">Conclusion&lt;/h2>
@@ -1082,7 +1129,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/dyoMJRw">an fmap exam
 &lt;li>&lt;a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">How to deal with dirty side effects in your pure functional JavaScript&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://jrsinclair.com/articles/2020/whats-more-fantastic-than-fantasy-land-static-land/">What’s more fantastic than fantasy land? An Introduction to Static land&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://medium.com/@lettier/your-easy-guide-to-monads-applicatives-functors-862048d61610">Your easy guide to Monads, Applicatives, &amp;amp; Functors&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Dealing with side effects and pure functions in javascript</title><pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/dealing-with-side-effects-and-pure-functions/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/dealing-with-side-effects-and-pure-functions/</guid><description>&lt;p>Have you ever heard the term &amp;quot;pure function&amp;quot;? What about &amp;quot;side effects&amp;quot;? If you have then probably you've heard that side effects are evil and should be avoided at all cost (just like &lt;code>var&lt;/code>.) Here is the problem, if you write javascript you probably want to cause those side effects (specially if you get paid to write javascript) So the solution here is not to avoid all the side effects but to control them. I going to show you a few things that you can do to make your pure functions and your side effects get along just fine.&lt;/p>
+&lt;/ul></description></item><item><title>Dealing with side effects and pure functions in javascript</title><pubDate>Sun, 05 Jan 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/</guid><description>&lt;p>Have you ever heard the term &amp;quot;pure function&amp;quot;? What about &amp;quot;side effects&amp;quot;? If you have then probably you've heard that side effects are evil and should be avoided at all cost (just like &lt;code>var&lt;/code>.) Here is the problem, if you write javascript you probably want to cause those side effects (specially if you get paid to write javascript) So the solution here is not to avoid all the side effects but to control them. I going to show you a few things that you can do to make your pure functions and your side effects get along just fine.&lt;/p>
 &lt;p>Before we start let us just do a little recap on some terms, so we can all be in the same page.&lt;/p>
 &lt;h2 id="concepts">Concepts&lt;/h2>
 &lt;h3 id="pure-function">Pure function&lt;/h3>
@@ -1268,7 +1315,7 @@ Increment value every 1s, emit even numbers.
 &lt;h2 id="sources">Sources&lt;/h2>
 &lt;ul>
 &lt;li>&lt;a href="https://jrsinclair.com/articles/2018/how-to-deal-with-dirty-side-effects-in-your-pure-functional-javascript/">How to deal with dirty side effects in your pure functional JavaScript&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Lenses A.K.A. composable getters and setters</title><pubDate>Wed, 27 Nov 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/lenses-a-k-a-composable-getters-and-setters/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/lenses-a-k-a-composable-getters-and-setters/</guid><description>&lt;p>This time around we will figure out what are lenses, how do they look like in javascript and hopefully will build a mostly adequate implementation.&lt;/p>
+&lt;/ul></description></item><item><title>Lenses A.K.A. composable getters and setters</title><pubDate>Wed, 27 Nov 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/</guid><description>&lt;p>This time around we will figure out what are lenses, how do they look like in javascript and hopefully will build a mostly adequate implementation.&lt;/p>
 &lt;p>Let us first take a step back and ask.&lt;/p>
 &lt;h2 id="what-are-getters-and-setters">What are getters and setters?&lt;/h2>
 &lt;p>This are functions that have one goal, they get or set value. But of course that is not the only thing they are good for. Most use cases I've seen involve triggering a side-effect when a value changes or put some validations to prevent undesired behavior.&lt;/p>
@@ -2110,7 +2157,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/OJJvQzR">Finite Rando
 &lt;li>&lt;a href="https://xstate.js.org/docs/about/concepts.html">XState (concepts)&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://thisrobot.life/">robot3 - docs&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/">Understanding State Machines&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Using a Maybe</title><pubDate>Mon, 28 Oct 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/fp-in-js/using-a-maybe/</link><guid>https://vonheikemen.github.io/devlog/web-development/fp-in-js/using-a-maybe/</guid><description>&lt;p>Have you ever heard about monads and how great they are? Maybe you have but you still don't get it. Well... I'm not here to tell you what they are, I won't try to sell them to you either, what I will do is show you an example of how would it be if you use them in your javascripts.&lt;/p>
+&lt;/ul></description></item><item><title>Functional programming for your everyday javascript: Using a Maybe</title><pubDate>Mon, 28 Oct 2019 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/</guid><description>&lt;p>Have you ever heard about monads and how great they are? Maybe you have but you still don't get it. Well... I'm not here to tell you what they are, I won't try to sell them to you either, what I will do is show you an example of how would it be if you use them in your javascripts.&lt;/p>
 &lt;p>We'll do something fun, lets solve a fairly trivial problem in an unnecessary complicated way. &lt;/p>
 &lt;p>Suppose that we have a dictionary stored in a json file or a plain js object.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
