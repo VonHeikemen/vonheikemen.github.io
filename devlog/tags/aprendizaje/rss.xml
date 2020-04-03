@@ -1,4 +1,71 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/aprendizaje/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Thu, 02 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Funciones puras y porque son una buena idea</title><pubDate>Thu, 02 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/pure-functions/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/pure-functions/</guid><description>&lt;p>Cuando se habla del paradigma funcional en la programación uno de los conceptos básicos que resalta por su importancia son la funciones puras. Las personas acostumbradas a este paradigma hacen un gran esfuerzo para mantener su código tanto como sea posible en funciones puras, aquí les explicaré algunas de las razones. Pero primero debemos saber...&lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/aprendizaje/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Lo que sé del paradigma funcional</title><pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/table-of-content/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/table-of-content/</guid><description>&lt;p>Aprender sobre el paradigma funcional en la programación no es una tarea fácil, sobre todo si buscan material que contenga ejemplos prácticos de cómo usar los conceptos que enseñan. Lo que presento en esta ocasión es una recopilación de las notas que he tomado, y que he transformado en &amp;quot;artículos&amp;quot;, así como también enlaces a las fuentes de donde he sacado toda esta información.&lt;/p>
+&lt;p>Aunque todo este material esté relacionado, no planifiqué escribir todas esas notas. Entonces aquí intentaré darles una sugerencia en el orden de lectura.&lt;/p>
+&lt;h2 id="conceptos-basicos">Conceptos básicos&lt;/h2>
+&lt;p>Para empezar quisiera que vieran el video que me convenció de darle una oportunidad a este paradigma. La charla se llama &amp;quot;Programación funcional en JS: ¿Qué? ¿Por qué? ¿Cómo?&amp;quot; En el video se explica lo que es y lo que no es programación funcional, también muestra ejemplos de los conceptos básicos del paradigma en javascript.&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/qtsbZarFzm8" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;p>Si no pudieron entender la charla porque no hablan inglés, no se preocupen, una búsqueda rápida sobre &lt;strong>funciones puras&lt;/strong> y sus beneficios técnicos debería ponerlos al tanto.&lt;/p>
+&lt;p>Ahora bien, yo también hice mi propia investigación y escribí un material que complementa lo que se dice en el video.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/pure-functions/">Funciones puras y porque son una buena idea&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/">Cómo combinar efectos y funciones puras en javascript&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="lectura-extra">Lectura extra&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://codewords.recurse.com/issues/one/an-introduction-to-functional-programming">Una introducción a la programación funcional (artículo en inglés)&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="una-herramienta-especial">Una herramienta especial&lt;/h2>
+&lt;p>Si ya revisaron todo el material anterior ya cuentan con suficiente conocimiento para empezar a incorporar un poco del estilo funcional en su rutina habitual. No tienen que conocer todos los trucos del libro para beneficiarse de este paradigma.&lt;/p>
+&lt;p>Quiero que presten una atención especial a algo llamado &lt;strong>aplicación parcial&lt;/strong>, al igual que las funciones puras este es un que concepto que puede ayudarlos mucho, incluso si deciden no adoptar el paradigma funcional completamente.&lt;/p>
+&lt;p>Estas son mis notas (con ejemplos prácticos): &lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/partial-application/">Aplicación parcial&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;p>Si están convencidos de que la aplicación parcial es útil vean este video para que tengan una idea del tipo de cosas que pueden lograr.&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/m3svKOdZijA" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;h2 id="como-armar-las-piezas">Cómo armar las piezas&lt;/h2>
+&lt;p>Una cosa es conocer los conceptos y otra es saber utilizarlos de la manera más efectiva posible. Ya tienen las bases y algunas herramientas, pero aún deben estar preguntándose ¿Cómo encaja todo esto? Ese nuestro siguiente paso. &lt;/p>
+&lt;p>En este artículo veremos cómo podemos usar lo que hemos aprendido:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/composition-techniques/">Técnicas de composición&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Y por si acaso se pasaron por alto este video, aquí se los dejo otra vez. Aquí se explica con un poco más de detalle lo que está en el material que yo escribí (porque lo que yo escribí son notas que tomé de aquí).&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/vDe-4o8Uwl8" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;h2 id="un-paso-mas-alla">Un paso más allá&lt;/h2>
+&lt;p>Ya tienen una idea de cómo manipular funciones y adaptarlas a sus necesidades. Pero todavía hay un par de conceptos que no están claros, dos en particular: Functors y Monads. Aquí hago mi mejor esfuerzo para decirles cómo pueden usarlos en su beneficio. &lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/the-power-of-map/">Hablando de Functors&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/using-a-maybe/">Usando un Maybe&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="contenido-extra">Contenido extra&lt;/h2>
+&lt;h3 id="un-concepto-curioso">Un concepto curioso&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/">Lenses: Una alternativa a los getters y setters&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="mas-charlas-interesantes">Más charlas interesantes&lt;/h3>
+&lt;p>Si se siguen preguntando qué se puede lograr sólo combinando funciones.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=7BsfMMYvGaU">Mary had a little lambda&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=SfWR3dKnFIo">Oh Composable World!&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="hasta-la-proxima">Hasta la próxima&lt;/h2>
+&lt;p>Si llegaron hasta aquí y ya revisaron todo, entonces saben tanto como yo. No tengo nada más que enseñarles. Ya sea que hayan decidido adoptar el paradigma funcional en su código o no espero que hayan aprendido algo que puedan aplicar en su desarrollo diario.&lt;/p></description></item><item><title>Funciones puras y porque son una buena idea</title><pubDate>Thu, 02 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/pure-functions/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/pure-functions/</guid><description>&lt;p>Cuando se habla del paradigma funcional en la programación uno de los conceptos básicos que resalta por su importancia son la funciones puras. Las personas acostumbradas a este paradigma hacen un gran esfuerzo para mantener su código tanto como sea posible en funciones puras, aquí les explicaré algunas de las razones. Pero primero debemos saber...&lt;/p>
 &lt;h2 id="que-es-una-funcion-pura">¿Qué es una función pura?&lt;/h2>
 &lt;p>Una función cuyo resultado es influenciado solamente por sus parámetros de entrada y no tiene ningún efecto observable en el mundo exterior (lo que se conoce como efecto secundario).&lt;/p>
 &lt;h3 id="beneficios">Beneficios&lt;/h3>

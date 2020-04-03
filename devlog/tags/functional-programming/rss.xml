@@ -1,4 +1,70 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/functional-programming/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Thu, 02 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Pure functions and why they are a good idea</title><pubDate>Thu, 02 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</guid><description>&lt;p>When we talk about functional programming very few things can be as important as pure functions. People who write code in this style make a considerable effort to contain as much logic as they can in pure functions, I'll try to explain some of the reasons behind this. But, first things first...&lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/functional-programming/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>What I know about functional programming</title><pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/table-of-content/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/table-of-content/</guid><description>&lt;p>Learning about functional programming is not an easy task, specially if you search for articles that have concrete examples of the concepts they try to teach. I have been learning about this paradigm for a while and I want it to share the notes I have taken, the ones I've turn into articles, and also the source material where I got the information.&lt;/p>
+&lt;p>Even though all these articles are related I didn't plan on writing them. So, I'll be presenting some sort of guide (a suggestion) on the order they should be read.&lt;/p>
+&lt;h2 id="the-basics">The basics&lt;/h2>
+&lt;p>To begin I would like you to see the video of the talk that convinced me to try learning this paradigm. The talk is about what is and what isn't functional programming, it also shows some examples of the core principles using javascript.&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/qtsbZarFzm8" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;p>To complement that video I wrote my own notes.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/">Pure functions and why they are a good idea&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/">Dealing with side effects and pure functions in javascript&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="further-reading">Further reading&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://codewords.recurse.com/issues/one/an-introduction-to-functional-programming">An introduction to functional programming&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="a-very-special-tool">A very special tool&lt;/h2>
+&lt;p>If you read everything so far you already have enough knowledge to add some functional style to your everyday coding. You don't have to know every trick in the book to start seeing the benefits of this paradigm.&lt;/p>
+&lt;p>So, I want you to pay close attention to something called &lt;strong>partial application&lt;/strong>, just like the concept of a &lt;strong>pure function&lt;/strong>, partial application can help you a lot even if you decide you don't want to write code in a functional style.&lt;/p>
+&lt;p>This are my notes on the topic (with practical examples): &lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/">Partial application&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;p>If you are convinced that this is useful then watch this video, in here you can see the kind of thing you can accomplish.&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/m3svKOdZijA" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;h2 id="how-to-put-the-pieces-together">How to put the pieces together&lt;/h2>
+&lt;p>Now, knowing the basics is one thing, it's a whole other deal knowing how to use them in the most effective way. You already have the tools but you might be wondering how all of this fits together, that is our next step.&lt;/p>
+&lt;p>In this article we are going to learn how to use everything we have learned.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/">Composition techniques&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Just in case you missed it. In this talk (the source of the previous article) you can see in more detail what composition is about.&lt;/p>
+&lt;div >
+&lt;iframe src="https://www.youtube.com/embed/vDe-4o8Uwl8" webkitallowfullscreen mozallowfullscreen allowfullscreen>
+&lt;/iframe>
+&lt;/div>
+&lt;h2 id="one-step-further">One step further&lt;/h2>
+&lt;p>By now you must know how to manipulate functions and make them do your bidding. But I bet there are still things you want to know in more detail, two in particular: Functors and Monads. So, I'll try my best to tell you how you can use them to your advantage.&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/the-power-of-map/">Have you met Functors?&lt;/a>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/using-a-maybe/">Using a Maybe&lt;/a>&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h2 id="extra-content">Extra content&lt;/h2>
+&lt;h3 id="a-curious-concept">A curious concept&lt;/h3>
+&lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/">Lenses: an alternative to getters and setters&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h3 id="more-interesting-talks">More interesting talks&lt;/h3>
+&lt;p>If you're still wondering what you can do just by composing functions just watch this.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=7BsfMMYvGaU">Mary had a little lambda&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=SfWR3dKnFIo">Oh Composable World!&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="til-next-time">'Til next time&lt;/h2>
+&lt;p>If you got here and read everything then you know as much as I do. Got nothing else to show you. Whether you decided to adopt a fully functional style or not I hope you learned something that you can apply in your everyday coding.&lt;/p></description></item><item><title>Pure functions and why they are a good idea</title><pubDate>Thu, 02 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</link><guid>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</guid><description>&lt;p>When we talk about functional programming very few things can be as important as pure functions. People who write code in this style make a considerable effort to contain as much logic as they can in pure functions, I'll try to explain some of the reasons behind this. But, first things first...&lt;/p>
 &lt;h2 id="what-s-a-pure-function">What's a pure function?&lt;/h2>
 &lt;p>A function whose output is only determined by its input and has no observable effect on the outside world (has no side effects).&lt;/p>
 &lt;h3 id="benefits">Benefits&lt;/h3>
