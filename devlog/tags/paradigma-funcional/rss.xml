@@ -1,4 +1,285 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/paradigma-funcional/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Lo que sé del paradigma funcional</title><pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/table-of-content/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/table-of-content/</guid><description>&lt;p>Aprender sobre el paradigma funcional en la programación no es una tarea fácil, sobre todo si buscan material que contenga ejemplos prácticos de cómo usar los conceptos que enseñan. Lo que presento en esta ocasión es una recopilación de las notas que he tomado, y que he transformado en &amp;quot;artículos&amp;quot;, así como también enlaces a las fuentes de donde he sacado toda esta información.&lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/paradigma-funcional/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Sun, 19 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Reduce: cómo y cuando</title><pubDate>Sun, 19 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</guid><description>&lt;p>Vamos a hablar del elefante rosa en el prototipo &lt;code>Array&lt;/code>, me refiero al a veces odiado método &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce">reduce&lt;/a>. Pero no vamos a discutir sobre si esta función es buena o mala, nos mantendremos objetivos (o eso espero). Vamos a descubrir qué es lo que hace internamente, luego intentaremos descubrir las situaciones en las que puede ser una solución efectiva.&lt;/p>
+&lt;p>Para asegurarnos de entender su funcionamiento vamos a empezar implementando nuestra versión.&lt;/p>
+&lt;h2 id="como-funciona">¿Cómo funciona?&lt;/h2>
+&lt;p>&lt;code>reduce&lt;/code> es una función que toma una lista de valores y la transforma en otra cosa. La palabra clave aquí es &lt;strong>transformación&lt;/strong>. Esta transformación la determina el &amp;quot;usuario&amp;quot; de nuestra función, son ellos los que deciden qué pasará ¿Qué quiere decir eso? Significa que aparte del arreglo que vamos a procesar necesitamos aceptar una función (un callback) como parámetro. Así que la firma de la función sería esta.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">callback&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#5f6364;">// código...
+&lt;/span>&lt;span style="color:#5fb3b3;">}
+&lt;/span>&lt;/pre>
+&lt;p>Ya tenemos algunos valores, y ahora ¿Qué hacemos con ellos? Sabemos que los métodos del prototipo &lt;code>Array&lt;/code> aplican la función a cada uno de los elementos. Hagamos eso.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">callback&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">for&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">valor &lt;/span>&lt;span style="color:#5fb3b3;">of &lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#6699cc;">callback&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">valor&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>Todavía no hace lo que queremos pero se acerca. Ahora falta el ingrediente secreto, el acumulador. Esta será una variable que crearemos para recordar el &lt;strong>estado actual&lt;/strong> de nuestra transformación. Cada vez que apliquemos la función &lt;code>callback&lt;/code> a un valor guardamos ese resultado en el acumulador, y como bono extra también se lo pasaremos a &lt;code>callback&lt;/code> para que nuestro &amp;quot;usuario&amp;quot; no tenga que hacer ningún esfuerzo extra.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> function reduce(arr, callback) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> let estado;
+&lt;/span>&lt;span style="color:#cccece;"> for(const valor of arr) {
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> callback(valor);
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> estado = callback(estado, valor);
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return estado;
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;/pre>
+&lt;p>Recuerden bien esas líneas que están verde. Por muy complicado que se vea &lt;code>reduce&lt;/code> en el exterior, sin importar cuantos trucos raros vean por ahí, esas tres líneas son lo único que importa.&lt;/p>
+&lt;p>Aunque no sea una replica exacta de &lt;code>Array.reduce&lt;/code> será suficiente para nuestros propósitos. Vamos a probarla. &lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array1 &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">4&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">callback &lt;/span>&lt;span style="color:#5fb3b3;">= (&lt;/span>&lt;span style="color:#f99157;">estado&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">valor&lt;/span>&lt;span style="color:#5fb3b3;">) &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">== &lt;/span>&lt;span style="color:#f99157;">null&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">valor&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#cccece;">valor&lt;/span>&lt;span style="color:#5fb3b3;">;
+};
+&lt;/span>&lt;span style="color:#5f6364;">// 1 + 2 + 3 + 4
+&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">callback&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: 10
+&lt;/span>&lt;/pre>
+&lt;p>¿Ven ese &lt;code>if&lt;/code>? Está ahí porque en la primera iteración &lt;code>estado&lt;/code> no tiene un valor, eso parece innecesario, nosotros como autores de &lt;code>reduce&lt;/code> podemos ayudar a reducir la cantidad de código que necesita &lt;code>callback&lt;/code>. Al disminuir la carga de responsabilidad que necesita &lt;code>callback&lt;/code> podemos hacer que &lt;code>reduce&lt;/code> sea mucho más flexible. Lo que haremos será tomar el primer valor del arreglo y ese se convertirá en el &lt;code>estado&lt;/code> para nuestra primera iteración.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> function reduce(arr, callback) {
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> let estado;
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> for(const valor of arr) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> let estado = arr[0];
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> let resto = arr.slice(1);
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> for(const valor of resto) {
+&lt;/span>&lt;span style="color:#cccece;"> estado = callback(estado, valor);
+}
+return estado;
+}
+&lt;/span>&lt;/pre>
+&lt;p>Vamos otra vez.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array1 &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">4&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#6699cc;">callback &lt;/span>&lt;span style="color:#5fb3b3;">= (&lt;/span>&lt;span style="color:#f99157;">estado&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">valor&lt;/span>&lt;span style="color:#5fb3b3;">) &lt;/span>&lt;span style="color:#c594c5;">=&amp;gt; &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#cccece;">valor&lt;/span>&lt;span style="color:#5fb3b3;">;
+};
+&lt;/span>&lt;span style="color:#5f6364;">// 1 + 2 + 3 + 4
+&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">callback&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: 10
+&lt;/span>&lt;/pre>
+&lt;p>Si aún les cuesta un poco descifrar lo que está pasando, puedo ayudarles con eso. Si sacamos &lt;code>callback&lt;/code> de la ecuación esto es lo que sucede.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">[&lt;/span>&lt;span style="color:#f99157;">0&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#c594c5;">let &lt;/span>&lt;span style="color:#cccece;">resto &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">slice&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">1&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#c594c5;">for&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">valor &lt;/span>&lt;span style="color:#5fb3b3;">of &lt;/span>&lt;span style="color:#cccece;">resto&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#cccece;">estado &lt;/span>&lt;span style="color:#5fb3b3;">+ &lt;/span>&lt;span style="color:#cccece;">valor&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">estado&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+&lt;/span>&lt;/pre>
+&lt;p>¿Recuerdan las tres líneas verdes?&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;"> function reduce(arr) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> let estado = arr[0];
+&lt;/span>&lt;span style="color:#cccece;"> let resto = arr.slice(1);
+for(const valor of resto) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> estado = estado + valor;
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return estado;
+&lt;/span>&lt;span style="color:#cccece;"> }
+&lt;/span>&lt;/pre>
+&lt;p>¿Lo notaron? Eso es todo lo que necesitan recordar. Básicamente&lt;code>reduce&lt;/code> nos da la habilidad de transformar una &lt;strong>operación&lt;/strong> que actúa sobre dos valores a una que actúa sobre una cantidad variada.&lt;/p>
+&lt;h2 id="cuando-es-util">¿Cuando es útil?&lt;/h2>
+&lt;p>&lt;code>reduce&lt;/code> es una de esas funciones que pueden utilizarse en muchas ocasiones pero no en todas es la mejor solución. Ahora que sabemos cómo funciona veamos en qué tipo de situaciones puede ser la mejor opción.&lt;/p>
+&lt;h3 id="un-caso-ideal">Un caso ideal&lt;/h3>
+&lt;p>El ejemplo anterior ya debería darles una pista. Nuestra función es más efectiva cuando seguimos ciertos patrones. Pensemos un momento en lo que hace &lt;code>callback&lt;/code> en nuestro ejemplo. Sabemos que necesita dos números, ejecuta una operación matemática y eso nos devuelve otro número. Entonces hace esto.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">Número + Número -&amp;gt; Número
+&lt;/span>&lt;/pre>
+&lt;p>Bien, pero si damos un paso atrás y pensamos en términos más generales lo que tenemos es esto.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">TipoA + TipoA -&amp;gt; TipoA
+&lt;/span>&lt;/pre>
+&lt;p>Hay dos valores del mismo tipo (TipoA), una operación (el signo +) y eso nos devuelve otro valor del mismo tipo (TipoA). Cuando lo vemos de esa manera podemos darnos cuenta que esto puede ser útil más allá de las operaciones matemáticas. Hagamos otro ejemplo con números pero esta vez lo que haremos será una comparación.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">un_numero&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">otro_numero&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">un_numero &lt;/span>&lt;span style="color:#5fb3b3;">&amp;gt; &lt;/span>&lt;span style="color:#cccece;">otro_numero&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">un_numero&lt;/span>&lt;span style="color:#5fb3b3;">;
+} &lt;/span>&lt;span style="color:#c594c5;">else &lt;/span>&lt;span style="color:#5fb3b3;">{
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">otro_numero&lt;/span>&lt;span style="color:#5fb3b3;">;
+}
+}
+&lt;/span>&lt;/pre>
+&lt;p>&lt;code>max&lt;/code> es una operación que actúa sobre dos números, los compara y devuelve el mayor. Es muy general y con una capacidad limitada. Si volvemos a pensar en lo abstracto tenemos que es una función con las siguientes características.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">TipoA + TipoA -&amp;gt; TipoA
+&lt;/span>&lt;/pre>
+&lt;p>O si somos más específicos.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">Número + Número -&amp;gt; Número
+&lt;/span>&lt;/pre>
+&lt;p>Ya saben lo que significa, podemos usar &lt;code>reduce&lt;/code> para ampliar su capacidad.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array2 &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">39&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">38&lt;/span>&lt;span style="color:#5fb3b3;">];
+&lt;/span>&lt;span style="color:#5f6364;">// 40 &amp;gt; 41 &amp;gt; 42 &amp;gt; 39 &amp;gt; 38
+&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array2&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">max&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: 42
+&lt;/span>&lt;/pre>
+&lt;p>Resulta que el patrón que hemos estado siguiendo para crear el &lt;code>callback&lt;/code> que necesita &lt;code>reduce&lt;/code> tiene un nombre en el paradigma funcional, a este lo llaman &lt;strong>Semigrupo&lt;/strong>. En cualquier ocasión en la tengan dos valores de un mismo tipo y puedan combinarlos para crear otra instancia, están en la presencia de un semigrupo. En otras palabras, &lt;em>dos valores&lt;/em> + &lt;em>forma de combinarlos&lt;/em> = &lt;em>Semigrupo&lt;/em>.&lt;/p>
+&lt;p>Una manera de probar que tienen una operación que sigue las reglas de un semigrupo es asegurarse de que la función cumple con la propiedad asociativa. Nuestra función &lt;code>max&lt;/code> por ejemplo.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">max_1 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">), &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; 42
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">max_2 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">)); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; 42
+&lt;/span>&lt;span style="color:#cccece;">max_1 &lt;/span>&lt;span style="color:#5fb3b3;">=== &lt;/span>&lt;span style="color:#cccece;">max_2
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
+&lt;/span>&lt;/pre>
+&lt;p>¿Ven? Ejecutarla con el tipo de dato adecuado en diferente orden no afecta su resultado. Esto nos da la garantía de que funcionará si la combinamos con &lt;code>reduce&lt;/code> y un arreglo de números.&lt;/p>
+&lt;p>¿Pero podríamos aplicar estas reglas a una estructura más compleja? Claro que sí. En javascript ya tenemos un par que las cumplen. Piensen en los arreglos, en el prototipo &lt;code>Array&lt;/code> tenemos el método &lt;code>concat&lt;/code>, este nos permita mezclar dos arreglos y crear uno nuevo con los elementos de ambos.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">uno&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">otro&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">uno&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">otro&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Con esto tenemos que.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">Array + Array -&amp;gt; Array
+&lt;/span>&lt;/pre>
+&lt;p>Okey, el segundo parámetro de &lt;code>concat&lt;/code> no tiene que ser un arreglo pero ignoraremos eso por el momento. Entonces si combinamos &lt;code>concat&lt;/code> con &lt;code>reduce&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array3 &lt;/span>&lt;span style="color:#5fb3b3;">= [[&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">], [&lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">], [&lt;/span>&lt;span style="color:#f99157;">39&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">38&lt;/span>&lt;span style="color:#5fb3b3;">]];
+&lt;/span>&lt;span style="color:#5f6364;">// [40, 41] + [42] + [39, 38]
+&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array3&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">concat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: [40, 41, 42, 39, 38]
+&lt;/span>&lt;/pre>
+&lt;p>Ahora si quisieramos podríamos crear una función que &amp;quot;aplana&amp;quot; un nivel de un arreglo multidimensional, ¿No es genial? Y al igual que con los números, con los arreglos no tenemos porque limitarnos a operaciones que nos provee javascript. Si tenemos alguna función auxiliar que trabaje con dos arreglos y cumpla con la propiedad asociativa podemos combinarla con &lt;code>reduce&lt;/code>.&lt;/p>
+&lt;p>Digamos que tenemos una función que une los elementos únicos de dos arreglos.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">uno&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">otro&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">set &lt;/span>&lt;span style="color:#5fb3b3;">= new &lt;/span>&lt;span style="color:#fac863;">Set&lt;/span>&lt;span style="color:#5fb3b3;">([...&lt;/span>&lt;span style="color:#cccece;">uno&lt;/span>&lt;span style="color:#5fb3b3;">, ...&lt;/span>&lt;span style="color:#cccece;">otro&lt;/span>&lt;span style="color:#5fb3b3;">]);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Array&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">from&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">set&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;/pre>
+&lt;p>Bien, tenemos una función que trabaja con dos valores de un mismo tipo ahora veamos si cumple con la propiedad asociativa.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">union_1 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">([&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">], [&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">]), [&lt;/span>&lt;span style="color:#f99157;">39&lt;/span>&lt;span style="color:#5fb3b3;">]);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">union_2 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">([&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">], &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">([&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">], [&lt;/span>&lt;span style="color:#f99157;">39&lt;/span>&lt;span style="color:#5fb3b3;">]));
+&lt;/span>&lt;span style="color:#cccece;">union_1&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) == &lt;/span>&lt;span style="color:#cccece;">union_2&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
+&lt;/span>&lt;/pre>
+&lt;p>Sí cumple con las reglas, eso quiere decir que es posible procesar una cantidad variada de arreglos si usamos &lt;code>reduce&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array4 &lt;/span>&lt;span style="color:#5fb3b3;">= [
+[&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;],
+[&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">awesome&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;],
+[&amp;#39;&lt;/span>&lt;span style="color:#99c794;">world&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">!&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;],
+[&amp;#39;&lt;/span>&lt;span style="color:#99c794;">!!!!&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">world&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]
+];
+&lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array4&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">union&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: [ &amp;quot;hello&amp;quot;, &amp;quot;awesome&amp;quot;, &amp;quot;world&amp;quot;, &amp;quot;!&amp;quot;, &amp;quot;!!&amp;quot; ]
+&lt;/span>&lt;/pre>&lt;h3 id="algo-de-resistencia">Algo de resistencia&lt;/h3>
+&lt;p>Habrán notado que en todos los ejemplos nuestros arreglos de datos son todos del tipo correcto, esto no siempre es así en el &amp;quot;mundo real&amp;quot;. Podemos encontrarnos situaciones en las que el primer elemento de un arreglo no es un dato válido para nuestra operación.&lt;/p>
+&lt;p>Imaginemos que queremos usar &lt;code>concat&lt;/code> otra vez pero el arreglo que tenemos para procesar es el siguiente.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array5 &lt;/span>&lt;span style="color:#5fb3b3;">= [&lt;/span>&lt;span style="color:#f99157;">40&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">41&lt;/span>&lt;span style="color:#5fb3b3;">, [&lt;/span>&lt;span style="color:#f99157;">42&lt;/span>&lt;span style="color:#5fb3b3;">], [&lt;/span>&lt;span style="color:#f99157;">39&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">38&lt;/span>&lt;span style="color:#5fb3b3;">]];
+&lt;/span>&lt;/pre>
+&lt;p>Si intentamos usar &lt;code>reduce&lt;/code>.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array5&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">concat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;/pre>
+&lt;p>Obtenemos esto.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">TypeError: uno.concat is not a function
+&lt;/span>&lt;/pre>
+&lt;p>Esto ocurre porque en la primera iteración &lt;code>uno&lt;/code> en &lt;code>concat&lt;/code> es el número &lt;code>40&lt;/code>, el cual no posee un método &lt;code>concat&lt;/code>. ¿Qué debemos hacer? Por lo general se considera una buena práctica utilizar un valor inicial fijo para evitar este tipo de errores. Pero ahora tenemos un problema, nuestro &lt;code>reduce&lt;/code> no acepta un valor inicial, así que deberíamos corregir eso.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> function reduce(arr, callback) {
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> let estado = arr[0];
+&lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> let resto = arr.slice(1);
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> function reduce(arr, ...args) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> if(args.length === 1) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var [callback] = args;
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var estado = arr[0];
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var resto = arr.slice(1);
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> } else if(args.length &amp;gt;= 2) {
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var [estado, callback] = args;
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> var resto = arr;
+&lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> }
+&lt;/span>&lt;span style="color:#cccece;"> for(const valor of resto) {
+estado = callback(estado, valor);
+}
+return estado;
+}
+&lt;/span>&lt;/pre>
+&lt;p>Ahora para evitar el error anterior lo que haremos será pasarle a &lt;code>reduce&lt;/code> un arreglo vacío como valor inicial.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array5&lt;/span>&lt;span style="color:#5fb3b3;">, [], &lt;/span>&lt;span style="color:#cccece;">concat&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: [ 40, 41, 42, 39, 38 ]
+&lt;/span>&lt;/pre>
+&lt;p>Ya no hay error, pudimos obtener el arreglo que queríamos. Pero fíjense en una cosa, el arreglo vacío no sólo logró evitar el error sino que también dejó intacto el resultado de la operación. Al igual que con los números, con los arreglos tenemos la noción de un elemento vacío que podemos usar en nuestras operaciones sin causar un error en nuestro programa.&lt;/p>
+&lt;p>El arreglo vacío puede considerarse como un &lt;strong>elemento identidad&lt;/strong>, un valor neutro que al aplicarlo a una operación no tiene ningún efecto en el resultado final. Adivinen qué, este comportamiento también tiene un nombre en el paradigma funcional, se le conoce como &lt;strong>Monoid&lt;/strong>. Cuando tenemos un semigrupo con un elemento identidad estamos en presencia de un monoid. Entonces, &lt;em>semigrupo&lt;/em> + &lt;em>elemento identidad&lt;/em> = &lt;em>Monoid&lt;/em>.&lt;/p>
+&lt;p>Podemos probar que los arreglos siguen las reglas de un monoid para nuestras operaciones.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#5f6364;">// Concat
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">concat_1 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">([], [&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]) &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [&amp;quot;hello&amp;quot;]
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">concat_2 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;], []) &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [&amp;quot;hello&amp;quot;]
+&lt;/span>&lt;span style="color:#cccece;">concat_1&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) == &lt;/span>&lt;span style="color:#cccece;">concat_2&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
+// Union
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">union_3 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">([], [&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [&amp;quot;hello&amp;quot;]
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">union_4 &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">hello&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;], []); &lt;/span>&lt;span style="color:#5f6364;">// =&amp;gt; [&amp;quot;hello&amp;quot;]
+&lt;/span>&lt;span style="color:#cccece;">union_3&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) == &lt;/span>&lt;span style="color:#cccece;">union_4&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
+&lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
+&lt;/span>&lt;/pre>
+&lt;p>¿Por qué es importante? Piensen en esto: ¿Cuantas veces han tenido que escribir un &lt;code>if&lt;/code> para resguardar una operación de un valor &lt;code>null&lt;/code> o &lt;code>undefined&lt;/code>? Si podemos representar un &amp;quot;valor vacío&amp;quot; de una manera más segura podemos disminuir la cantidad de errores en nuestros programas. Podemos decir que cuando trabajamos con un arreglo de estructuras que siguen las reglas de los monoid podemos estar seguros que &lt;code>reduce&lt;/code> será una buena opción para procesarlo.&lt;/p>
+&lt;h2 id="mas-alla-de-los-arreglos">Más allá de los arreglos&lt;/h2>
+&lt;p>Si nosotros pudimos implementar una versión de &lt;code>reduce&lt;/code> para los arreglos entonces no sería del todo extraño pensar que otras personas hayan incorporado algo similar a otras estructuras. Saber cómo funciona &lt;code>reduce&lt;/code> puede ser muy útil si utilizan una librería que tenga un método parecido.&lt;/p>
+&lt;p>Por ejemplo, la librería &lt;code>mithril-stream&lt;/code> tiene un método llamado &lt;code>scan&lt;/code> que tiene la siguiente forma.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">Stream.scan(fn, accumulator, stream)
+&lt;/span>&lt;/pre>
+&lt;p>Esa variable &lt;code>fn&lt;/code> debe ser una función que debe tener la siguiente firma.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">(accumulator, value) -&amp;gt; result | SKIP
+&lt;/span>&lt;/pre>
+&lt;p>¿Reconocen eso? Espero que sí. Son los mismos requerimientos de &lt;code>reduce&lt;/code>. ¿Pero qué hace esa función? Bueno, ejecuta la función &lt;code>fn&lt;/code> cuando la fuente (&lt;code>stream&lt;/code>) produce un nuevo dato. Cada vez que llama la función &lt;code>fn&lt;/code> le pasa como parámetro el nuevo dato producido y el estado actual del acumulador y el resultado se convierte en el nuevo estado del acumulador. ¿Les suena familiar ese comportamiento?&lt;/p>
+&lt;p>Pueden probar el método &lt;code>scan&lt;/code> con nuestra función &lt;code>union&lt;/code> y ver cómo se comporta.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">import &lt;/span>&lt;span style="color:#cccece;">Stream &lt;/span>&lt;span style="color:#c594c5;">from &lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;&lt;/span>&lt;span style="color:#99c794;">https://cdn.pika.dev/mithril-stream@^2.0.0&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;;
+&lt;/span>&lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">union&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">one&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">another&lt;/span>&lt;span style="color:#5fb3b3;">) {
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">set &lt;/span>&lt;span style="color:#5fb3b3;">= new &lt;/span>&lt;span style="color:#fac863;">Set&lt;/span>&lt;span style="color:#5fb3b3;">([...&lt;/span>&lt;span style="color:#cccece;">one&lt;/span>&lt;span style="color:#5fb3b3;">, ...&lt;/span>&lt;span style="color:#cccece;">another&lt;/span>&lt;span style="color:#5fb3b3;">]);
+&lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#fac863;">Array&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">from&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">set&lt;/span>&lt;span style="color:#5fb3b3;">);
+}
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">list &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Stream&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">node&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">js&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]);
+&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">state &lt;/span>&lt;span style="color:#5fb3b3;">= &lt;/span>&lt;span style="color:#fac863;">Stream&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">scan&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">union&lt;/span>&lt;span style="color:#5fb3b3;">, [], &lt;/span>&lt;span style="color:#cccece;">list&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#cccece;">state&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">map&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#fac863;">console&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">log&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#6699cc;">list&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">node&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]);
+&lt;/span>&lt;span style="color:#6699cc;">list&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">js&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">deno&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]);
+&lt;/span>&lt;span style="color:#6699cc;">list&lt;/span>&lt;span style="color:#5fb3b3;">([&amp;#39;&lt;/span>&lt;span style="color:#99c794;">node&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;, &amp;#39;&lt;/span>&lt;span style="color:#99c794;">javascript&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;]);
+&lt;/span>&lt;/pre>
+&lt;p>Deberían observar cómo la lista sólo agrega elementos que no han sido agregados antes.&lt;/p>
+&lt;p>Pueden ver en acción una versión modificada de ese fragmento en codepen.&lt;/p>
+&lt;p
+class="codepen"
+data-height="600"
+data-theme-id="dark"
+data-default-tab="js,result"
+data-user="VonHeikemen"
+data-slug-hash="NWGrozo"
+data-preview="true"
+style="height: 600px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;"
+data-pen-title="A different reduce">
+&lt;span>
+See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/NWGrozo">A different reduce&lt;/a> by Heiker (&lt;a href="https://codepen.io/VonHeikemen">@VonHeikemen&lt;/a>) on &lt;a href="https://codepen.io">CodePen&lt;/a>.
+&lt;/span>
+&lt;/p>
+&lt;script async src="https://static.codepen.io/assets/embed/ei.js">&lt;/script>
+&lt;h2 id="conclusion">Conclusión&lt;/h2>
+&lt;p>Aunque no mencioné todas las cosas que pueden hacer con &lt;code>reduce&lt;/code> ahora tienen las herramientas para poder identificar los casos en lo que puede ser utilizado efectivamente, incluso si no están seguros pueden hacer las pruebas necesarias para garantizar que la operación que quieren ejecutar tiene las características adecuadas.&lt;/p>
+&lt;h2 id="fuentes">Fuentes&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=Qnkn4612ZIQ">Practical Category Theory: Monoids (video)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/thefrontside/funcadelic.js">Funcadelic.js&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://jrsinclair.com/articles/2019/functional-js-do-more-with-reduce/">Functional JavaScript: How to use array reduce for more than just numbers&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce">Array.prototype.reduce (MDN)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/fantasyland/fantasy-land#fantasy-land-specification">Fantasy Land&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Aprendiendo sobre el paradigma funcional: un camino a seguir</title><pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/roadmap/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/roadmap/</guid><description>&lt;p>Aprender sobre el paradigma funcional en la programación no es una tarea fácil, sobre todo si buscan material que contenga ejemplos prácticos de cómo usar los conceptos que enseñan. Lo que presento en esta ocasión es una recopilación de las notas que he tomado, y que he transformado en &amp;quot;artículos&amp;quot;, así como también enlaces a las fuentes de donde he sacado toda esta información.&lt;/p>
 &lt;p>Aunque todo este material esté relacionado, no planifiqué escribir todas esas notas. Entonces aquí intentaré darles una sugerencia en el orden de lectura.&lt;/p>
 &lt;h2 id="conceptos-basicos">Conceptos básicos&lt;/h2>
 &lt;p>Para empezar quisiera que vieran el video que me convenció de darle una oportunidad a este paradigma. La charla se llama &amp;quot;Programación funcional en JS: ¿Qué? ¿Por qué? ¿Cómo?&amp;quot; En el video se explica lo que es y lo que no es programación funcional, también muestra ejemplos de los conceptos básicos del paradigma en javascript.&lt;/p>
@@ -54,8 +335,8 @@
 &lt;/li>
 &lt;/ul>
 &lt;h2 id="contenido-extra">Contenido extra&lt;/h2>
-&lt;h3 id="un-concepto-curioso">Un concepto curioso&lt;/h3>
 &lt;ul>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/">Reduce: cómo y cuando&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/">Lenses: Una alternativa a los getters y setters&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h3 id="mas-charlas-interesantes">Más charlas interesantes&lt;/h3>
