@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/aprendizaje/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Sun, 19 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Reduce: cómo y cuando</title><pubDate>Sun, 19 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</guid><description>&lt;p>Vamos a hablar del elefante rosa en el prototipo &lt;code>Array&lt;/code>, me refiero al a veces odiado método &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce">reduce&lt;/a>. Pero no vamos a discutir sobre si esta función es buena o mala, nos mantendremos objetivos (o eso espero). Vamos a descubrir qué es lo que hace internamente, luego intentaremos descubrir las situaciones en las que puede ser una solución efectiva.&lt;/p>
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Devlog</title><link>https://vonheikemen.github.io/devlog/</link><description/><generator>Zola</generator><language>en</language><atom:link href="https://vonheikemen.github.io/devlog/tags/aprendizaje/rss.xml" rel="self" type="application/rss+xml"/><lastBuildDate>Sun, 19 Apr 2020 00:00:00 +0000</lastBuildDate><item><title>Reduce: cómo y cuando</title><pubDate>Sun, 19 Apr 2020 00:00:00 +0000</pubDate><link>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</link><guid>https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/</guid><description>&lt;p>Vamos a hablar del elefante rosa en el prototipo &lt;code>Array&lt;/code>, me refiero al a veces odiado método &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce">reduce&lt;/a> pero no vamos a discutir sobre si esta función es buena o mala. Vamos a descubrir qué es lo que hace internamente, luego intentaremos descubrir las situaciones en las que puede ser una solución efectiva.&lt;/p>
 &lt;p>Para asegurarnos de entender su funcionamiento vamos a empezar implementando nuestra versión.&lt;/p>
 &lt;h2 id="como-funciona">¿Cómo funciona?&lt;/h2>
 &lt;p>&lt;code>reduce&lt;/code> es una función que toma una lista de valores y la transforma en otra cosa. La palabra clave aquí es &lt;strong>transformación&lt;/strong>. Esta transformación la determina el &amp;quot;usuario&amp;quot; de nuestra función, son ellos los que deciden qué pasará ¿Qué quiere decir eso? Significa que aparte del arreglo que vamos a procesar necesitamos aceptar una función (un callback) como parámetro. Así que la firma de la función sería esta.&lt;/p>
@@ -7,7 +7,7 @@
 &lt;/span>&lt;span style="color:#5f6364;">// código...
 &lt;/span>&lt;span style="color:#5fb3b3;">}
 &lt;/span>&lt;/pre>
-&lt;p>Ya tenemos algunos valores, y ahora ¿Qué hacemos con ellos? Sabemos que los métodos del prototipo &lt;code>Array&lt;/code> aplican la función a cada uno de los elementos. Hagamos eso.&lt;/p>
+&lt;p>Ya tenemos algunos valores, y ahora ¿Qué hacemos con ellos? Sabemos que los métodos del prototipo &lt;code>Array&lt;/code> aplican una función a cada uno de sus elementos. Hagamos eso.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">arr&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">callback&lt;/span>&lt;span style="color:#5fb3b3;">) {
 &lt;/span>&lt;span style="color:#c594c5;">for&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">valor &lt;/span>&lt;span style="color:#5fb3b3;">of &lt;/span>&lt;span style="color:#cccece;">arr&lt;/span>&lt;span style="color:#5fb3b3;">) {
@@ -15,7 +15,7 @@
 }
 }
 &lt;/span>&lt;/pre>
-&lt;p>Todavía no hace lo que queremos pero se acerca. Ahora falta el ingrediente secreto, el acumulador. Esta será una variable que crearemos para recordar el &lt;strong>estado actual&lt;/strong> de nuestra transformación. Cada vez que apliquemos la función &lt;code>callback&lt;/code> a un valor guardamos ese resultado en el acumulador, y como bono extra también se lo pasaremos a &lt;code>callback&lt;/code> para que nuestro &amp;quot;usuario&amp;quot; no tenga que hacer ningún esfuerzo extra.&lt;/p>
+&lt;p>Todavía no hace lo que queremos pero se acerca. Ahora falta el ingrediente secreto, el acumulador. Esta será una variable que crearemos para recordar el &lt;strong>estado actual&lt;/strong> de nuestra transformación. Cada vez que apliquemos la función &lt;code>callback&lt;/code> a un valor guardamos el resultado en el acumulador. Como bono extra, antes de guardar el nuevo estado en el acumulador le pasamos a &lt;code>callback&lt;/code> el estado actual para que nuestro &amp;quot;usuario&amp;quot; no tenga que hacer ningún esfuerzo extra.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> function reduce(arr, callback) {
 &lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> let estado;
@@ -40,7 +40,7 @@
 &lt;/span>&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array1&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#cccece;">callback&lt;/span>&lt;span style="color:#5fb3b3;">);
 &lt;/span>&lt;span style="color:#5f6364;">// valor esperado: 10
 &lt;/span>&lt;/pre>
-&lt;p>¿Ven ese &lt;code>if&lt;/code>? Está ahí porque en la primera iteración &lt;code>estado&lt;/code> no tiene un valor, eso parece innecesario, nosotros como autores de &lt;code>reduce&lt;/code> podemos ayudar a reducir la cantidad de código que necesita &lt;code>callback&lt;/code>. Al disminuir la carga de responsabilidad que necesita &lt;code>callback&lt;/code> podemos hacer que &lt;code>reduce&lt;/code> sea mucho más flexible. Lo que haremos será tomar el primer valor del arreglo y ese se convertirá en el &lt;code>estado&lt;/code> para nuestra primera iteración.&lt;/p>
+&lt;p>¿Ven ese &lt;code>if&lt;/code>? Está ahí porque en la primera iteración &lt;code>estado&lt;/code> no tiene un valor, eso parece innecesario. Nosotros como autores de &lt;code>reduce&lt;/code> podemos ayudar a reducir la cantidad de código que necesita &lt;code>callback&lt;/code>. Al disminuir la carga de responsabilidad que necesita &lt;code>callback&lt;/code> podemos hacer que &lt;code>reduce&lt;/code> sea mucho más flexible. Lo que haremos será tomar el primer valor del arreglo y ese se convertirá en el &lt;code>estado&lt;/code> para nuestra primera iteración.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;"> function reduce(arr, callback) {
 &lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> let estado;
@@ -85,11 +85,11 @@ for(const valor of resto) {
 &lt;/span>&lt;span style="color:#5fb3b3;">+&lt;/span>&lt;span style="color:#99c794;"> return estado;
 &lt;/span>&lt;span style="color:#cccece;"> }
 &lt;/span>&lt;/pre>
-&lt;p>¿Lo notaron? Eso es todo lo que necesitan recordar. Básicamente&lt;code>reduce&lt;/code> nos da la habilidad de transformar una &lt;strong>operación&lt;/strong> que actúa sobre dos valores a una que actúa sobre una cantidad variada.&lt;/p>
+&lt;p>¿Lo notaron? Eso es todo lo que necesitan recordar. Básicamente,&lt;code>reduce&lt;/code> nos da la habilidad de transformar una &lt;strong>operación&lt;/strong> que actúa sobre dos valores a una que actúa sobre una cantidad variada.&lt;/p>
 &lt;h2 id="cuando-es-util">¿Cuando es útil?&lt;/h2>
 &lt;p>&lt;code>reduce&lt;/code> es una de esas funciones que pueden utilizarse en muchas ocasiones pero no en todas es la mejor solución. Ahora que sabemos cómo funciona veamos en qué tipo de situaciones puede ser la mejor opción.&lt;/p>
 &lt;h3 id="un-caso-ideal">Un caso ideal&lt;/h3>
-&lt;p>El ejemplo anterior ya debería darles una pista. Nuestra función es más efectiva cuando seguimos ciertos patrones. Pensemos un momento en lo que hace &lt;code>callback&lt;/code> en nuestro ejemplo. Sabemos que necesita dos números, ejecuta una operación matemática y eso nos devuelve otro número. Entonces hace esto.&lt;/p>
+&lt;p>El ejemplo anterior ya debería darles una pista. Nuestra función es más efectiva cuando seguimos ciertos patrones. Pensemos un momento en lo que hace &lt;code>callback&lt;/code> en nuestro ejemplo. Sabemos que necesita dos números, ejecuta una operación matemática y nos devuelve otro número. Entonces hace esto.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">Número + Número -&amp;gt; Número
 &lt;/span>&lt;/pre>
@@ -97,7 +97,7 @@ for(const valor of resto) {
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">TipoA + TipoA -&amp;gt; TipoA
 &lt;/span>&lt;/pre>
-&lt;p>Hay dos valores del mismo tipo (TipoA), una operación (el signo +) y eso nos devuelve otro valor del mismo tipo (TipoA). Cuando lo vemos de esa manera podemos darnos cuenta que esto puede ser útil más allá de las operaciones matemáticas. Hagamos otro ejemplo con números pero esta vez lo que haremos será una comparación.&lt;/p>
+&lt;p>Hay dos valores del mismo tipo (TipoA) y una operación (el signo +) que nos devuelve otro valor del mismo tipo (TipoA). Cuando lo vemos de esa manera podemos darnos cuenta de un patrón que puede ser útil más allá de las operaciones matemáticas. Hagamos otro ejemplo con números pero esta vez lo que haremos será una comparación.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">max&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">un_numero&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">otro_numero&lt;/span>&lt;span style="color:#5fb3b3;">) {
 &lt;/span>&lt;span style="color:#c594c5;">if&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">un_numero &lt;/span>&lt;span style="color:#5fb3b3;">&amp;gt; &lt;/span>&lt;span style="color:#cccece;">otro_numero&lt;/span>&lt;span style="color:#5fb3b3;">) {
@@ -107,7 +107,7 @@ for(const valor of resto) {
 }
 }
 &lt;/span>&lt;/pre>
-&lt;p>&lt;code>max&lt;/code> es una operación que actúa sobre dos números, los compara y devuelve el mayor. Es muy general y con una capacidad limitada. Si volvemos a pensar en lo abstracto tenemos que es una función con las siguientes características.&lt;/p>
+&lt;p>&lt;code>max&lt;/code> es una operación que actúa sobre dos números, los compara y devuelve el mayor. Es muy general y con una capacidad limitada. Si volvemos a pensar en lo abstracto vemos ese patrón otra vez.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">TipoA + TipoA -&amp;gt; TipoA
 &lt;/span>&lt;/pre>
@@ -187,7 +187,7 @@ for(const valor of resto) {
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">TypeError: uno.concat is not a function
 &lt;/span>&lt;/pre>
-&lt;p>Esto ocurre porque en la primera iteración &lt;code>uno&lt;/code> en &lt;code>concat&lt;/code> es el número &lt;code>40&lt;/code>, el cual no posee un método &lt;code>concat&lt;/code>. ¿Qué debemos hacer? Por lo general se considera una buena práctica utilizar un valor inicial fijo para evitar este tipo de errores. Pero ahora tenemos un problema, nuestro &lt;code>reduce&lt;/code> no acepta un valor inicial, así que deberíamos corregir eso.&lt;/p>
+&lt;p>Esto ocurre porque en la primera iteración el valor de &lt;code>uno&lt;/code> es el número &lt;code>40&lt;/code>, el cual no posee un método &lt;code>concat&lt;/code>. ¿Qué debemos hacer? Por lo general se considera una buena práctica utilizar un valor inicial fijo para evitar este tipo de errores. Pero tenemos un problema, nuestro &lt;code>reduce&lt;/code> no acepta un valor inicial, así que deberíamos corregir eso.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> function reduce(arr, callback) {
 &lt;/span>&lt;span style="color:#5fb3b3;">-&lt;/span>&lt;span style="color:#ec5f67;"> let estado = arr[0];
@@ -212,7 +212,7 @@ return estado;
 &lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array5&lt;/span>&lt;span style="color:#5fb3b3;">, [], &lt;/span>&lt;span style="color:#cccece;">concat&lt;/span>&lt;span style="color:#5fb3b3;">);
 &lt;/span>&lt;span style="color:#5f6364;">// valor esperado: [ 40, 41, 42, 39, 38 ]
 &lt;/span>&lt;/pre>
-&lt;p>Ya no hay error, pudimos obtener el arreglo que queríamos. Pero fíjense en una cosa, el arreglo vacío no sólo logró evitar el error sino que también dejó intacto el resultado de la operación. Al igual que con los números, con los arreglos tenemos la noción de un elemento vacío que podemos usar en nuestras operaciones sin causar un error en nuestro programa.&lt;/p>
+&lt;p>Ya no hay error y pudimos obtener el arreglo que queríamos. Pero fíjense en una cosa, el arreglo vacío no sólo logró evitar el error sino que también dejó intacto el resultado de la operación. Al igual que con los números, con los arreglos tenemos la noción de un elemento vacío que podemos usar en nuestras operaciones sin causar un error en nuestro programa.&lt;/p>
 &lt;p>El arreglo vacío puede considerarse como un &lt;strong>elemento identidad&lt;/strong>, un valor neutro que al aplicarlo a una operación no tiene ningún efecto en el resultado final. Adivinen qué, este comportamiento también tiene un nombre en el paradigma funcional, se le conoce como &lt;strong>Monoid&lt;/strong>. Cuando tenemos un semigrupo con un elemento identidad estamos en presencia de un monoid. Entonces, &lt;em>semigrupo&lt;/em> + &lt;em>elemento identidad&lt;/em> = &lt;em>Monoid&lt;/em>.&lt;/p>
 &lt;p>Podemos probar que los arreglos siguen las reglas de un monoid para nuestras operaciones.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
@@ -227,10 +227,40 @@ return estado;
 &lt;/span>&lt;span style="color:#cccece;">union_3&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;) == &lt;/span>&lt;span style="color:#cccece;">union_4&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">join&lt;/span>&lt;span style="color:#5fb3b3;">(&amp;#39;&lt;/span>&lt;span style="color:#99c794;">,&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;);
 &lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
 &lt;/span>&lt;/pre>
-&lt;p>¿Por qué es importante? Piensen en esto: ¿Cuantas veces han tenido que escribir un &lt;code>if&lt;/code> para resguardar una operación de un valor &lt;code>null&lt;/code> o &lt;code>undefined&lt;/code>? Si podemos representar un &amp;quot;valor vacío&amp;quot; de una manera más segura podemos disminuir la cantidad de errores en nuestros programas. Podemos decir que cuando trabajamos con un arreglo de estructuras que siguen las reglas de los monoid podemos estar seguros que &lt;code>reduce&lt;/code> será una buena opción para procesarlo.&lt;/p>
+&lt;p>¿Por qué es importante? Piensen en esto: ¿Cuantas veces han tenido que escribir un &lt;code>if&lt;/code> para resguardar una operación de un valor &lt;code>null&lt;/code> o &lt;code>undefined&lt;/code>? Si podemos representar un &amp;quot;valor vacío&amp;quot; de una manera más segura podemos eliminar toda una categoría de errores en nuestros programas.&lt;/p>
+&lt;p>Otra situación donde los monoids son útiles es cuando queremos ejecutar una operación &amp;quot;insegura&amp;quot; sobre un valor. Podríamos aplicar esa operación sobre una referencia a un valor vacío y así dejar el resto de los elementos intactos.&lt;/p>
+&lt;p>Imaginen que tienen fragmentos de información esparcidos en varios objectos y queremos unirlos.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#c594c5;">const &lt;/span>&lt;span style="color:#cccece;">array6 &lt;/span>&lt;span style="color:#5fb3b3;">= [
+{&lt;/span>&lt;span style="color:#cccece;">name&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">Harold&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;},
+{&lt;/span>&lt;span style="color:#cccece;">lastname&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">Cooper&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;},
+{&lt;/span>&lt;span style="color:#cccece;">state&lt;/span>&lt;span style="color:#5fb3b3;">: &amp;#39;&lt;/span>&lt;span style="color:#99c794;">wrong&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;}
+];
+&lt;/span>&lt;/pre>
+&lt;p>Normalmente usarían la &lt;a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax">sintaxis de extensión&lt;/a> para mezclar todo eso, pero digamos que vivimos en un mundo donde eso no es posible. No teman, tenemos una función que puede hacer el trabajo.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#fac863;">Object&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#cccece;">assign&lt;/span>&lt;span style="color:#5fb3b3;">;
+&lt;/span>&lt;/pre>
+&lt;p>Si lo piensan &lt;code>Object.assign&lt;/code> también sigue el patrón.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#cccece;">TipoA + TipoA -&amp;gt; TipoA
+&lt;/span>&lt;/pre>
+&lt;p>Si le pasamos dos objetos nos devuelve un nuevo objecto. Pero hay algo que deben saber, &lt;code>Object.assign&lt;/code> modifica el objeto que le pasamos como primer parámetro. Entonces si hacemos esto.&lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array6&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#fac863;">Object&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">assign&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// Valor esperado: { &amp;quot;name&amp;quot;: &amp;quot;Harold&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Cooper&amp;quot;, &amp;quot;state&amp;quot;: &amp;quot;wrong&amp;quot; }
+&lt;/span>&lt;/pre>
+&lt;p>Parecería que todo está bien, pero no es así. Si revisan &lt;code>array6[0]&lt;/code> verán que ha cambiado, definitivamente no quieren eso. Por suerte para nosotros los objetos en javascript se comportan como monoids, así que podemos usar un &amp;quot;valor vacío&amp;quot;. Entonces la manera correcta de usar &lt;code>reduce&lt;/code> en este caso sería esta. &lt;/p>
+&lt;pre style="background-color:#2b2c2f;">
+&lt;span style="color:#6699cc;">reduce&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">array6&lt;/span>&lt;span style="color:#5fb3b3;">, {}, &lt;/span>&lt;span style="color:#fac863;">Object&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">assign&lt;/span>&lt;span style="color:#5fb3b3;">);
+&lt;/span>&lt;span style="color:#5f6364;">// Valor esperado: { &amp;quot;name&amp;quot;: &amp;quot;Harold&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Cooper&amp;quot;, &amp;quot;state&amp;quot;: &amp;quot;wrong&amp;quot; }
+&lt;/span>&lt;span style="color:#cccece;">array6
+&lt;/span>&lt;span style="color:#5f6364;">// Valor esperado: [ { &amp;quot;name&amp;quot;: &amp;quot;Harold&amp;quot; }, { &amp;quot;lastname&amp;quot;: &amp;quot;Cooper&amp;quot; }, { &amp;quot;state&amp;quot;: &amp;quot;wrong&amp;quot; } ]
+&lt;/span>&lt;/pre>
+&lt;p>Podemos decir que cuando trabajamos con un arreglo de estructuras que siguen las reglas de los monoid podemos estar seguros que &lt;code>reduce&lt;/code> será una buena opción para procesarlo.&lt;/p>
 &lt;h2 id="mas-alla-de-los-arreglos">Más allá de los arreglos&lt;/h2>
 &lt;p>Si nosotros pudimos implementar una versión de &lt;code>reduce&lt;/code> para los arreglos entonces no sería del todo extraño pensar que otras personas hayan incorporado algo similar a otras estructuras. Saber cómo funciona &lt;code>reduce&lt;/code> puede ser muy útil si utilizan una librería que tenga un método parecido.&lt;/p>
-&lt;p>Por ejemplo, la librería &lt;code>mithril-stream&lt;/code> tiene un método llamado &lt;code>scan&lt;/code> que tiene la siguiente forma.&lt;/p>
+&lt;p>Por ejemplo, la librería &lt;a href="https://mithril.js.org/stream.html">mithril-stream&lt;/a> tiene un método llamado &lt;code>scan&lt;/code> que tiene la siguiente forma.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">Stream.scan(fn, accumulator, stream)
 &lt;/span>&lt;/pre>
@@ -238,7 +268,7 @@ return estado;
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#cccece;">(accumulator, value) -&amp;gt; result | SKIP
 &lt;/span>&lt;/pre>
-&lt;p>¿Reconocen eso? Espero que sí. Son los mismos requerimientos de &lt;code>reduce&lt;/code>. ¿Pero qué hace esa función? Bueno, ejecuta la función &lt;code>fn&lt;/code> cuando la fuente (&lt;code>stream&lt;/code>) produce un nuevo dato. Cada vez que llama la función &lt;code>fn&lt;/code> le pasa como parámetro el nuevo dato producido y el estado actual del acumulador y el resultado se convierte en el nuevo estado del acumulador. ¿Les suena familiar ese comportamiento?&lt;/p>
+&lt;p>¿Reconocen eso? Espero que sí. Son los mismos requerimientos de &lt;code>reduce&lt;/code>. ¿Pero qué hace esa función? Bueno, ejecuta la función &lt;code>fn&lt;/code> cuando la fuente (&lt;code>stream&lt;/code>) produce un nuevo dato. Cuando la función &lt;code>fn&lt;/code> es ejecutada recibe como parámetro el estado actual del acumulador y el nuevo dato producido, luego el resultado retornado por &lt;code>fn&lt;/code> se convierte en el nuevo estado del acumulador. ¿Les suena familiar ese comportamiento?&lt;/p>
 &lt;p>Pueden probar el método &lt;code>scan&lt;/code> con nuestra función &lt;code>union&lt;/code> y ver cómo se comporta.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">import &lt;/span>&lt;span style="color:#cccece;">Stream &lt;/span>&lt;span style="color:#c594c5;">from &lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;&lt;/span>&lt;span style="color:#99c794;">https://cdn.pika.dev/mithril-stream@^2.0.0&lt;/span>&lt;span style="color:#5fb3b3;">&amp;#39;;
@@ -270,6 +300,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/NWGrozo">A different 
 &lt;/span>
 &lt;/p>
 &lt;script async src="https://static.codepen.io/assets/embed/ei.js">&lt;/script>
+&lt;p>¿Vieron? nuestro conocimiento de &lt;code>reduce&lt;/code> (y tal vez algo de semigrupos y monoids) nos puede ayudar a crear funciones auxiliares que podemos reusar con diferentes estructuras. ¿No es genial?&lt;/p>
 &lt;h2 id="conclusion">Conclusión&lt;/h2>
 &lt;p>Aunque no mencioné todas las cosas que pueden hacer con &lt;code>reduce&lt;/code> ahora tienen las herramientas para poder identificar los casos en lo que puede ser utilizado efectivamente, incluso si no están seguros pueden hacer las pruebas necesarias para garantizar que la operación que quieren ejecutar tiene las características adecuadas.&lt;/p>
 &lt;h2 id="fuentes">Fuentes&lt;/h2>
