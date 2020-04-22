@@ -131,7 +131,7 @@ for(const valor of resto) {
 &lt;/span>&lt;span style="color:#5f6364;">// valor esperado: true
 &lt;/span>&lt;/pre>
 &lt;p>¿Ven? Ejecutarla con el tipo de dato adecuado en diferente orden no afecta su resultado. Esto nos da la garantía de que funcionará si la combinamos con &lt;code>reduce&lt;/code> y un arreglo de números.&lt;/p>
-&lt;p>¿Pero podríamos aplicar estas reglas a una estructura más compleja? Claro que sí. En javascript ya tenemos un par que las cumplen. Piensen en los arreglos, en el prototipo &lt;code>Array&lt;/code> tenemos el método &lt;code>concat&lt;/code>, este nos permita mezclar dos arreglos y crear uno nuevo con los elementos de ambos.&lt;/p>
+&lt;p>¿Pero podríamos aplicar estas reglas a una estructura más compleja? Claro que sí. En javascript ya tenemos un par que las cumplen. Piensen en los arreglos, en el prototipo &lt;code>Array&lt;/code> tenemos el método &lt;code>concat&lt;/code>, este nos permite mezclar dos arreglos y crear uno nuevo con los elementos de ambos.&lt;/p>
 &lt;pre style="background-color:#2b2c2f;">
 &lt;span style="color:#c594c5;">function &lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#f99157;">uno&lt;/span>&lt;span style="color:#5fb3b3;">, &lt;/span>&lt;span style="color:#f99157;">otro&lt;/span>&lt;span style="color:#5fb3b3;">) {
 &lt;/span>&lt;span style="color:#c594c5;">return &lt;/span>&lt;span style="color:#cccece;">uno&lt;/span>&lt;span style="color:#5fb3b3;">.&lt;/span>&lt;span style="color:#6699cc;">concat&lt;/span>&lt;span style="color:#5fb3b3;">(&lt;/span>&lt;span style="color:#cccece;">otro&lt;/span>&lt;span style="color:#5fb3b3;">);
