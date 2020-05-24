@@ -369,6 +369,7 @@ See the Pen &lt;a href="https://codepen.io/VonHeikemen/pen/NWGrozo">A different 
 &lt;ul>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/reduce-how-and-when/">Reduce: cómo y cuando&lt;/a>&lt;/li>
 &lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/">Lenses: Una alternativa a los getters y setters&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://vonheikemen.github.io/devlog/es/web-development/learn-fp/discriminated-unions-and-fantasy-land/">Explorando Fantasy Land&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;h3 id="mas-charlas-interesantes">Más charlas interesantes&lt;/h3>
 &lt;p>Si se siguen preguntando qué se puede lograr sólo combinando funciones.&lt;/p>
