@@ -2,7 +2,7 @@
 | Originalmente publicado en
 <a href=https://dev.to/vonheikemen/un-vistazo-a-las-maquinas-de-estados-finitos-1181>dev.to</a>
 | <a href=https://vonheikemen.github.io/devlog/web-development/taking-a-look-at-finite-state-machine/>Read in english</a></span><h2 id=maquinas-de-que-quien>¿Máquinas de qué-- quién?</h2><p>Las máquinas de estados finitos son una manera de modelar el comportamiento de un sistema. La idea es que tu "sistema" sólo puede encontrarse en un estado a la vez, y una entrada (evento) puede activar la transición a otro estado.<h2 id=que-tipo-de-problemas-resuelven>¿Qué tipo de problemas resuelven?</h2><p>Estados inválidos. ¿Cuántas veces han tenido que usar una variable con un booleano o un atributo como "disabled" para evitar que un usuario haga algo indebido? Al marcar las reglas de comportamiento por adelantado podemos evitar este tipo de cosas.<h2 id=como-se-hace-eso-en-javascript>¿Cómo se hace eso en javascript?</h2><p>Me alegra que preguntaran. La verdadera razón por la escribo esto es para mostrar una librería que vi el otro día. Vamos a usar <a href=https://thisrobot.life/>robot3</a> para crear un máquina de frases semi-famosas.<p>Lo que haremos será mostrar una "carta" con una frase y debajo de tendremos un botón que podremos usar para mostrar otra frase.<p>Haremos esto un paso a la vez. Primero preparemos los posibles estados de la aplicación.<p>Nuestra carta estará en estado <code>idle</code> (algo así como 'esperando') o <code>loading</code> (cargando) Crearemos nuestra máquina a partir de eso.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
+<code><span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
   </span><span style=color:#cccece>createMachine</span><span style=color:#5fb3b3>,
   </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
   </span><span style=color:#cccece>interpret
@@ -12,8 +12,8 @@
   </span><span style=color:#69c>idle</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>(),
   </span><span style=color:#69c>loading</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>()
 });
-</span></pre><p>Aquí cada <code>estado</code> es un índice del "objeto de configuración" que le pasamos a <code>createMachine</code>, vean que cada uno de estos índices deben ser el resultado de llamar la función <code>state</code>.<p>Ahora necesitamos transiciones. El estado <code>idle</code> cambiará a estado <code>loading</code> si ocurre un evento <code>fetch</code> (buscar), <code>loading</code> volverá a <code>idle</code> cuando el evento <code>done</code> (terminado) sea despachado.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> import {
+</span></code></pre><p>Aquí cada <code>estado</code> es un índice del "objeto de configuración" que le pasamos a <code>createMachine</code>, vean que cada uno de estos índices deben ser el resultado de llamar la función <code>state</code>.<p>Ahora necesitamos transiciones. El estado <code>idle</code> cambiará a estado <code>loading</code> si ocurre un evento <code>fetch</code> (buscar), <code>loading</code> volverá a <code>idle</code> cuando el evento <code>done</code> (terminado) sea despachado.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> import {
   createMachine,
   state,
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794> transition,
@@ -26,14 +26,14 @@ const mr_robot = createMachine({
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
 </span><span style=color:#cccece> });
-</span></pre><p><code>transition</code> es lo que conecta los estados. El primer parámetro que recibe es el nombre del evento que lo activará, el segundo parámetro es el "evento destino" al cual cambiará. El resto de los parámetros consiste en una de funciones que serán ejecutadas cuando ocurra la transición.<p>Luce bien y todo pero... uhm... ¿cómo hacemos pruebas? Por sí sola la máquina no hace nada. Necesitamos que nuestra máquina sea interpretada y para ello se la pasamos a la función <code>interpret</code>, esta función nos devuelve un "servicio" con el cual podemos despachar eventos. Para asegurarnos que de verdad estamos haciendo algo vamos a usar el segundo parámetro de <code>interpret</code> el cual será una función que "escuchará" los cambios de estado.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+</span></code></pre><p><code>transition</code> es lo que conecta los estados. El primer parámetro que recibe es el nombre del evento que lo activará, el segundo parámetro es el "evento destino" al cual cambiará. El resto de los parámetros consiste en una de funciones que serán ejecutadas cuando ocurra la transición.<p>Luce bien y todo pero... uhm... ¿cómo hacemos pruebas? Por sí sola la máquina no hace nada. Necesitamos que nuestra máquina sea interpretada y para ello se la pasamos a la función <code>interpret</code>, esta función nos devuelve un "servicio" con el cual podemos despachar eventos. Para asegurarnos que de verdad estamos haciendo algo vamos a usar el segundo parámetro de <code>interpret</code> el cual será una función que "escuchará" los cambios de estado.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>const </span><span style=color:#cccece>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>);
 }
 
 </span><span style=color:#c594c5>const </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>send </span><span style=color:#5fb3b3>} = </span><span style=color:#69c>interpret</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>mr_robot</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>handler</span><span style=color:#5fb3b3>);
-</span></pre><p>Ahora veamos si está viva.<pre style=background-color:#2b2c2f>
-<span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
+</span></code></pre><p>Ahora veamos si está viva.<pre style=background-color:#2b2c2f>
+<code><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
 </span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
 </span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
 </span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
@@ -41,20 +41,20 @@ const mr_robot = createMachine({
 </span><span style=color:#5f6364>// Deberían ver en la cónsola
 // loading (3)
 // idle
-</span></pre><p>Despachar <code>fetch</code> hace que el estado actual se convierta en <code>loading</code> y despachar<code>done</code> lo regresa a <code>idle</code>. Veo que no están impresionados. Bien. Intentemos algo más. Agregemos otro estado <code>end</code> y hagamos que <code>loading</code> cambie a ese, luego despachamos <code>done</code> y vemos qué pasa.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> const mr_robot = createMachine({
+</span></code></pre><p>Despachar <code>fetch</code> hace que el estado actual se convierta en <code>loading</code> y despachar<code>done</code> lo regresa a <code>idle</code>. Veo que no están impresionados. Bien. Intentemos algo más. Agregemos otro estado <code>end</code> y hagamos que <code>loading</code> cambie a ese, luego despachamos <code>done</code> y vemos qué pasa.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>   loading: state(transition(&#39;done&#39;, &#39;idle&#39;))
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>   loading: state(transition(&#39;done&#39;, &#39;end&#39;)),
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>   end: state()
 </span><span style=color:#cccece> });
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
 
 </span><span style=color:#5f6364>// Deberían ver en la cónsola
 // idle
-</span></pre><p>Enviar <code>done</code> mientras el estado es <code>idle</code> no activa el estado <code>loading</code>, se queda en <code>idle</code> porque ese estado no tiene un evento <code>done</code>. Y ahora...<pre style=background-color:#2b2c2f>
-<span style=color:#5f6364>// El curso normal de eventos.
+</span></code></pre><p>Enviar <code>done</code> mientras el estado es <code>idle</code> no activa el estado <code>loading</code>, se queda en <code>idle</code> porque ese estado no tiene un evento <code>done</code>. Y ahora...<pre style=background-color:#2b2c2f>
+<code><span style=color:#5f6364>// El curso normal de eventos.
 
 </span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>fetch</span><span style=color:#5fb3b3>&#39;);
 </span><span style=color:#69c>send</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;);
@@ -68,8 +68,8 @@ const mr_robot = createMachine({
 
 </span><span style=color:#5f6364>// Ahora...
 // end
-</span></pre><p>Si enviamos <code>fetch</code> (o cualquier otro evento) mientras el estado es <code>end</code> resultará en <code>end</code> siempre. ¿Por qué? Porque no hay a dónde ir, <code>end</code> no tiene transiciones.<p>Espero que les haya sido útil, si no fue así me disculpo por tanto <code>console.log</code>.<p>Volvamos a nuestra máquina. Esto es lo que tenemos hasta ahora.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> </span><span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
+</span></code></pre><p>Si enviamos <code>fetch</code> (o cualquier otro evento) mientras el estado es <code>end</code> resultará en <code>end</code> siempre. ¿Por qué? Porque no hay a dónde ir, <code>end</code> no tiene transiciones.<p>Espero que les haya sido útil, si no fue así me disculpo por tanto <code>console.log</code>.<p>Volvamos a nuestra máquina. Esto es lo que tenemos hasta ahora.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> </span><span style=color:#c594c5>import </span><span style=color:#5fb3b3>{
   </span><span style=color:#cccece>createMachine</span><span style=color:#5fb3b3>,
   </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
   </span><span style=color:#cccece>transition</span><span style=color:#5fb3b3>,
@@ -81,13 +81,13 @@ const mr_robot = createMachine({
   </span><span style=color:#69c>loading</span><span style=color:#5fb3b3>: </span><span style=color:#69c>state</span><span style=color:#5fb3b3>(</span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;))
 });
 
-</span><span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+</span><span style=color:#c594c5>const </span><span style=color:#cccece>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>);
 }
 
 </span><span style=color:#c594c5>const </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>send </span><span style=color:#5fb3b3>} = </span><span style=color:#69c>interpret</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>mr_robot</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>handler</span><span style=color:#5fb3b3>);
-</span></pre><p>Pero aún no es suficiente, ahora debemos extraer datos de alguna parte cuando el estado sea <code>loading</code>. Vamos a fingir que buscamos los datos en nuestra función.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>function </span><span style=color:#69c>get_quote</span><span style=color:#5fb3b3>() {
+</span></code></pre><p>Pero aún no es suficiente, ahora debemos extraer datos de alguna parte cuando el estado sea <code>loading</code>. Vamos a fingir que buscamos los datos en nuestra función.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>function </span><span style=color:#69c>get_quote</span><span style=color:#5fb3b3>() {
   </span><span style=color:#5f6364>// crea un retraso de 3 a 5 segundos.
   </span><span style=color:#c594c5>const </span><span style=color:#cccece>delay </span><span style=color:#5fb3b3>= </span><span style=color:#69c>random_number</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>3</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>5</span><span style=color:#5fb3b3>) * </span><span style=color:#f99157>1000</span><span style=color:#5fb3b3>;
 
@@ -100,8 +100,8 @@ const mr_robot = createMachine({
 
   </span><span style=color:#c594c5>return </span><span style=color:#cccece>promise</span><span style=color:#5fb3b3>;
 }
-</span></pre><p>Para integrar esta función a nuestra máquina vamos a usar la función <code>invoke</code>, esta nos ayuda a manejar "funciones asíncronas" (una función que devuelve una promesa) cuando se active el estado, luego cuando la promesa se resuelve envía el evento <code>done</code> (si algo falla envía el evento <code>error</code>).<pre style=background-color:#2b2c2f>
-<span style=color:#cccece>  import {
+</span></code></pre><p>Para integrar esta función a nuestra máquina vamos a usar la función <code>invoke</code>, esta nos ayuda a manejar "funciones asíncronas" (una función que devuelve una promesa) cuando se active el estado, luego cuando la promesa se resuelve envía el evento <code>done</code> (si algo falla envía el evento <code>error</code>).<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>  import {
    createMachine,
    state,
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  invoke,
@@ -114,27 +114,27 @@ const mr_robot = createMachine({
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: state(transition(&#39;done&#39;, &#39;idle&#39;)),
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)),
 </span><span style=color:#cccece> });
-</span></pre><p>Si prueban <code>send('fetch')</code> deberían ver en la cónsola.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece>loading
+</span></code></pre><p>Si prueban <code>send('fetch')</code> deberían ver en la cónsola.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>loading
 
 // Esperen unos segundos...
 
 &lt;quote&gt;
 idle
-</span></pre><p>Espero que estas alturas se estén preguntando ¿Y dónde guardamos los datos? <code>createMachine</code> nos deja definir un "contexto" que estará disponible para nosotros en las función que apliquemos en las transiciones.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>const </span><span style=color:#69c>context </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>ev </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({
+</span></code></pre><p>Espero que estas alturas se estén preguntando ¿Y dónde guardamos los datos? <code>createMachine</code> nos deja definir un "contexto" que estará disponible para nosotros en las función que apliquemos en las transiciones.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>const </span><span style=color:#cccece>context </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>ev </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({
   </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>: {},
 });
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#cccece>  const mr_robot = createMachine({
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>  const mr_robot = createMachine({
     idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;)),
     loading: invoke(get_quote, transition(&#39;done&#39;, &#39;idle&#39;)),
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67> });
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794> }, context);
-</span></pre><p>Ahora agregaremos una función a nuestra transición <code>loading</code>. Será el lugar donde modificaremos el context. Esta función es llamada <code>reduce</code> y luce así.<pre style=background-color:#2b2c2f>
-<span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>data </span><span style=color:#5fb3b3>}))
-</span></pre><p>Recibe el context actual, una carga (aquí la llamamos <code>ev</code>) y lo que sea que devuelva se convertirá en tu nuevo contexto.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece>  import {
+</span></code></pre><p>Ahora agregaremos una función a nuestra transición <code>loading</code>. Será el lugar donde modificaremos el context. Esta función es llamada <code>reduce</code> y luce así.<pre style=background-color:#2b2c2f>
+<code><span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#69c>data </span><span style=color:#5fb3b3>}))
+</span></code></pre><p>Recibe el context actual, una carga (aquí la llamamos <code>ev</code>) y lo que sea que devuelva se convertirá en tu nuevo contexto.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>  import {
    createMachine,
    state,
    invoke,
@@ -155,21 +155,21 @@ idle
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    )
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  ),
 </span><span style=color:#cccece> }, context);
-</span></pre><p>Hora de probar. ¿Cómo lo hacemos? Modificamos el callback de <code>interpret</code>.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>const </span><span style=color:#69c>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>context </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
-  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>JSON</span><span style=color:#5fb3b3>.</span><span style=color:#69c>stringify</span><span style=color:#5fb3b3>({ 
+</span></code></pre><p>Hora de probar. ¿Cómo lo hacemos? Modificamos el callback de <code>interpret</code>.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>const </span><span style=color:#cccece>handler </span><span style=color:#5fb3b3>= ({ </span><span style=color:#f99157>machine</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>context </span><span style=color:#5fb3b3>}) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>JSON</span><span style=color:#5fb3b3>.</span><span style=color:#69c>stringify</span><span style=color:#5fb3b3>({ 
     </span><span style=color:#69c>state</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>machine</span><span style=color:#5fb3b3>.</span><span style=color:#69c>current</span><span style=color:#5fb3b3>,
     </span><span style=color:#cccece>context
   </span><span style=color:#5fb3b3>}));
 }
-</span></pre><p>Deberían ver esto.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece>{&#39;state&#39;:&#39;loading&#39;,&#39;context&#39;:{&#39;data&#39;:{}}}
+</span></code></pre><p>Deberían ver esto.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>{&#39;state&#39;:&#39;loading&#39;,&#39;context&#39;:{&#39;data&#39;:{}}}
 
 // esperen unos segundos...
 
 {&#39;state&#39;:&#39;idle&#39;,&#39;context&#39;:{&#39;data&#39;:&#39;&lt;quote&gt;&#39;}}
-</span></pre><p>Estamos listos. Mostremos algo en el navegador.<pre style=background-color:#2b2c2f>
-<span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>main </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>app</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>&quot;&gt;
+</span></code></pre><p>Estamos listos. Mostremos algo en el navegador.<pre style=background-color:#2b2c2f>
+<code><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>main </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>app</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>&quot;&gt;
   &lt;</span><span style=color:#eb606b>section </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>&quot; </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__content</span><span style=color:#5fb3b3>&quot;&gt;
      &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__body</span><span style=color:#5fb3b3>&quot;&gt;
         &lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>=&quot;</span><span style=color:#99c794>card__quote</span><span style=color:#5fb3b3>&quot;&gt;</span><span style=color:#cccece>
@@ -190,8 +190,8 @@ idle
       &lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>&gt; 
   &lt;/</span><span style=color:#eb606b>section</span><span style=color:#5fb3b3>&gt; 
 &lt;/</span><span style=color:#eb606b>main</span><span style=color:#5fb3b3>&gt;
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#eb606b>body </span><span style=color:#5fb3b3>{
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#eb606b>body </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>flex</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>justify-content</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>align-items</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
@@ -204,7 +204,7 @@ idle
 .</span><span style=color:#bb80b3>card </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>width</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>600px</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>background</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>white</span><span style=color:#5fb3b3>;
-  </span><span style=color:#fac863>box-shadow</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0 2px 5px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0.16</span><span style=color:#5fb3b3>)</span><span style=color:#cccece>, </span><span style=color:#f99157>0 2px 10px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0.12</span><span style=color:#5fb3b3>);
+  </span><span style=color:#fac863>box-shadow</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0 2px 5px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>16</span><span style=color:#5fb3b3>)</span><span style=color:#cccece>, </span><span style=color:#f99157>0 2px 10px 0 </span><span style=color:#69c>rgba</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>12</span><span style=color:#5fb3b3>);
 }
 
 .</span><span style=color:#bb80b3>card__content </span><span style=color:#5fb3b3>{
@@ -239,34 +239,34 @@ idle
   </span><span style=color:#fac863>cursor</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>pointer</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>margin-top</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>10px</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>margin-left</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>10px</span><span style=color:#5fb3b3>;
-  </span><span style=color:#fac863>border-radius</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.4rem</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>border-radius</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>4rem</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>text-decoration</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
   </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>inline-block</span><span style=color:#5fb3b3>;
-  </span><span style=color:#fac863>padding</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>.3rem .9rem</span><span style=color:#5fb3b3>;
+  </span><span style=color:#fac863>padding</span><span style=color:#5fb3b3>: .</span><span style=color:#f99157>3rem </span><span style=color:#5fb3b3>.</span><span style=color:#f99157>9rem</span><span style=color:#5fb3b3>;
 }
 
 .</span><span style=color:#bb80b3>btn--new </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>background-color</span><span style=color:#5fb3b3>: #2093be;
-  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#2093be;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>1rem solid </span><span style=color:#5fb3b3>#2093be;
   
 }
 
 .</span><span style=color:#bb80b3>btn--tweet </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>background-color</span><span style=color:#5fb3b3>: #0074d9;
-  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#0074d9;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>1rem solid </span><span style=color:#5fb3b3>#0074d9;
 }
 
 .</span><span style=color:#bb80b3>btn</span><span style=color:#5fb3b3>:</span><span style=color:#cccece>hover </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>background</span><span style=color:#5fb3b3>: #3cb0fd;
-  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0.1rem solid </span><span style=color:#5fb3b3>#3cb0fd;
+  </span><span style=color:#fac863>border</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>1rem solid </span><span style=color:#5fb3b3>#3cb0fd;
   </span><span style=color:#fac863>text-decoration</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
 }
 
 .</span><span style=color:#bb80b3>hide </span><span style=color:#5fb3b3>{
   </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>none</span><span style=color:#5fb3b3>;
 }
-</span></pre><p>La última pieza del rompecabezas, los efectos secundarios. Necesitamos agregar otra función a la transición <code>loading</code> para poder actualizar el DOM. Podríamos usar <code>reduce</code> nuevamente pero es de mala educación hacer eso en algo que se llame <code>reduce</code>. Utilizaremos otra función, una llamada <code>action</code>.<p>Pero primero debemos preprarnos. Modificaremos el contexto con las dependencias necesarias. (Este paso es innecesario, esto es sólo por mi alergia a las variables globales)<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> const context = ev =&gt; ({
+</span></code></pre><p>La última pieza del rompecabezas, los efectos secundarios. Necesitamos agregar otra función a la transición <code>loading</code> para poder actualizar el DOM. Podríamos usar <code>reduce</code> nuevamente pero es de mala educación hacer eso en algo que se llame <code>reduce</code>. Utilizaremos otra función, una llamada <code>action</code>.<p>Pero primero debemos preprarnos. Modificaremos el contexto con las dependencias necesarias. (Este paso es innecesario, esto es sólo por mi alergia a las variables globales)<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> const context = ev =&gt; ({
    data: {},
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  dom: {
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    quote: document.querySelector(&#39;.card__quote&#39;),
@@ -276,8 +276,8 @@ idle
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    card: window.card
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  }
 </span><span style=color:#cccece> });
-</span></pre><p>Ahora sí, efectos secundarios. En este punto deberían asegurarse que <code>get_quote</code> devuelva un objeto con las propiedades <code>quote</code> y <code>author</code>.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>function </span><span style=color:#69c>update_card</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data </span><span style=color:#5fb3b3>}) {
+</span></code></pre><p>Ahora sí, efectos secundarios. En este punto deberían asegurarse que <code>get_quote</code> devuelva un objeto con las propiedades <code>quote</code> y <code>author</code>.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>function </span><span style=color:#69c>update_card</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>data </span><span style=color:#5fb3b3>}) {
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>load_btn</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>More</span><span style=color:#5fb3b3>&#39;;
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>quote</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>quote</span><span style=color:#5fb3b3>;
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>author</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>data</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>author</span><span style=color:#5fb3b3>;
@@ -292,8 +292,8 @@ idle
 </span><span style=color:#c594c5>function </span><span style=color:#69c>show_loading</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom </span><span style=color:#5fb3b3>}) {
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>load_btn</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>textContent </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>Loading...</span><span style=color:#5fb3b3>&#39;;
 }
-</span></pre><p>Juntamos todo.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece>  import {
+</span></code></pre><p>Juntamos todo.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece>  import {
    createMachine,
    state,
    invoke,
@@ -316,8 +316,8 @@ idle
 </span><span style=color:#cccece>     )
    ),
  }, context);
-</span></pre><p>Funciona. Pero se ve mal cuando carga por primera vez. Hagamos otra transición de carga, una que esconda la carta mientras se carga la primera frase.<p>Empecemos por el HTML.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> &lt;main id=&quot;app&quot; class=&quot;card&quot;&gt;
+</span></code></pre><p>Funciona. Pero se ve mal cuando carga por primera vez. Hagamos otra transición de carga, una que esconda la carta mientras se carga la primera frase.<p>Empecemos por el HTML.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> &lt;main id=&quot;app&quot; class=&quot;card&quot;&gt;
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;section class=&quot;card__content card__content--loader&quot;&gt; 
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    &lt;p&gt;Loading&lt;/p&gt; 
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;/section&gt;
@@ -342,20 +342,20 @@ idle
      &lt;/div&gt; 
    &lt;/section&gt; 
  &lt;/main&gt;
-</span></pre><p>Creamos otro estado, <code>empty</code>. Podemos reusar la lógica del estado <code>loading</code> para esto. Creamos una función que crea transiciones.<pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>const </span><span style=color:#69c>load_quote </span><span style=color:#5fb3b3>= (...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt;
+</span></code></pre><p>Creamos otro estado, <code>empty</code>. Podemos reusar la lógica del estado <code>loading</code> para esto. Creamos una función que crea transiciones.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>const </span><span style=color:#cccece>load_quote </span><span style=color:#5fb3b3>= (...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt;
   </span><span style=color:#69c>invoke</span><span style=color:#5fb3b3>(
     </span><span style=color:#cccece>get_quote</span><span style=color:#5fb3b3>,
     </span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(
       &#39;</span><span style=color:#99c794>done</span><span style=color:#5fb3b3>&#39;,
       &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;,
-      </span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>data </span><span style=color:#5fb3b3>})),
+      </span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>((</span><span style=color:#f99157>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ ...</span><span style=color:#cccece>ctx</span><span style=color:#5fb3b3>, </span><span style=color:#69c>data</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>ev</span><span style=color:#5fb3b3>.</span><span style=color:#69c>data </span><span style=color:#5fb3b3>})),
       ...</span><span style=color:#cccece>args
     </span><span style=color:#5fb3b3>),
     </span><span style=color:#69c>transition</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>error</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>idle</span><span style=color:#5fb3b3>&#39;)
   );
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#cccece> const mr_robot = createMachine({
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> const mr_robot = createMachine({
    idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  loading: invoke(
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>    get_quote, 
@@ -368,8 +368,8 @@ idle
 </span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  ),
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  loading: load_quote(action(update_card))
 </span><span style=color:#cccece> }, context);
-</span></pre><p>Ahora la usamos para esconder el esqueleto de la carta en la primera carga y muestre la frase cuando esté lista.<pre style=background-color:#2b2c2f>
-<span style=color:#cccece> const context = ev =&gt; ({
+</span></code></pre><p>Ahora la usamos para esconder el esqueleto de la carta en la primera carga y muestre la frase cuando esté lista.<pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> const context = ev =&gt; ({
    data: {},
    dom: {
      quote: document.querySelector(&#39;.card__quote&#39;),
@@ -380,13 +380,13 @@ idle
      card: window.card
    }
  });
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#c594c5>function </span><span style=color:#69c>hide_loader</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom </span><span style=color:#5fb3b3>}) {
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>function </span><span style=color:#69c>hide_loader</span><span style=color:#5fb3b3>({ </span><span style=color:#f99157>dom </span><span style=color:#5fb3b3>}) {
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#69c>loader</span><span style=color:#5fb3b3>.</span><span style=color:#69c>classList</span><span style=color:#5fb3b3>.</span><span style=color:#69c>add</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>hide</span><span style=color:#5fb3b3>&#39;);
   </span><span style=color:#cccece>dom</span><span style=color:#5fb3b3>.</span><span style=color:#69c>card</span><span style=color:#5fb3b3>.</span><span style=color:#69c>classList</span><span style=color:#5fb3b3>.</span><span style=color:#69c>remove</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>hide</span><span style=color:#5fb3b3>&#39;);
 }
-</span></pre><pre style=background-color:#2b2c2f>
-<span style=color:#cccece> const mr_robot = createMachine({
+</span></code></pre><pre style=background-color:#2b2c2f>
+<code><span style=color:#cccece> const mr_robot = createMachine({
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  empty: load_quote(action(update_card), action(hide_loader)),
 </span><span style=color:#cccece>   idle: state(transition(&#39;fetch&#39;, &#39;loading&#39;, action(show_loading))),
    loading: load_quote(action(update_card))
@@ -405,4 +405,4 @@ idle
 +</span><span style=color:#99c794> const fetch_quote = () =&gt; send(&#39;fetch&#39;);
 </span><span style=color:#5fb3b3>+
 +</span><span style=color:#99c794> window.load_btn.addEventListener(&#39;click&#39;, fetch_quote);
-</span></pre><p>Veamos cómo quedó.<p class=codepen data-height=600 data-theme-id=dark data-default-tab=js,result data-user=VonHeikemen data-slug-hash=OJJvQzR data-preview=true style="height:600px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid;margin:1em 0;padding:1em" data-pen-title="Finite Random Quote Machine"><span>See the Pen <a href=https://codepen.io/VonHeikemen/pen/OJJvQzR>Finite Random Quote Machine</a> by Heiker (<a href=https://codepen.io/VonHeikemen>@VonHeikemen</a>) on <a href=https://codepen.io>CodePen</a>.</span></p><script async src=https://static.codepen.io/assets/embed/ei.js></script><h2 id=entonces-esto-de-la-maquina-de-estados-finitos-fue-util>¿Entonces esto de la máquina de estados finitos fue útil?</h2><p>Eso espero. ¿Notaron que nos permitió hacer un montón de pruebas y planear el comportamiento incluso antes de crear el HTML? Me parece que eso es genial.<p>¿Intentaron darle click al botón 'loading' mientras cargaba? ¿Causó llamadas repetidas a <code>get_quote</code>? Eso es porque hicimos que fuera (casi) imposible que el evento <code>fetch</code> ocurriera durante <code>loading</code>.<p>No sólo eso, el comportamiento de la máquina y sus efectos en el mundo exterior están separados. Esto puede ser bueno o malo para ustedes pero eso depende de su tendencia filosófica.<h2 id=quieren-saber-mas>¿Quieren saber más?</h2><p>(me perdonan que todo estos sean en inglés.)<ul><li><a href=https://xstate.js.org/docs/about/concepts.html>XState (concepts)</a><li><a href=https://thisrobot.life/>robot3 - docs</a><li><a href=https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/>Understanding State Machines</a></ul></div></div>
+</span></code></pre><p>Veamos cómo quedó.<p class=codepen data-height=600 data-theme-id=dark data-default-tab=js,result data-user=VonHeikemen data-slug-hash=OJJvQzR data-preview=true style="height:600px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid;margin:1em 0;padding:1em" data-pen-title="Finite Random Quote Machine"><span>See the Pen <a href=https://codepen.io/VonHeikemen/pen/OJJvQzR>Finite Random Quote Machine</a> by Heiker (<a href=https://codepen.io/VonHeikemen>@VonHeikemen</a>) on <a href=https://codepen.io>CodePen</a>.</span></p><script async src=https://static.codepen.io/assets/embed/ei.js></script><h2 id=entonces-esto-de-la-maquina-de-estados-finitos-fue-util>¿Entonces esto de la máquina de estados finitos fue útil?</h2><p>Eso espero. ¿Notaron que nos permitió hacer un montón de pruebas y planear el comportamiento incluso antes de crear el HTML? Me parece que eso es genial.<p>¿Intentaron darle click al botón 'loading' mientras cargaba? ¿Causó llamadas repetidas a <code>get_quote</code>? Eso es porque hicimos que fuera (casi) imposible que el evento <code>fetch</code> ocurriera durante <code>loading</code>.<p>No sólo eso, el comportamiento de la máquina y sus efectos en el mundo exterior están separados. Esto puede ser bueno o malo para ustedes pero eso depende de su tendencia filosófica.<h2 id=quieren-saber-mas>¿Quieren saber más?</h2><p>(me perdonan que todo estos sean en inglés.)<ul><li><a href=https://xstate.js.org/docs/about/concepts.html>XState (concepts)</a><li><a href=https://thisrobot.life/>robot3 - docs</a><li><a href=https://www.freecodecamp.org/news/state-machines-basics-of-computer-science-d42855debc66/>Understanding State Machines</a></ul></div></div>
