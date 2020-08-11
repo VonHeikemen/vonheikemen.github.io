@@ -53,7 +53,7 @@ new </span><span style=color:#fac863>Promise</span><span style=color:#5fb3b3>(</
 <code><span style=color:#cccece>IT WORKED 1 times
 IT WORKED 2 times
 AWW
-</span></code></pre><p>Now that we have what we want, let's go to the next step.<ul><li>Make it functor</ul><p>As you know applicatives are functors, it means that now we need a <code>map</code>.<p>Let's go over one more time. What is expected behaviour of <code>map</code>?<ol><li>It should give us access to the inner value through a callback function.<li>It should return a new container of the same type. In our case it should return another <code>Task</code>.</ol><pre style=background-color:#2b2c2f>
+</span></code></pre><p>Now that we have what we want, let's go to the next step.<ul><li>Make it functor</ul><p>As you know applicatives are functors, it means that now we need a <code>map</code>.<p>Let's go over one more time. What is the expected behaviour of <code>map</code>?<ol><li>It should give us access to the inner value through a callback function.<li>It should return a new container of the same type. In our case it should return another <code>Task</code>.</ol><pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  function Task(proc) {
     return {
 </span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     map(fn) {
