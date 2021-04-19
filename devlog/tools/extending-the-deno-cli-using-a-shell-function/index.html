@@ -1,26 +1,26 @@
 <!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><title>Devlog | Extending the deno cli using a shell function</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="shell,deno,todayilearned,software,coding,development"><meta name=monetization content="$ilp.uphold.com/dFQbFZ49nJdQ"><meta name=description content="Improving the deno cli with a little bit of magic"><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>Whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020-2021 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Extending the deno cli using a shell function</h1><span class=post-date>2021-04-18
-| <a href=https://vonheikemen.github.io/devlog/es/tools/extending-the-deno-cli-using-a-shell-function/>Leer en español</a></span><p>I've been using <code>deno</code> more and more these days and I must tell you that are still a couple that bug me. But I did manage to solve some of those problems by "adding" sub-commands to cli. No, it's not dark magic, it's just a trick that I learned a while ago and that I'm going to share with you today.<h2 id=what-do-we-need-for-this>What do we need for this?</h2><p>In theory any shell that allows you to declare functions should be enough. In this post I'll be showing you the examples using a POSIX compliant syntax, so they should work on shells like <code>bash</code>, <code>zsh</code> or <code>ash</code>.<h2 id=what-do-we-want-to-achieve>What do we want to achieve?</h2><p>I would love for <code>deno</code> to have some built-in equivalent of <code>npm scripts</code>, but it doesn't seem like is going to happen any time soon. I wish I could do something like this.<pre style=background-color:#2b2c2f>
+| <a href=https://vonheikemen.github.io/devlog/es/tools/extending-the-deno-cli-using-a-shell-function/>Leer en español</a></span><p>I've been using <code>deno</code> more and more these days and I must tell you they are still things that bug me. But I did manage to solve some of those problems by "adding" some sub-commands to the cli. No, it's not dark magic, it's just a trick that I learned a while ago and that I'm going to share with you today.<h2 id=what-do-we-need-for-this>What do we need for this?</h2><p>In theory any shell that allows you to declare functions should be enough. In this post I'll be showing you the examples using a POSIX compliant syntax, so they should work on shells like <code>bash</code>, <code>zsh</code> or <code>ash</code>.<h2 id=what-do-we-want-to-achieve>What do we want to achieve?</h2><p>I would love for <code>deno</code> to have some built-in equivalent of <code>npm scripts</code>, but it doesn't seem like is going to happen any time soon. I wish I could do something like this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno start hello world
 </span></code></pre><p>It would also be nice if I could initialize those scripts, because they have to live somewhere.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno init
-</span></code></pre><p>But as you know those sub-commands don't exists and that's what we are going to fix today (kinda).<h2 id=let-us-begin>Let us begin</h2><p>The first step is to locate that one file you know your shell always execute. In <code>zsh</code> is <code>~/.zshrc</code>. <code>bash</code> has <code>~/.bashrc</code>. Those two are the only ones I know, if you use any other shell try to find in its documentation the equivalent of that.<h3 id=the-definition>The definition</h3><p>You ready now? Okay, now in that file you're going to write this.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>But as you know those sub-commands don't exists and that's what we are going to fix today (kinda).<h2 id=let-us-begin>Let us begin</h2><p>The first step is to locate that one file you know your shell always execute. In <code>zsh</code> there's <code>~/.zshrc</code>. <code>bash</code> has <code>~/.bashrc</code>. Those two are the only ones I know, if you use any other shell try to find in its documentation the equivalent of that.<h3 id=the-definition>The definition</h3><p>You ready now? Okay, now in that file you're going to write this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
 {
   </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>Hello</span><span style=color:#5fb3b3>&quot;
 }
-</span></code></pre><p>Now if you restart your shell (or "reload" your configuration) and try to call <code>deno</code> you should get <code>hello</code>. Isn't that nice? Awesome, but now we have created a problem, we can use <code>deno</code>. But fear not, we are on a good path.<h3 id=come-back-to-me-deno>Come back to me deno</h3><p>If we want to call the <code>deno</code> <strong>command</strong> we need to use the command known as <code>command</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Now if you restart your shell (or "reload" your configuration) and try to call <code>deno</code> you should get <code>Hello</code>. Isn't that nice? Awesome, but now we have created a problem, we can't use <code>deno</code>. But fear not, we are on a good path.<h3 id=come-back-to-me-deno>Come back to me deno</h3><p>If we want to call the <code>deno</code> <strong>command</strong> we need to use the command known as <code>command</code>. Something like this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>command deno --version
-</span></code></pre><p>And that you get us all the info <code>deno</code> has about itself.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>And that will get us all the info <code>deno</code> has about itself.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>deno x.x.x (release, x86_64-unknown-linux-gnu)
 v8 x
 typescript x.x
-</span></code></pre><p>With this new knowledge we can solve our problem. Let's put it in the function.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>With this new knowledge we can solve our problem. Let's use that in our function.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
 {
   </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>You&#39;re using</span><span style=color:#5fb3b3>&quot;
   </span><span style=color:#69c>command deno --version
 </span><span style=color:#5fb3b3>}
-</span></code></pre><p>Good, and when we call it we should get this.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>And when we call it we should get this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno
 
 You&#39;re using
@@ -38,9 +38,9 @@ typescript x.x
     </span><span style=color:#5fb3b3>;;
   </span><span style=color:#c594c5>esac
 </span><span style=color:#5fb3b3>}
-</span></code></pre><p>The first thing this function does is assign the first parameter (<code>$1</code>) to the variabl <code>cmd</code> and then remove it from the arguments list (<code>$@</code>). After that we compare <code>cmd</code> with a pattern. For now the only pattern we have is <code>*</code> which is a wildcard that matches everything, is basically our default case. Let's make a test.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>The first thing this function does is assign the first parameter (<code>$1</code>) to the variable <code>cmd</code> and then remove it from the arguments list (<code>$@</code>). After that we compare <code>cmd</code> with a pattern. For now the only pattern we have is <code>*</code> which is a wildcard that matches everything, is basically our default case. Let's make a test.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3> --</span><span style=color:#f99157>version
-</span></code></pre><p>We good. But notice that if we try to use <code>deno</code> without any arguments it'll give us an error. To fix that we are going to check if the first parameter is empty, and if it is we just call <code>deno</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>It's getting better. But notice that if we try to use <code>deno</code> without any arguments it'll give us an error. To fix that we are going to check if the first parameter is empty, and if it is we just call <code>deno</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
 {
   </span><span style=color:#c594c5>if </span><span style=color:#69c>[ </span><span style=color:#5fb3b3>-</span><span style=color:#f99157>z </span><span style=color:#5fb3b3>&quot;$</span><span style=color:#cccece>1</span><span style=color:#5fb3b3>&quot; </span><span style=color:#69c>]</span><span style=color:#5fb3b3>;</span><span style=color:#c594c5>then
@@ -56,7 +56,7 @@ typescript x.x
     </span><span style=color:#5fb3b3>;;
   </span><span style=color:#c594c5>esac
 </span><span style=color:#5fb3b3>}
-</span></code></pre><h3 id=calling-all-sub-commands>Calling all sub-commands</h3><p>We are right were we want to be, we can finally start adding our own sub-commands. But first let's make a sanity check.<pre style=background-color:#2b2c2f>
+</span></code></pre><h3 id=calling-all-sub-commands>Calling all sub-commands</h3><p>We are right were we want to be, we can finally start adding our own sub-commands. Let's figure out how this would work.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -75,11 +75,11 @@ typescript x.x
       ;;
     esac
   }
-</span></code></pre><p>Let's call the <code>hello</code> command.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Now call this new <code>hello</code> command.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno hello
 
 deno says hello
-</span></code></pre><p>So we know for sure this thing works.<h3 id=deno-scripts>deno scripts</h3><p>We can work on our ad-hoc replacement for npm scripts. Let's start at the beginning, <code>start</code> command of course. Is a convention to use this command to start an application or project.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>So we know for sure this thing works.<h3 id=deno-scripts>deno scripts</h3><p>We can work on our ad-hoc replacement for npm scripts. There is a common convention in <code>node</code> where we use a <code>start</code> command to "boot up" our application or project. Let's start with that.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -98,14 +98,14 @@ deno says hello
       ;;
     esac
   }
-</span></code></pre><p>This command will execute a file called <code>Taskfile.js</code> using <code>deno</code>. The <code>--allow-run</code> will let us use <code>Deno.run</code> in our code to call external commands. It's test time.<p>Let's make that <code>Taskfile.js</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>This command will execute a file called <code>Taskfile.js</code> using <code>deno</code>. The <code>--allow-run</code> will let us use <code>Deno.run</code> in our code to call external commands. It's test time.<p>Make that <code>Taskfile.js</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#c594c5>const </span><span style=color:#cccece>cmd </span><span style=color:#5fb3b3>= [&#39;</span><span style=color:#99c794>echo</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>Taskfile: </span><span style=color:#5fb3b3>&#39;, ...</span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>args</span><span style=color:#5fb3b3>];
 </span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>run</span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>cmd </span><span style=color:#5fb3b3>});
-</span></code></pre><p>Now we use <code>start</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Now use <code>start</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno start hello
 
-Taskfile start hello
-</span></code></pre><p>Just great. The next step will be to create a "smarter" <code>Taskfile.js</code>, one that can call different tasks. I've done something like this in the past (check out the details of it in <a href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g>here</a>), so I'm going to show you the code I would use.<pre style=background-color:#2b2c2f>
+Taskfile: start hello
+</span></code></pre><p>Just lovely. The next step will be to create a "smarter" <code>Taskfile.js</code>, one that can call different tasks. I've done something like this in the past (check out the details of it in <a href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g>here</a>), so I'm going to show you the code I would use.<pre style=background-color:#2b2c2f>
 <code><span style=color:#c594c5>const </span><span style=color:#cccece>entrypoint </span><span style=color:#5fb3b3>= &quot;</span><span style=color:#99c794>./src/main.js</span><span style=color:#5fb3b3>&quot;;
 
 </span><span style=color:#69c>run</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>args</span><span style=color:#5fb3b3>, {
@@ -159,7 +159,7 @@ Taskfile start hello
       ;;
     esac
   }
-</span></code></pre><p>Everything is looking good. The last thing we will deal is calling other tasks besides <code>start</code>. With <code>npm</code> we can call any script we want using <code>npm run</code>, the equivalent for us will be called <code>x</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Everything is looking good. The last thing we will deal with is calling other tasks besides <code>start</code>. With <code>npm</code> we can call any script we want using <code>npm run</code>, the equivalent for us will be called <code>x</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -185,9 +185,9 @@ Taskfile start hello
       ;;
     esac
   }
-</span></code></pre><p>We are all set. If we had a "task" called <code>test:api</code> we can invoke that using this.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>We are all set. If we had a "task" called <code>test:api</code> we can invoke it using this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno x test:api
-</span></code></pre><h3 id=a-little-extra-convenience>A little extra convenience</h3><p>One more thing, I would like to have a way of calling a specific script and be able to call all my most used libraries without using URLs. We can do this with the help of <a href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps>import-map</a>s, <code>.json</code> files that can bind an "alias" with a URL.<p>I use one like this.<pre style=background-color:#2b2c2f>
+</span></code></pre><h3 id=a-little-extra-convenience>A little extra convenience</h3><p>One more thing, I would like to have a way of calling a specific script and be able to call all my most used libraries without using URLs. We can do this with the help of <a href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps>import-map</a>s, <code>.json</code> files that can bind an "alias" to a URL.<p>I use one like this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#5fb3b3>{
   &quot;</span><span style=color:#99c794>imports</span><span style=color:#5fb3b3>&quot;: {
     &quot;</span><span style=color:#99c794>@std/</span><span style=color:#5fb3b3>&quot;: &quot;</span><span style=color:#99c794>https://deno.land/std@0.93.0/</span><span style=color:#5fb3b3>&quot;,
@@ -202,7 +202,7 @@ Taskfile start hello
     &quot;</span><span style=color:#99c794>@utils/</span><span style=color:#5fb3b3>&quot;: &quot;</span><span style=color:#99c794>/path/to/deno/utils/</span><span style=color:#5fb3b3>&quot;
   }
 }
-</span></code></pre><p><code>deno</code> can read this if we provide its path using the <code>--import-map</code> flag. Let's add command that uses that.<pre style=background-color:#2b2c2f>
+</span></code></pre><p><code>deno</code> can read this if we provide its path using the <code>--import-map</code> flag. Let's add a command that uses that.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -231,7 +231,7 @@ Taskfile start hello
       ;;
     esac
   }
-</span></code></pre><p>As with everything else, we need to test this thing. Create a test script with this.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>As with everything else, we need to test this thing. Create a script with this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#c594c5>import </span><span style=color:#cccece>dayjs </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>@npm/dayjs</span><span style=color:#5fb3b3>&#39;;
 </span><span style=color:#c594c5>import </span><span style=color:#cccece>c </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>ansi-colors</span><span style=color:#5fb3b3>&#39;;
 
@@ -240,7 +240,7 @@ Taskfile start hello
 </span><span style=color:#c594c5>const </span><span style=color:#cccece>date </span><span style=color:#5fb3b3>= </span><span style=color:#69c>dayjs</span><span style=color:#5fb3b3>().</span><span style=color:#69c>format</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>{YYYY} MM-DDTHH:mm:ss SSS [Z] A</span><span style=color:#5fb3b3>&#39;);
 
 </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>c</span><span style=color:#5fb3b3>.</span><span style=color:#69c>green</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>date</span><span style=color:#5fb3b3>));
-</span></code></pre><blockquote><p>Might want to specify the library version. Instead of using <code>@npm/dayjs</code>, you put <code>@npm/dayjs@1.10.4</code></blockquote><p>Now call it.<pre style=background-color:#2b2c2f>
+</span></code></pre><blockquote><p>Might want to specify the library version. Instead of using <code>@npm/dayjs</code>, use <code>@npm/dayjs@1.10.4</code></blockquote><p>And now call it.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno script ./test.js
 
 Download https://jspm.dev/dayjs@1.10.4

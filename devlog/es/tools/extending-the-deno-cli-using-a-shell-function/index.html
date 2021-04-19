@@ -8,7 +8,7 @@
 {
   </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>Hola</span><span style=color:#5fb3b3>&quot;
 }
-</span></code></pre><p>Ahora si reinician el interprete (o "recargan" su configuración) e invocan el comando <code>deno</code> debería obtener <code>Hola</code> como resultado. Genial, hemos creado un problema, no podemos usar el comando <code>deno</code>. No teman, vamos por buen camino.<h3 id=vuelve-a-mi-deno>Vuelve a mi, deno</h3><p>Si quisieramos invocar el <strong>comando</strong> <code>deno</code> lo único que tenemos que hacer es usar el comando <code>command</code> así:<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Ahora si reinician el intérprete (o "recargan" su configuración) e invocan el comando <code>deno</code> deberían obtener <code>Hola</code> como resultado. Genial, hemos creado un problema, no podemos usar el comando <code>deno</code>. No teman, vamos por buen camino.<h3 id=vuelve-a-mi-deno>Vuelve a mi, deno</h3><p>Si quisieramos invocar el <strong>comando</strong> <code>deno</code> lo único que tenemos que hacer es usar el comando <code>command</code> así:<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>command deno --version
 </span></code></pre><p>Eso debería mostrarle la información de <code>deno</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>deno x.x.x (release, x86_64-unknown-linux-gnu)
@@ -40,7 +40,7 @@ typescript x.x
 </span><span style=color:#5fb3b3>}
 </span></code></pre><p>La primera línea lo que hace es asignar el primer parámetro (<code>$1</code>) a la variable <code>cmd</code> y luego lo elimina de la lista de argumentos (<code>$@</code>). Después lo que hacemos es comparar <code>cmd</code> con un patrón. Por ahora el único patrón que tenemos es <code>*</code>, que actúa como un comodín que coincide con todo, básicamente es nuestro default. Probemos.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3> --</span><span style=color:#f99157>version
-</span></code></pre><p>Bien, pero ahora si intentamos usar <code>deno</code> sin argumentos nos dará un error. Para arreglar eso vamos verificar si el primer argumento está vacío, si ese es el caso sólo llamamos <code>deno</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Bien, pero ahora si intentamos usar <code>deno</code> sin argumentos nos dará un error. Para arreglar eso vamos verificar si el primer parámetro está vacío, si ese es el caso sólo llamamos <code>deno</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
 {
   </span><span style=color:#c594c5>if </span><span style=color:#69c>[ </span><span style=color:#5fb3b3>-</span><span style=color:#f99157>z </span><span style=color:#5fb3b3>&quot;$</span><span style=color:#cccece>1</span><span style=color:#5fb3b3>&quot; </span><span style=color:#69c>]</span><span style=color:#5fb3b3>;</span><span style=color:#c594c5>then
@@ -56,7 +56,7 @@ typescript x.x
     </span><span style=color:#5fb3b3>;;
   </span><span style=color:#c594c5>esac
 </span><span style=color:#5fb3b3>}
-</span></code></pre><h3 id=invocando-sub-comandos>Invocando sub-comandos</h3><p>Ya estamos en el lugar que queremos, finalmente podremos agregar los subcomandos que queremos. Primero vamos a hacer una prueba.<pre style=background-color:#2b2c2f>
+</span></code></pre><h3 id=invocando-sub-comandos>Invocando sub-comandos</h3><p>Ya estamos en el lugar que queremos, finalmente podremos agregar nuestros propios sub-comandos. Veamos cómo funcionaría.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -75,11 +75,11 @@ typescript x.x
       ;;
     esac
   }
-</span></code></pre><p>Si invocamos el comando hola:<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Si invocamos el comando <code>hola</code>:<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno hola
 
 deno dice hola
-</span></code></pre><p>Ahora estamos seguros que funciona.<h3 id=deno-scripts>deno scripts</h3><p>Ya podemos comenzar con lo más importante, nuestro reemplazo para los npm scripts. Lo que quiero hacer primero es crear el comando <code>start</code>, el cual es el más común que usaría.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Ahora estamos seguros que funciona.<h3 id=deno-scripts>deno scripts</h3><p>Ya podemos comenzar con lo más importante, nuestro reemplazo para los <code>npm scripts</code>. Lo que quiero hacer primero es crear el comando <code>start</code>, el cual es el más común que usaría.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -98,14 +98,14 @@ deno dice hola
       ;;
     esac
   }
-</span></code></pre><p>Esto lo que hará será ejecutar un archivo llamado <code>Taskfile.js</code> usando <code>deno</code>. <code>--allow-run</code> nos permitirá usar <code>Deno.run</code> en nuestro código para poder llamar comandos externos dentro de <code>Taskfile.js</code>. Vamos a asegurarnos de que funciona.<p>Creamos <code>Taskfile.js</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Esto lo que hará será ejecutar un archivo llamado <code>Taskfile.js</code> usando <code>deno</code>. <code>--allow-run</code> nos permitirá usar <code>Deno.run</code> en nuestro código para poder llamar comandos externos dentro de <code>Taskfile.js</code>. Ahora vamos a usarlo.<p>Creamos <code>Taskfile.js</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#c594c5>const </span><span style=color:#cccece>cmd </span><span style=color:#5fb3b3>= [&#39;</span><span style=color:#99c794>echo</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>Taskfile: </span><span style=color:#5fb3b3>&#39;, ...</span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>args</span><span style=color:#5fb3b3>];
 </span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>run</span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>cmd </span><span style=color:#5fb3b3>});
-</span></code></pre><p>Y usamos <code>start</code> de esta manera.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Y llamamos <code>start</code> de esta manera.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>$ deno start hola
 
 Taskfile start hola
-</span></code></pre><p>Genial. El siguiente paso sería crear un <code>Taskfile.js</code> "más inteligente," que sea capaz de ejecutar varias tareas. Ya he hecho algo así en el pasado (Pueden encontrar los detalles <a href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g>aquí</a>), así que les mostraré el código que yo usaría.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Genial. El siguiente paso sería crear un <code>Taskfile.js</code> "más inteligente," que sea capaz de ejecutar varias tareas. Ya he hecho algo así en el pasado (pueden encontrar los detalles <a href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g>aquí</a>), así que les mostraré el código que yo usaría.<pre style=background-color:#2b2c2f>
 <code><span style=color:#c594c5>const </span><span style=color:#cccece>entrypoint </span><span style=color:#5fb3b3>= &quot;</span><span style=color:#99c794>./src/main.js</span><span style=color:#5fb3b3>&quot;;
 
 </span><span style=color:#69c>run</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>args</span><span style=color:#5fb3b3>, {
@@ -159,7 +159,7 @@ Taskfile start hola
       ;;
     esac
   }
-</span></code></pre><p>Ya tiene buena forma. La última cosa que nos quedaría por hacer es manejar otras tareas además de <code>start</code>. Con <code>npm</code> podemos invocar <code>npm run</code> para elegir qué script queremos ejecutar, nuestro equivalente sólo se llamará <code>x</code>.<pre style=background-color:#2b2c2f>
+</span></code></pre><p>Ya tiene buena forma. La última cosa que nos quedaría por hacer es manejar otras tareas además de <code>start</code>. Con <code>npm</code> podemos invocar <code>npm run</code> para elegir qué script queremos ejecutar, nuestro equivalente se llamará <code>x</code>.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
@@ -187,7 +187,7 @@ Taskfile start hola
   }
 </span></code></pre><p>Ahora podríamos tener una "tarea" llamada <code>test:api</code> y llamarla de esta manera.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>deno x test:api
-</span></code></pre><h3 id=un-poco-mas-de-conveniencia>Un poco más de conveniencia</h3><p>Lo último que quiero hacer es crear una forma de llamar a un script el cual pueda llamar las librerías que yo uso con más frecuencia sin usar su URL. Podemos hacer esto con el apoyo de un <a href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps>import-map</a>, un archivo <code>.json</code> en el cual podemos vincular un "alias" a una URL.<p>Yo uso uno como este.<pre style=background-color:#2b2c2f>
+</span></code></pre><h3 id=un-poco-mas-de-conveniencia>Un poco más de conveniencia</h3><p>Lo último que quiero hacer es crear una forma de ejecutar un script el cual pueda llamar las librerías que uso con más frecuencia sin usar su URL. Podemos hacer esto con el apoyo de un <a href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps>import-map</a>, un archivo <code>.json</code> en el cual podemos vincular un "alias" a una URL.<p>Yo uso uno como este.<pre style=background-color:#2b2c2f>
 <code><span style=color:#5fb3b3>{
   &quot;</span><span style=color:#99c794>imports</span><span style=color:#5fb3b3>&quot;: {
     &quot;</span><span style=color:#99c794>@std/</span><span style=color:#5fb3b3>&quot;: &quot;</span><span style=color:#99c794>https://deno.land/std@0.93.0/</span><span style=color:#5fb3b3>&quot;,
@@ -202,7 +202,7 @@ Taskfile start hola
     &quot;</span><span style=color:#99c794>@utils/</span><span style=color:#5fb3b3>&quot;: &quot;</span><span style=color:#99c794>/path/to/deno/utils/</span><span style=color:#5fb3b3>&quot;
   }
 }
-</span></code></pre><p><code>deno</code> puede leerlo si le pasamos el argumento <code>--import-map</code>. Agregemos el comando.<pre style=background-color:#2b2c2f>
+</span></code></pre><p><code>deno</code> puede leerlo si le pasamos el argumento <code>--import-map</code>. Ahora vamos a crear un comando para usarlo.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>  deno()
   {
     if [ -z &quot;$1&quot; ];then
