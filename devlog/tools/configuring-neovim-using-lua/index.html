@@ -188,6 +188,14 @@ end
 </span></code></pre><p>And so is this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#69c>map </span><span style=color:#5fb3b3>{&#39;</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>&lt;Leader&gt;e</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>%</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#99c794>noremap </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>false</span><span style=color:#5fb3b3>}
 </span></code></pre><h3 id=calling-lua-functions>Calling lua functions</h3><p>If we apply the knowledge we gained already about calling lua from vimscript, then we can do this.<p>Assuming we have a lua module called <code>usermod</code> and this module has a function called <code>somefunction</code>.<pre style=background-color:#2b2c2f>
+<code><span style=color:#c594c5>local </span><span style=color:#cccece>M </span><span style=color:#5fb3b3>= {}
+
+</span><span style=color:#cccece>M</span><span style=color:#5fb3b3>.</span><span style=color:#69c>somefunction </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
+  </span><span style=color:#69c>print</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>all good</span><span style=color:#5fb3b3>&#39;)
+</span><span style=color:#c594c5>end
+
+return </span><span style=color:#cccece>M
+</span></code></pre><p>We can call it like this.<pre style=background-color:#2b2c2f>
 <code><span style=color:#cccece>vim</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_set_keymap</span><span style=color:#5fb3b3>(
   &#39;</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>&#39;,
   &#39;</span><span style=color:#99c794>&lt;Leader&gt;w</span><span style=color:#5fb3b3>&#39;,
