@@ -1,244 +1,218 @@
-<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta http-equiv=permissions-policy content="interest-cohort=()"><title>Devlog | The case for reducers</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,software,coding,development"><meta name=monetization content="$ilp.uphold.com/dFQbFZ49nJdQ"><meta name=description content="Reducers are good for many things, let's find out what those things are"><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>Whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020-2021 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>The case for reducers</h1><span class=post-date>2020-11-22
-| <a href=https://vonheikemen.github.io/devlog/es/web-development/the-case-for-reducers/>Leer en español</a></span><p>In a <a href=https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/>previous post</a> I talked about <code>.reduce</code>, how it worked and (what I think) it's ideal use case, this time around I'll cover some other use cases where <code>.reduce</code> could be a good fit. Now, you don't have to read that post but I will assume that you at least know how <code>Array.reduce</code> works. By the end of this post I hope that you learn how to recognize the places where <code>.reduce</code> would work perfectly.<h2 id=what-are-we-looking-for>What are we looking for?</h2><p>Patterns, we are looking for patterns. Well... just one. And to know what is it that we are looking for we need to take a look at the requirements of a <code>reducer</code>. Think about <code>reducers</code>, when you create one for <code>Array.reduce</code> sometimes it looks like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#5fb3b3>(</span><span style=color:#f99157>accumulator</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#5f6364>/*
-    some logic
-  */
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>accumulator</span><span style=color:#5fb3b3>;
-}
-</span></code></pre><p>We usually return a modified copy of <code>accumulator</code> but that's not important right now, the point is that we return the same "type" we got in the first parameter. Then the <strong>shape of the function</strong> would be something like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(Accumulator, Value) -&gt; Accumulator
-</span></code></pre><p>This is a concrete example but I want you to see it in a more abstract way. What we are really after are functions that have this shape.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(A, B) -&gt; A
-</span></code></pre><p>This is basically it. For a <code>reducer</code> to do it's job the only thing it needs is a binary function capable of returning the same type of its first parameter.<p>Still confused? Don't worry I'll spend the rest of this post showing examples where this pattern might show up.<h2 id=use-cases>Use cases</h2><h3 id=accumulators>Accumulators</h3><p>I guess this is the part where I show you a scenario where we sum an array of numbers of something like that. Let's not do that. Let's try a more complex scenario where an accumulator might be used.<p>Imagine we are in a codebase for some kind of blog system and we are making the profile page for the user. We want to show all the tags where the user has at least one article. You might want to retrieve that data from your database using a crazy query but that would take too much time, let's do a prototype first.<p>So before we do things the appropriate way we transform the array of posts into a <a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set>Set</a> of tags using <code>Array.reduce</code>, just to have something to work with.<pre style=background-color:#2b2c2f>
-<code><span style=color:#5f6364>// Pretend these are complex objects
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>posts </span><span style=color:#5fb3b3>= [
-  { </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;] },
-  { </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>react</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>vue-is-better</span><span style=color:#5fb3b3>&quot;] },
-  { </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;] },
-  { </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;] },
-];
-
-</span><span style=color:#c594c5>function </span><span style=color:#69c>dangerously_add_tags</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>acc</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>post</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>for</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>let </span><span style=color:#cccece>value </span><span style=color:#5fb3b3>of </span><span style=color:#cccece>post</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#cccece>acc</span><span style=color:#5fb3b3>.</span><span style=color:#69c>add</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>);
-  }
-
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>acc</span><span style=color:#5fb3b3>;
-}
-
-</span><span style=color:#cccece>posts</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dangerously_add_tags</span><span style=color:#5fb3b3>, new </span><span style=color:#fac863>Set</span><span style=color:#5fb3b3>());
-</span></code></pre><p>This is the result.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>Set(4) [ &quot;javascript&quot;, &quot;discuss&quot;, &quot;react&quot;, &quot;vue-is-better&quot; ]
-</span></code></pre><p>Think about the shape of our reducer. We have a <code>Set</code> with tags as our accumulator and our <code>value</code> is a "post object". We could say we have this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(Set, Object) -&gt; Set
-</span></code></pre><p>Technically <code>Object</code> can't be any object, it has to have a <code>tags</code> property. So is more like.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(Set, Post) -&gt; Set
-</span></code></pre><p>Anyway, this has the pattern I was talking about <code>(A, B) -> A</code>. The implementation of <code>dangerously_add_tags</code> demands that <code>B</code> must be of type <code>Post</code>. But in order for that function to be an effective <code>reducer</code> it needs to be able to return the same type of the first parameter, and we do that by returning <code>accumulator</code>.<h3 id=transformations>Transformations</h3><p>You've probably heard that you can implement other array methods using <code>.reduce</code>, while this is an interesting piece of trivia it's not very useful to do so. Why would you? Doesn't make any sense to me. What is useful about it is that you can combine the features of this methods into one. Have you ever wanted to filter and map at the same time? With <code>.reduce</code> you can.<p>Let's reuse our <code>posts</code> data here too.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>posts </span><span style=color:#5fb3b3>= [
-  {
-    </span><span style=color:#cccece>category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;,
-    </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;]
-  },
-  {
-    </span><span style=color:#cccece>category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>frameworks</span><span style=color:#5fb3b3>&quot;,
-    </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>react</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>vue-is-better</span><span style=color:#5fb3b3>&quot;]
-  },
-  {
-    </span><span style=color:#cccece>category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>watercooler</span><span style=color:#5fb3b3>&quot;,
-    </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;]
-  },
-  {
-    </span><span style=color:#cccece>category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>functional programming</span><span style=color:#5fb3b3>&quot;,
-    </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;]
-  },
-];
-</span></code></pre><p>What want to do this time is filter the ones that have the tag <code>discuss</code>, for those who pass the filter we want to get the category and capitalize it. How would that look like?<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>capitalize</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>].</span><span style=color:#69c>toUpperCase</span><span style=color:#5fb3b3>() + </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>1</span><span style=color:#5fb3b3>);
-}
-
-</span><span style=color:#c594c5>function </span><span style=color:#69c>filter_map_posts</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>acc</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>post</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#5f6364>// We&#39;re filtering, y&#39;all
-  </span><span style=color:#c594c5>if</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>post</span><span style=color:#5fb3b3>.</span><span style=color:#69c>tags</span><span style=color:#5fb3b3>.</span><span style=color:#69c>includes</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&#39;)) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>acc</span><span style=color:#5fb3b3>.</span><span style=color:#69c>concat</span><span style=color:#5fb3b3>(
-      </span><span style=color:#5f6364>// this is the mapping part
-      </span><span style=color:#69c>capitalize</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>post</span><span style=color:#5fb3b3>.</span><span style=color:#69c>category</span><span style=color:#5fb3b3>)
-    );
-  }
-	
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>acc</span><span style=color:#5fb3b3>;
-}
-
-</span><span style=color:#cccece>posts</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>filter_map_posts</span><span style=color:#5fb3b3>, []);
-</span></code></pre><p>Here is our result.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>Array [ &quot;Javascript&quot;, &quot;Watercooler&quot; ]
-</span></code></pre><p>Why does that work? Because if you check what the <code>reducer</code> does you would get this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(Array, Post) -&gt; Array
-</span></code></pre><h3 id=coordinating>Coordinating</h3><p>If you've seen any library that has a focus on functional programming chances are you've come across a function called <code>pipe</code>. This function is used to compose any arbitrary quantity of functions. The interface is something like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(
-  </span><span style=color:#cccece>some_function</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>another</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>serious_stuff</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>side_effects_ahead</span><span style=color:#5fb3b3>,
-);
-</span></code></pre><p>The idea here is that we "pipe" the result of one function to the next one in the list. Is effectively coordinating function calls. In this case the example above could be written like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>arg</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>side_effects_ahead</span><span style=color:#5fb3b3>(</span><span style=color:#69c>serious_stuff</span><span style=color:#5fb3b3>(</span><span style=color:#69c>another</span><span style=color:#5fb3b3>(</span><span style=color:#69c>some_function</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>arg</span><span style=color:#5fb3b3>))));
-}
-</span></code></pre><p>If you're wondering why do I bring this up, is because we can implement <code>pipe</code> using <code>.reduce</code>. If you squint your eyes a little bit you'll notice that what is happening in here is that we are applying functions to arguments. That's it. We are not doing anything else.<p>So what?<p>It's a binary operation! We turn that into a function.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>apply</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>arg</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>arg</span><span style=color:#5fb3b3>);
-}
-</span></code></pre><p>You know what works well with binary operations? Our friend <code>.reduce</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(...</span><span style=color:#f99157>fns</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>some_arg</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>fns</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>apply</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>some_arg</span><span style=color:#5fb3b3>);
-  };
-}
-</span></code></pre><p>The first step of <code>pipe</code> is gathering the list of functions and turn that into a proper array. Step two is returning the function that will trigger the function calls and get the initial state for our <code>.reduce</code>. At the end when you have everything in place, <code>.reduce</code> will take care of the rest. You can watch it in action.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>post </span><span style=color:#5fb3b3>= { 
-  </span><span style=color:#cccece>category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;,
-  </span><span style=color:#cccece>tags</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;] 
-}
-
-</span><span style=color:#c594c5>function </span><span style=color:#69c>capitalize</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>].</span><span style=color:#69c>toUpperCase</span><span style=color:#5fb3b3>() + </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>1</span><span style=color:#5fb3b3>);
-}
-
-</span><span style=color:#c594c5>function </span><span style=color:#69c>get_prop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>];
-  }
-}
-
-</span><span style=color:#c594c5>function </span><span style=color:#69c>exclaim</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>str </span><span style=color:#5fb3b3>+ &quot;</span><span style=color:#99c794>!!</span><span style=color:#5fb3b3>&quot;;
-}
-
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>exciting_category </span><span style=color:#5fb3b3>= </span><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(
-  </span><span style=color:#69c>get_prop</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>category</span><span style=color:#5fb3b3>&quot;),
-  </span><span style=color:#cccece>capitalize</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>exclaim
-</span><span style=color:#5fb3b3>);
-
-</span><span style=color:#69c>exciting_category</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>post</span><span style=color:#5fb3b3>);
-</span><span style=color:#5f6364>// =&gt; Javascript!!
-</span></code></pre><p>Cool, cool. Now, how on earth does <code>apply</code> follow the pattern?<p>Ah, good question. It's weird but we can still make it make sense (I guess). Look at it this way.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(Anything, Function) -&gt; Anything
-</span></code></pre><p>If you have a unit of literally anything and a function, <code>apply</code> will work. Keep in mind that in here there is no guarantee that your pipeline of function will not explode, that's your responsibility.<h3 id=state-changes-over-time>State changes over time</h3><p>Bonus track!! This is for the frontend developers out there.<p>If you have spend any amount of time reading about javascript libraries for state management maybe you've have heard of this thing called <a href=https://redux.js.org/>redux</a>. This library takes an interesting approach because it expects the user (the developer) to provide a <code>reducer</code> to handle state changes. Some people like that, others don't like it. But whether you're team redux or not, they're approach does make a ton of sense when you think about it. I'll show you.<p>Let's start with the <code>reducer</code>. In this case we need one with this shape.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(State, Action) -&gt; State
-</span></code></pre><p><code>State</code> and <code>Action</code> are just objects. There is nothing fancy happening. The <code>State</code> will look different depending on the application, the developers can do anything they want with it. The <code>Action</code> on the other hand must have a <code>type</code> property, and <code>redux</code> enforces this.<p>Let's pretend this is our app's state.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>state </span><span style=color:#5fb3b3>= {
-  </span><span style=color:#cccece>count</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>40</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>flag</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>false
-</span><span style=color:#5fb3b3>};
-</span></code></pre><p>Yes, a miracle of engineering.<p>Now that we now how <code>State</code> looks like, and we also know what an <code>Action</code> needs, we can write our <code>reducer</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>reducer</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>state</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>switch</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>action</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>type</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39;:
-      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
-        ...</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
-        </span><span style=color:#cccece>count</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>count </span><span style=color:#5fb3b3>+ </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>,
-      };
-    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39;:
-      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
-        ...</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
-        </span><span style=color:#cccece>count</span><span style=color:#5fb3b3>: </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>count </span><span style=color:#5fb3b3>- </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>,
-      };
-    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39;:
-      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
-        ...</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>,
-        </span><span style=color:#cccece>flag</span><span style=color:#5fb3b3>: !</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>flag</span><span style=color:#5fb3b3>,
-      };
-    </span><span style=color:#c594c5>default</span><span style=color:#5fb3b3>:
-      </span><span style=color:#c594c5>return </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>;
-  }
-}
-</span></code></pre><p>This is the funny part: we don't need <code>redux</code> to test this. I mean, this is just a generic <code>reducer</code>, we could just try it with <code>Array.reduce</code> first. If you do this you can see what it does right away.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>actions </span><span style=color:#5fb3b3>= [
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
-  { </span><span style=color:#cccece>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39; }
-];
-
-</span><span style=color:#cccece>actions</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>reducer</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>);
-</span></code></pre><p><code>actions.reduce</code> should give you another "instance" of your state. In our case after applying all those actions we should get this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#5fb3b3>{
-  </span><span style=color:#cccece>count</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>42</span><span style=color:#5fb3b3>,
-  </span><span style=color:#cccece>flag: </span><span style=color:#f99157>true
+<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta http-equiv=permissions-policy content="interest-cohort=()"><title>The case for reducers | Devlog</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,software,coding,development"><meta name=monetization content="$ilp.uphold.com/dFQbFZ49nJdQ"><meta name=description content="Reducers are good for many things, let's find out what those things are"><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020-2021 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>The case for reducers</h1><span class=post-date>2020-11-22
+| 10 min read
+| <a href=https://vonheikemen.github.io/devlog/es/web-development/the-case-for-reducers/>Leer en español</a></span><p>In a <a href=https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/>previous post</a> I talked about <code>.reduce</code>, how it worked and (what I think) it's ideal use case, this time around I'll cover some other use cases where <code>.reduce</code> could be a good fit. Now, you don't have to read that post but I will assume that you at least know how <code>Array.reduce</code> works. By the end of this post I hope that you learn how to recognize the places where <code>.reduce</code> would work perfectly.<h2 id=what-are-we-looking-for>What are we looking for?</h2><p>Patterns, we are looking for patterns. Well... just one. And to know what is it that we are looking for we need to take a look at the requirements of a <code>reducer</code>. Think about <code>reducers</code>, when you create one for <code>Array.reduce</code> sometimes it looks like this.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#5fb3b3>(</span><span style=color:#f99157>accumulator</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#5f6364>/*
+</span><span style=color:#5f6364>    some logic
+</span><span style=color:#5f6364>  */
+</span><span>  </span><span style=color:#c594c5>return </span><span>accumulator</span><span style=color:#5fb3b3>;
 </span><span style=color:#5fb3b3>}
-</span></code></pre><p>And there you have it, the core feature of <code>redux</code> without <code>redux</code>.<p>Let's take it one step further and introduce the concept of time. For this we will introduce a fake <code>redux</code> store. The store will be "real" but it'll be a cheap imitation. Let's do this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Store</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>reducer</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>state</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>let </span><span style=color:#cccece>_listener </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>;
-
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>get_state </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>() {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>;
-  };
-
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>subscribe </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>listener</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#cccece>_listener </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>listener</span><span style=color:#5fb3b3>;
-  };
-
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>dispatch </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#cccece>state </span><span style=color:#5fb3b3>= </span><span style=color:#69c>reducer</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>action</span><span style=color:#5fb3b3>);
-    </span><span style=color:#cccece>_listener </span><span style=color:#5fb3b3>&amp;&amp; </span><span style=color:#69c>_listener</span><span style=color:#5fb3b3>();
-
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>action</span><span style=color:#5fb3b3>;
-  };
-
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>get_state</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>dispatch</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>subscribe </span><span style=color:#5fb3b3>};
-}
-</span></code></pre><p>All good? You know what's happening in there? The part we care about the most is <code>dispatch</code>. This right here.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>dispatch </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#cccece>state </span><span style=color:#5fb3b3>= </span><span style=color:#69c>reducer</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>state</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>action</span><span style=color:#5fb3b3>);
-  </span><span style=color:#cccece>_listener </span><span style=color:#5fb3b3>&amp;&amp; </span><span style=color:#69c>_listener</span><span style=color:#5fb3b3>();
-
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>action</span><span style=color:#5fb3b3>;
-};
-</span></code></pre><p>This takes care of the process of updating the current <code>State</code>. Like I mentioned before, the <code>reducer</code> is the one that deals with the logic that dictates <strong>how</strong> the state will change. The <code>Store</code> takes care of logic that dictates <strong>when</strong> the state is updated. Enough about that, let's try it.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>ms</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>new </span><span style=color:#fac863>Promise</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>resolve </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setTimeout</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>resolve</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>ms</span><span style=color:#5fb3b3>));
-}
-
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>store </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Store</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>reducer</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>state</span><span style=color:#5fb3b3>);
-</span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>subscribe</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>() {
-  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_state</span><span style=color:#5fb3b3>());
-});
-
-(</span><span style=color:#c594c5>async function</span><span style=color:#5fb3b3>() {
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>500</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>500</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>700</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>400</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>800</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; });
-  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>100</span><span style=color:#5fb3b3>);
-
-  </span><span style=color:#cccece>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span style=color:#5fb3b3>({ </span><span style=color:#69c>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39; });
-})();
-</span></code></pre><p>You should have this messages on your screen (or browser console) with a little delay between each of them.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>- { count: 41, flag: false }
-- { count: 42, flag: false }
-- { count: 41, flag: false }
-- { count: 42, flag: false }
-- { count: 41, flag: false }
-- { count: 42, flag: false }
-- { count: 42, flag: true }
-</span></code></pre><p>Did you notice that the end result is the same as with <code>Array.reduce</code>? Now that's cool.<p>If you want to play around with this using the real <code>redux</code>, you can mess around with this pen.<p class=codepen data-height=600 data-theme-id=dark data-default-tab=js,result data-user=VonHeikemen data-slug-hash=zYBgObJ data-preview=true style="height:600px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid;margin:1em 0;padding:1em" data-pen-title="Using redux"><span>See the Pen <a href=https://codepen.io/VonHeikemen/pen/zYBgObJ>Using redux</a> by Heiker (<a href=https://codepen.io/VonHeikemen>@VonHeikemen</a>) on <a href=https://codepen.io>CodePen</a>.</span></p><script async src=https://static.codepen.io/assets/embed/ei.js></script><h2 id=conclusion>Conclusion</h2><p>I do hope by now <code>reducers</code> appear less scary for you. Remember, it's just.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>(A, B) -&gt; A
-</span></code></pre><p>That's it. There is no magic. If you can make any function behave like that, it'll work wonderfully inside anything that acts like <code>.reduce</code>.<h2 id=sources>Sources</h2><ul><li><a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce>Array.prototype.reduce()</a><li><a href=https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/>Reduce: how and when</a><li><a href=https://redux.js.org/api/store>Redux: Store</a></ul><hr><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://www.buymeacoffee.com/vonheikemen style=display:flex;justify-content:center target=_blank><img src=https://cdn.buymeacoffee.com/buttons/v2/default-blue.png alt="Buy Me A Coffee" style=height:60px!important;width:217px!important></a></div></div>
+</span></code></pre><p>We usually return a modified copy of <code>accumulator</code> but that's not important right now, the point is that we return the same "type" we got in the first parameter. Then the <strong>shape of the function</strong> would be something like this.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(Accumulator, Value) -&gt; Accumulator
+</span></code></pre><p>This is a concrete example but I want you to see it in a more abstract way. What we are really after are functions that have this shape.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(A, B) -&gt; A
+</span></code></pre><p>This is basically it. For a <code>reducer</code> to do it's job the only thing it needs is a binary function capable of returning the same type of its first parameter.<p>Still confused? Don't worry I'll spend the rest of this post showing examples where this pattern might show up.<h2 id=use-cases>Use cases</h2><h3 id=accumulators>Accumulators</h3><p>I guess this is the part where I show you a scenario where we sum an array of numbers of something like that. Let's not do that. Let's try a more complex scenario where an accumulator might be used.<p>Imagine we are in a codebase for some kind of blog system and we are making the profile page for the user. We want to show all the tags where the user has at least one article. You might want to retrieve that data from your database using a crazy query but that would take too much time, let's do a prototype first.<p>So before we do things the appropriate way we transform the array of posts into a <a rel=noopener target=_blank href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set>Set</a> of tags using <code>Array.reduce</code>, just to have something to work with.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#5f6364>// Pretend these are complex objects
+</span><span style=color:#c594c5>const </span><span>posts </span><span style=color:#5fb3b3>= </span><span>[
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;</span><span>] </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>react</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>vue-is-better</span><span style=color:#5fb3b3>&quot;</span><span>] </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;</span><span>] </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;</span><span>] </span><span style=color:#5fb3b3>},
+</span><span>]</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#c594c5>function </span><span style=color:#69c>dangerously_add_tags</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>acc</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>post</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>for</span><span>(</span><span style=color:#c594c5>let </span><span>value </span><span style=color:#5fb3b3>of </span><span>post</span><span style=color:#5fb3b3>.</span><span>tags) </span><span style=color:#5fb3b3>{
+</span><span>    acc</span><span style=color:#5fb3b3>.</span><span style=color:#69c>add</span><span>(value)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>  </span><span style=color:#c594c5>return </span><span>acc</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>posts</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span>(dangerously_add_tags</span><span style=color:#5fb3b3>, new </span><span>Set())</span><span style=color:#5fb3b3>;
+</span></code></pre><p>This is the result.<pre style=background-color:#2b2c2f;color:#cccece><code><span>Set(4) [ &quot;javascript&quot;, &quot;discuss&quot;, &quot;react&quot;, &quot;vue-is-better&quot; ]
+</span></code></pre><p>Think about the shape of our reducer. We have a <code>Set</code> with tags as our accumulator and our <code>value</code> is a "post object". We could say we have this.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(Set, Object) -&gt; Set
+</span></code></pre><p>Technically <code>Object</code> can't be any object, it has to have a <code>tags</code> property. So is more like.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(Set, Post) -&gt; Set
+</span></code></pre><p>Anyway, this has the pattern I was talking about <code>(A, B) -> A</code>. The implementation of <code>dangerously_add_tags</code> demands that <code>B</code> must be of type <code>Post</code>. But in order for that function to be an effective <code>reducer</code> it needs to be able to return the same type of the first parameter, and we do that by returning <code>accumulator</code>.<h3 id=transformations>Transformations</h3><p>You've probably heard that you can implement other array methods using <code>.reduce</code>, while this is an interesting piece of trivia it's not very useful to do so. Why would you? Doesn't make any sense to me. What is useful about it is that you can combine the features of this methods into one. Have you ever wanted to filter and map at the same time? With <code>.reduce</code> you can.<p>Let's reuse our <code>posts</code> data here too.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>posts </span><span style=color:#5fb3b3>= </span><span>[
+</span><span>  </span><span style=color:#5fb3b3>{
+</span><span>    category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;,
+</span><span>    tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;</span><span>]
+</span><span>  </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{
+</span><span>    category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>frameworks</span><span style=color:#5fb3b3>&quot;,
+</span><span>    tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>react</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>vue-is-better</span><span style=color:#5fb3b3>&quot;</span><span>]
+</span><span>  </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{
+</span><span>    category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>watercooler</span><span style=color:#5fb3b3>&quot;,
+</span><span>    tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;</span><span>]
+</span><span>  </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#5fb3b3>{
+</span><span>    category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>functional programming</span><span style=color:#5fb3b3>&quot;,
+</span><span>    tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;</span><span>]
+</span><span>  </span><span style=color:#5fb3b3>},
+</span><span>]</span><span style=color:#5fb3b3>;
+</span></code></pre><p>What want to do this time is filter the ones that have the tag <code>discuss</code>, for those who pass the filter we want to get the category and capitalize it. How would that look like?<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>capitalize</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span>str[</span><span style=color:#f99157>0</span><span>]</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span>() </span><span style=color:#5fb3b3>+ </span><span>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span>(</span><span style=color:#f99157>1</span><span>)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>function </span><span style=color:#69c>filter_map_posts</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>acc</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>post</span><span style=color:#5fb3b3>) {
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// We&#39;re filtering, y&#39;all
+</span><span>  </span><span style=color:#c594c5>if</span><span>(post</span><span style=color:#5fb3b3>.</span><span style=color:#69c>tags</span><span style=color:#5fb3b3>.</span><span style=color:#69c>includes</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&#39;</span><span>)) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>return </span><span>acc</span><span style=color:#5fb3b3>.</span><span style=color:#69c>concat</span><span>(
+</span><span style=color:#5fb3b3>      </span><span style=color:#5f6364>// this is the mapping part
+</span><span>      </span><span style=color:#69c>capitalize</span><span>(post</span><span style=color:#5fb3b3>.</span><span>category)
+</span><span>    )</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>	
+</span><span>  </span><span style=color:#c594c5>return </span><span>acc</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>posts</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span>(filter_map_posts</span><span style=color:#5fb3b3>, </span><span>[])</span><span style=color:#5fb3b3>;
+</span></code></pre><p>Here is our result.<pre style=background-color:#2b2c2f;color:#cccece><code><span>Array [ &quot;Javascript&quot;, &quot;Watercooler&quot; ]
+</span></code></pre><p>Why does that work? Because if you check what the <code>reducer</code> does you would get this.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(Array, Post) -&gt; Array
+</span></code></pre><h3 id=coordinating>Coordinating</h3><p>If you've seen any library that has a focus on functional programming chances are you've come across a function called <code>pipe</code>. This function is used to compose any arbitrary quantity of functions. The interface is something like this.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#69c>pipe</span><span>(
+</span><span>  some_function</span><span style=color:#5fb3b3>,
+</span><span>  another</span><span style=color:#5fb3b3>,
+</span><span>  serious_stuff</span><span style=color:#5fb3b3>,
+</span><span>  side_effects_ahead</span><span style=color:#5fb3b3>,
+</span><span>)</span><span style=color:#5fb3b3>;
+</span></code></pre><p>The idea here is that we "pipe" the result of one function to the next one in the list. Is effectively coordinating function calls. In this case the example above could be written like this.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>arg</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>side_effects_ahead</span><span>(</span><span style=color:#69c>serious_stuff</span><span>(</span><span style=color:#69c>another</span><span>(</span><span style=color:#69c>some_function</span><span>(arg))))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>If you're wondering why do I bring this up, is because we can implement <code>pipe</code> using <code>.reduce</code>. If you squint your eyes a little bit you'll notice that what is happening in here is that we are applying functions to arguments. That's it. We are not doing anything else.<p>So what?<p>It's a binary operation! We turn that into a function.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>apply</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>arg</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>fn</span><span>(arg)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>You know what works well with binary operations? Our friend <code>.reduce</code>.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>pipe</span><span style=color:#5fb3b3>(...</span><span style=color:#f99157>fns</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>some_arg</span><span style=color:#5fb3b3>) {
+</span><span>    </span><span style=color:#c594c5>return </span><span>fns</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span>(apply</span><span style=color:#5fb3b3>, </span><span>some_arg)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>The first step of <code>pipe</code> is gathering the list of functions and turn that into a proper array. Step two is returning the function that will trigger the function calls and get the initial state for our <code>.reduce</code>. At the end when you have everything in place, <code>.reduce</code> will take care of the rest. You can watch it in action.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>post </span><span style=color:#5fb3b3>= { 
+</span><span>  category</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;,
+</span><span>  tags</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>discuss</span><span style=color:#5fb3b3>&quot;</span><span>] 
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>function </span><span style=color:#69c>capitalize</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span>str[</span><span style=color:#f99157>0</span><span>]</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span>() </span><span style=color:#5fb3b3>+ </span><span>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span>(</span><span style=color:#f99157>1</span><span>)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>function </span><span style=color:#69c>get_prop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>    </span><span style=color:#c594c5>return </span><span>obj[key]</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>function </span><span style=color:#69c>exclaim</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>str</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span>str </span><span style=color:#5fb3b3>+ &quot;</span><span style=color:#99c794>!!</span><span style=color:#5fb3b3>&quot;;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>const </span><span>exciting_category </span><span style=color:#5fb3b3>= </span><span style=color:#69c>pipe</span><span>(
+</span><span>  </span><span style=color:#69c>get_prop</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>category</span><span style=color:#5fb3b3>&quot;</span><span>)</span><span style=color:#5fb3b3>,
+</span><span>  capitalize</span><span style=color:#5fb3b3>,
+</span><span>  exclaim
+</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#69c>exciting_category</span><span>(post)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5f6364>// =&gt; Javascript!!
+</span></code></pre><p>Cool, cool. Now, how on earth does <code>apply</code> follow the pattern?<p>Ah, good question. It's weird but we can still make it make sense (I guess). Look at it this way.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(Anything, Function) -&gt; Anything
+</span></code></pre><p>If you have a unit of literally anything and a function, <code>apply</code> will work. Keep in mind that in here there is no guarantee that your pipeline of function will not explode, that's your responsibility.<h3 id=state-changes-over-time>State changes over time</h3><p>Bonus track!! This is for the frontend developers out there.<p>If you have spend any amount of time reading about javascript libraries for state management maybe you've have heard of this thing called <a rel=noopener target=_blank href=https://redux.js.org/>redux</a>. This library takes an interesting approach because it expects the user (the developer) to provide a <code>reducer</code> to handle state changes. Some people like that, others don't like it. But whether you're team redux or not, they're approach does make a ton of sense when you think about it. I'll show you.<p>Let's start with the <code>reducer</code>. In this case we need one with this shape.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(State, Action) -&gt; State
+</span></code></pre><p><code>State</code> and <code>Action</code> are just objects. There is nothing fancy happening. The <code>State</code> will look different depending on the application, the developers can do anything they want with it. The <code>Action</code> on the other hand must have a <code>type</code> property, and <code>redux</code> enforces this.<p>Let's pretend this is our app's state.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>state </span><span style=color:#5fb3b3>= {
+</span><span>  count</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>40</span><span style=color:#5fb3b3>,
+</span><span>  flag</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>false
+</span><span style=color:#5fb3b3>};
+</span></code></pre><p>Yes, a miracle of engineering.<p>Now that we now how <code>State</code> looks like, and we also know what an <code>Action</code> needs, we can write our <code>reducer</code>.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>reducer</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>state</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>switch</span><span>(action</span><span style=color:#5fb3b3>.</span><span>type) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39;:
+</span><span>      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
+</span><span>        </span><span style=color:#5fb3b3>...</span><span>state</span><span style=color:#5fb3b3>,
+</span><span>        count</span><span style=color:#5fb3b3>: </span><span>state</span><span style=color:#5fb3b3>.</span><span>count </span><span style=color:#5fb3b3>+ </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>,
+</span><span>      </span><span style=color:#5fb3b3>};
+</span><span>    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39;:
+</span><span>      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
+</span><span>        </span><span style=color:#5fb3b3>...</span><span>state</span><span style=color:#5fb3b3>,
+</span><span>        count</span><span style=color:#5fb3b3>: </span><span>state</span><span style=color:#5fb3b3>.</span><span>count </span><span style=color:#5fb3b3>- </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>,
+</span><span>      </span><span style=color:#5fb3b3>};
+</span><span>    </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39;:
+</span><span>      </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
+</span><span>        </span><span style=color:#5fb3b3>...</span><span>state</span><span style=color:#5fb3b3>,
+</span><span>        flag</span><span style=color:#5fb3b3>: !</span><span>state</span><span style=color:#5fb3b3>.</span><span>flag</span><span style=color:#5fb3b3>,
+</span><span>      </span><span style=color:#5fb3b3>};
+</span><span>    </span><span style=color:#c594c5>default</span><span style=color:#5fb3b3>:
+</span><span>      </span><span style=color:#c594c5>return </span><span>state</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>This is the funny part: we don't need <code>redux</code> to test this. I mean, this is just a generic <code>reducer</code>, we could just try it with <code>Array.reduce</code> first. If you do this you can see what it does right away.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>actions </span><span style=color:#5fb3b3>= </span><span>[
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; },
+</span><span>  </span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39; }
+</span><span>]</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>actions</span><span style=color:#5fb3b3>.</span><span style=color:#69c>reduce</span><span>(reducer</span><span style=color:#5fb3b3>, </span><span>state)</span><span style=color:#5fb3b3>;
+</span></code></pre><p><code>actions.reduce</code> should give you another "instance" of your state. In our case after applying all those actions we should get this.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#5fb3b3>{
+</span><span>  count</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>42</span><span style=color:#5fb3b3>,
+</span><span>  flag</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>true
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>And there you have it, the core feature of <code>redux</code> without <code>redux</code>.<p>Let's take it one step further and introduce the concept of time. For this we will introduce a fake <code>redux</code> store. The store will be "real" but it'll be a cheap imitation. Let's do this.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>Store</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>reducer</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>state</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>let </span><span>_listener </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>get_state </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>() {
+</span><span>    </span><span style=color:#c594c5>return </span><span>state</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span>
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>subscribe </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>listener</span><span style=color:#5fb3b3>) {
+</span><span>    _listener </span><span style=color:#5fb3b3>= </span><span>listener</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span>
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>dispatch </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
+</span><span>    state </span><span style=color:#5fb3b3>= </span><span style=color:#69c>reducer</span><span>(state</span><span style=color:#5fb3b3>, </span><span>action)</span><span style=color:#5fb3b3>;
+</span><span>    _listener </span><span style=color:#5fb3b3>&amp;&amp; </span><span style=color:#69c>_listener</span><span>()</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>    </span><span style=color:#c594c5>return </span><span>action</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span>
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{ </span><span>get_state</span><span style=color:#5fb3b3>, </span><span>dispatch</span><span style=color:#5fb3b3>, </span><span>subscribe </span><span style=color:#5fb3b3>};
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>All good? You know what's happening in there? The part we care about the most is <code>dispatch</code>. This right here.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span style=color:#69c>dispatch </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>action</span><span style=color:#5fb3b3>) {
+</span><span>  state </span><span style=color:#5fb3b3>= </span><span style=color:#69c>reducer</span><span>(state</span><span style=color:#5fb3b3>, </span><span>action)</span><span style=color:#5fb3b3>;
+</span><span>  _listener </span><span style=color:#5fb3b3>&amp;&amp; </span><span style=color:#69c>_listener</span><span>()</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  </span><span style=color:#c594c5>return </span><span>action</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>};
+</span></code></pre><p>This takes care of the process of updating the current <code>State</code>. Like I mentioned before, the <code>reducer</code> is the one that deals with the logic that dictates <strong>how</strong> the state will change. The <code>Store</code> takes care of logic that dictates <strong>when</strong> the state is updated. Enough about that, let's try it.<pre data-lang=js style=background-color:#2b2c2f;color:#cccece class=language-js><code class=language-js data-lang=js><span style=color:#c594c5>function </span><span style=color:#69c>delay</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>ms</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>new </span><span>Promise(</span><span style=color:#f99157>resolve </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setTimeout</span><span>(resolve</span><span style=color:#5fb3b3>, </span><span>ms))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>const </span><span>store </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Store</span><span>(reducer</span><span style=color:#5fb3b3>, </span><span>state)</span><span style=color:#5fb3b3>;
+</span><span>store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>subscribe</span><span>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>() {
+</span><span>  </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_state</span><span>())</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>(</span><span style=color:#c594c5>async function</span><span style=color:#5fb3b3>() {
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>500</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>500</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>700</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>400</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>subtract</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>800</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>add</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>await </span><span style=color:#69c>delay</span><span>(</span><span style=color:#f99157>100</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>  store</span><span style=color:#5fb3b3>.</span><span style=color:#69c>dispatch</span><span>(</span><span style=color:#5fb3b3>{ </span><span>type</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>toggle_flag</span><span style=color:#5fb3b3>&#39; }</span><span>)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}</span><span>)()</span><span style=color:#5fb3b3>;
+</span></code></pre><p>You should have this messages on your screen (or browser console) with a little delay between each of them.<pre style=background-color:#2b2c2f;color:#cccece><code><span>- { count: 41, flag: false }
+</span><span>- { count: 42, flag: false }
+</span><span>- { count: 41, flag: false }
+</span><span>- { count: 42, flag: false }
+</span><span>- { count: 41, flag: false }
+</span><span>- { count: 42, flag: false }
+</span><span>- { count: 42, flag: true }
+</span></code></pre><p>Did you notice that the end result is the same as with <code>Array.reduce</code>? Now that's cool.<p>If you want to play around with this using the real <code>redux</code>, you can mess around with this pen.<p class=codepen data-height=600 data-theme-id=dark data-default-tab=js,result data-user=VonHeikemen data-slug-hash=zYBgObJ data-preview=true style="height:600px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid;margin:1em 0;padding:1em" data-pen-title="Using redux"><span>See the Pen <a href=https://codepen.io/VonHeikemen/pen/zYBgObJ>Using redux</a> by Heiker (<a href=https://codepen.io/VonHeikemen>@VonHeikemen</a>) on <a href=https://codepen.io>CodePen</a>.</span></p><script async src=https://static.codepen.io/assets/embed/ei.js></script><h2 id=conclusion>Conclusion</h2><p>I do hope by now <code>reducers</code> appear less scary for you. Remember, it's just.<pre style=background-color:#2b2c2f;color:#cccece><code><span>(A, B) -&gt; A
+</span></code></pre><p>That's it. There is no magic. If you can make any function behave like that, it'll work wonderfully inside anything that acts like <code>.reduce</code>.<h2 id=sources>Sources</h2><ul><li><a rel=noopener target=_blank href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce>Array.prototype.reduce()</a><li><a href=https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/>Reduce: how and when</a><li><a rel=noopener target=_blank href=https://redux.js.org/api/store>Redux: Store</a></ul><hr><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://www.buymeacoffee.com/vonheikemen style=display:flex;justify-content:center target=_blank><img src=https://cdn.buymeacoffee.com/buttons/v2/default-blue.png alt="Buy Me A Coffee" style=height:60px!important;width:217px!important></a></div></div>

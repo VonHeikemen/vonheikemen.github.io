@@ -1,366 +1,337 @@
-<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta http-equiv=permissions-policy content="interest-cohort=()"><title>Devlog | Lenses A.K.A. composable getters and setters</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,functional-programming,software,coding,development"><meta name=monetization content="$ilp.uphold.com/dFQbFZ49nJdQ"><meta name=description content="Let's build a mostly adequate lenses implementation"><link rel=canonical href=https://dev.to/vonheikemen/lenses-a-k-a-composable-getters-and-setters-16jd><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>Whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020-2021 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Lenses A.K.A. composable getters and setters</h1><span class=post-date>2019-11-27
+<!doctype html><html lang=en><meta http-equiv=x-ua-compatible content="IE=edge"><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta http-equiv=permissions-policy content="interest-cohort=()"><title>Lenses A.K.A. composable getters and setters | Devlog</title><link rel=stylesheet href=https://vonheikemen.github.io/devlog/print.css media=print><link rel=stylesheet href=https://vonheikemen.github.io/devlog/styles.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"><meta name=keywords content="javascript,functional-programming,software,coding,development"><meta name=monetization content="$ilp.uphold.com/dFQbFZ49nJdQ"><meta name=description content="Let's build a mostly adequate lenses implementation"><link rel=canonical href=https://dev.to/vonheikemen/lenses-a-k-a-composable-getters-and-setters-16jd><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a></ul>© 2020-2021 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Lenses A.K.A. composable getters and setters</h1><span class=post-date>2019-11-27
 | Originally published at
 <a href=https://dev.to/vonheikemen/lenses-a-k-a-composable-getters-and-setters-16jd>dev.to</a>
-| <a href=https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/>Leer en español</a></span><p>This time around we will figure out what are lenses, how do they look like in javascript and hopefully will build a mostly adequate implementation.<p>Let us first take a step back and ask.<h2 id=what-are-getters-and-setters>What are getters and setters?</h2><p>This are functions that have one goal, they get or set value. But of course that is not the only thing they are good for. Most use cases I've seen involve triggering a side-effect when a value changes or put some validations to prevent undesired behavior.<p>In javascript you could make them explicit by doing something like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Some</span><span style=color:#5fb3b3>() {
-  </span><span style=color:#c594c5>let </span><span style=color:#cccece>thing </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>stuff</span><span style=color:#5fb3b3>&#39;;
-
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
-    </span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>() {
-      </span><span style=color:#5f6364>// you can do anything in here
-      </span><span style=color:#c594c5>return </span><span style=color:#cccece>thing</span><span style=color:#5fb3b3>;
-    },
-    </span><span style=color:#69c>set_thing</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
-      </span><span style=color:#5f6364>// same in here.
-      </span><span style=color:#cccece>thing </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-    }
-  }
-}
-
-</span><span style=color:#c594c5>let </span><span style=color:#cccece>obj </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Some</span><span style=color:#5fb3b3>();
-</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>(); </span><span style=color:#5f6364>// =&gt; &#39;stuff&#39;
-
-</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>set_thing</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>other stuff</span><span style=color:#5fb3b3>&#39;);
-
-</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>(); </span><span style=color:#5f6364>// =&gt; &#39;other stuff&#39;
-</span></code></pre><p>Or you could make then implicit.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>let </span><span style=color:#cccece>some </span><span style=color:#5fb3b3>= {};
-
-</span><span style=color:#fac863>Object</span><span style=color:#5fb3b3>.</span><span style=color:#69c>defineProperty</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>some</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>thing</span><span style=color:#5fb3b3>&#39;, {
-  </span><span style=color:#69c>get</span><span style=color:#5fb3b3>() {
-    </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>thing</span><span style=color:#5fb3b3>&#39;;
-  },
-  </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>can&#39;t touch this</span><span style=color:#5fb3b3>&quot;);
-  }
-});
-
-</span><span style=color:#cccece>some</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>thing </span><span style=color:#5f6364>// =&gt; &#39;thing&#39;
-</span><span style=color:#cccece>some</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>thing </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>what?</span><span style=color:#5fb3b3>&#39;;
-
+| 12 min read
+| <a href=https://vonheikemen.github.io/devlog/es/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/>Leer en español</a></span><p>This time around we will figure out what are lenses, how do they look like in javascript and hopefully will build a mostly adequate implementation.<p>Let us first take a step back and ask.<h2 id=what-are-getters-and-setters>What are getters and setters?</h2><p>This are functions that have one goal, they get or set value. But of course that is not the only thing they are good for. Most use cases I've seen involve triggering a side-effect when a value changes or put some validations to prevent undesired behavior.<p>In javascript you could make them explicit by doing something like this.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Some</span><span style=color:#5fb3b3>() {
+</span><span>  </span><span style=color:#c594c5>let </span><span>thing </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>stuff</span><span style=color:#5fb3b3>&#39;;
+</span><span>
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>() {
+</span><span style=color:#5fb3b3>      </span><span style=color:#5f6364>// you can do anything in here
+</span><span>      </span><span style=color:#c594c5>return </span><span>thing</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#5fb3b3>},
+</span><span>    </span><span style=color:#69c>set_thing</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
+</span><span style=color:#5fb3b3>      </span><span style=color:#5f6364>// same in here.
+</span><span>      thing </span><span style=color:#5fb3b3>= </span><span>value</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#5fb3b3>}
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#c594c5>let </span><span>obj </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Some</span><span>()</span><span style=color:#5fb3b3>;
+</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span>()</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;stuff&#39;
+</span><span>
+</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>set_thing</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>other stuff</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span>()</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;other stuff&#39;
+</span></code></pre><p>Or you could make then implicit.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>let </span><span>some </span><span style=color:#5fb3b3>= {};
+</span><span>
+</span><span style=color:#fac863>Object</span><span style=color:#5fb3b3>.</span><span style=color:#69c>defineProperty</span><span>(some</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>thing</span><span style=color:#5fb3b3>&#39;, {
+</span><span>  </span><span style=color:#69c>get</span><span style=color:#5fb3b3>() {
+</span><span>    </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>thing</span><span style=color:#5fb3b3>&#39;;
+</span><span>  </span><span style=color:#5fb3b3>},
+</span><span>  </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>value</span><span style=color:#5fb3b3>) {
+</span><span>    </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>can&#39;t touch this</span><span style=color:#5fb3b3>&quot;</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>some</span><span style=color:#5fb3b3>.</span><span>thing </span><span style=color:#5f6364>// =&gt; &#39;thing&#39;
+</span><span>some</span><span style=color:#5fb3b3>.</span><span>thing </span><span style=color:#5fb3b3>= &#39;</span><span style=color:#99c794>what?</span><span style=color:#5fb3b3>&#39;;
+</span><span>
 </span><span style=color:#5f6364>//
-// can&#39;t touch this
-//
-
-</span><span style=color:#cccece>some</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>thing </span><span style=color:#5f6364>// =&gt; &#39;thing&#39;
-</span></code></pre><p>But what is so wrong in there that some people feel the need to use something like lenses?<p>Let's start with that second example. I can tell you that some people don't like magical things, just the thought of a function being executed without their knowledge is bad enough.<p>The first example is bit more interesting. Let's see it again.<pre style=background-color:#2b2c2f>
-<code><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>(); </span><span style=color:#5f6364>// =&gt; &#39;stuff&#39;
-
-</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>set_thing</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>other stuff</span><span style=color:#5fb3b3>&#39;);
-
-</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span style=color:#5fb3b3>(); </span><span style=color:#5f6364>// =&gt; &#39;other stuff&#39;
-</span></code></pre><p>You use <code>get_thing</code> you get <code>stuff</code>, so far so good. But here is the problem you use it again in exactly the same way and yet you get <code>other stuff</code>. You kinda have to keep track of the last call to <code>set_thing</code> in order to know what you would get. We don't have the ability to predict the result from <code>get_thing</code>, you can't be 100% sure what it will do without looking around (or knowing) others parts of the code.<h2 id=is-there-a-better-way>Is there a better way?</h2><p>I wouldn't say better. Let us just try lenses, you can decide later if you like them or not.<p>What do we need? Lenses are a functional programing thing so the first thing we will do is create helper functions. This will be the first version of getters and setters.<pre style=background-color:#2b2c2f>
-<code><span style=color:#5f6364>// Getter
+</span><span style=color:#5f6364>// can&#39;t touch this
+</span><span style=color:#5f6364>//
+</span><span>
+</span><span>some</span><span style=color:#5fb3b3>.</span><span>thing </span><span style=color:#5f6364>// =&gt; &#39;thing&#39;
+</span></code></pre><p>But what is so wrong in there that some people feel the need to use something like lenses?<p>Let's start with that second example. I can tell you that some people don't like magical things, just the thought of a function being executed without their knowledge is bad enough.<p>The first example is bit more interesting. Let's see it again.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span>()</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;stuff&#39;
+</span><span>
+</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>set_thing</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>other stuff</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>get_thing</span><span>()</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;other stuff&#39;
+</span></code></pre><p>You use <code>get_thing</code> you get <code>stuff</code>, so far so good. But here is the problem you use it again in exactly the same way and yet you get <code>other stuff</code>. You kinda have to keep track of the last call to <code>set_thing</code> in order to know what you would get. We don't have the ability to predict the result from <code>get_thing</code>, you can't be 100% sure what it will do without looking around (or knowing) others parts of the code.<h2 id=is-there-a-better-way>Is there a better way?</h2><p>I wouldn't say better. Let us just try lenses, you can decide later if you like them or not.<p>What do we need? Lenses are a functional programing thing so the first thing we will do is create helper functions. This will be the first version of getters and setters.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#5f6364>// Getter
 </span><span style=color:#c594c5>function </span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>];
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span>obj[key]</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#5f6364>// Setter
 </span><span style=color:#c594c5>function </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>(</span><span style=color:#f99157>val</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#fac863>Object</span><span style=color:#5fb3b3>.</span><span style=color:#69c>assign</span><span style=color:#5fb3b3>({}, </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>, {[</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>]: </span><span style=color:#cccece>val</span><span style=color:#5fb3b3>});
-}
-</span></code></pre><p>Now for the "constructor."<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{ </span><span style=color:#cccece>getter</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>setter </span><span style=color:#5fb3b3>};
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>(</span><span style=color:#f99157>val</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=&gt; </span><span style=color:#fac863>Object</span><span style=color:#5fb3b3>.</span><span style=color:#69c>assign</span><span>(</span><span style=color:#5fb3b3>{}, </span><span>obj</span><span style=color:#5fb3b3>, {</span><span>[key]</span><span style=color:#5fb3b3>: </span><span>val</span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>Now for the "constructor."<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>{ </span><span>getter</span><span style=color:#5fb3b3>, </span><span>setter </span><span style=color:#5fb3b3>};
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#5f6364>// That is it.
-</span></code></pre><p>You'll notice that <code>Lens</code> does absolutely nothing, I'm doing that on purpose. You can already tell that most of the work is in the getter and setter. Your lens are going to be as robust as your getter and setter implementations.<p>Now we need to make them do something, we will make three little functions.<p><code>view</code>: gets a value<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-   </span><span style=color:#c594c5>return </span><span style=color:#cccece>lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-}
-</span></code></pre><p><code>over</code>: transforms a value using a callback<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>setter</span><span style=color:#5fb3b3>(
-    </span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>)),
-    </span><span style=color:#cccece>obj
-  </span><span style=color:#5fb3b3>);
-}
-</span></code></pre><p><code>set</code>: replaces a value<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>always</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>val</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>val</span><span style=color:#5fb3b3>;
-}
-
+</span></code></pre><p>You'll notice that <code>Lens</code> does absolutely nothing, I'm doing that on purpose. You can already tell that most of the work is in the getter and setter. Your lens are going to be as robust as your getter and setter implementations.<p>Now we need to make them do something, we will make three little functions.<p><code>view</code>: gets a value<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>   </span><span style=color:#c594c5>return </span><span>lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getter</span><span>(obj)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p><code>over</code>: transforms a value using a callback<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span>lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>setter</span><span>(
+</span><span>    </span><span style=color:#69c>fn</span><span>(lens</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getter</span><span>(obj))</span><span style=color:#5fb3b3>,
+</span><span>    obj
+</span><span>  )</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p><code>set</code>: replaces a value<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>always</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>val</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=&gt; </span><span>val</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>val</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#5f6364>// don&#39;t you love reusability?
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>always</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>val</span><span style=color:#5fb3b3>), </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-}
-</span></code></pre><p>It's time for a test drive.<p>Let's say we have an object named <code>alice</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>alice </span><span style=color:#5fb3b3>= {
-  </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>Alice Jones</span><span style=color:#5fb3b3>&#39;,
-  </span><span style=color:#cccece>address</span><span style=color:#5fb3b3>: [&#39;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&#39;],
-  </span><span style=color:#cccece>pets</span><span style=color:#5fb3b3>: { </span><span style=color:#cccece>dog</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>joker</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>cat</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>batman</span><span style=color:#5fb3b3>&#39; }
-};
-</span></code></pre><p>We'll start with something simple, inspect the values. This is how you would do it.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(
-  </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;)),
-  </span><span style=color:#cccece>alice
-</span><span style=color:#5fb3b3>);
-
-</span><span style=color:#cccece>result </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
-</span></code></pre><p>I see you're not impressed and that's fine. I just wrote a lot characters just to get a name. But here is the thing, these are standalone functions. We can always compose and create new ones. Let's start with that <code>Lens(prop, assoc)</code> bit, we will put that in a function because we will use it a lot.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>), </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>));
-}
-</span></code></pre><p>And now...<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);
-
-</span><span style=color:#cccece>result </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
-</span></code></pre><p>You could even take it one step further and make a function that just expects the object that holds the data.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>get_name </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// don&#39;t you love reusability?
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>over</span><span>(lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>always</span><span>(val)</span><span style=color:#5fb3b3>, </span><span>obj)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>It's time for a test drive.<p>Let's say we have an object named <code>alice</code>.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>alice </span><span style=color:#5fb3b3>= {
+</span><span>  name</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>Alice Jones</span><span style=color:#5fb3b3>&#39;,
+</span><span>  address</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&#39;</span><span>]</span><span style=color:#5fb3b3>,
+</span><span>  pets</span><span style=color:#5fb3b3>: { </span><span>dog</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>joker</span><span style=color:#5fb3b3>&#39;, </span><span>cat</span><span style=color:#5fb3b3>: &#39;</span><span style=color:#99c794>batman</span><span style=color:#5fb3b3>&#39; }
+</span><span style=color:#5fb3b3>};
+</span></code></pre><p>We'll start with something simple, inspect the values. This is how you would do it.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>result </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span>(
+</span><span>  </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>prop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assoc</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>))</span><span style=color:#5fb3b3>,
+</span><span>  alice
+</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>result </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
+</span></code></pre><p>I see you're not impressed and that's fine. I just wrote a lot characters just to get a name. But here is the thing, these are standalone functions. We can always compose and create new ones. Let's start with that <code>Lens(prop, assoc)</code> bit, we will put that in a function because we will use it a lot.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>prop</span><span>(key)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assoc</span><span>(key))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>And now...<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>result </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>result </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
+</span></code></pre><p>You could even take it one step further and make a function that just expects the object that holds the data.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span style=color:#69c>get_name </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>view</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, </span><span>obj)</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// or with partial application
-
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>get_name </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>view</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;));
-
+</span><span>
+</span><span style=color:#c594c5>const </span><span>get_name </span><span style=color:#5fb3b3>= </span><span>view</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span>(</span><span style=color:#f99157>null</span><span style=color:#5fb3b3>, </span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>))</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// or using a curry utility.
-// view = curry(view);
-
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>get_name </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;));
-
+</span><span style=color:#5f6364>// view = curry(view);
+</span><span>
+</span><span style=color:#c594c5>const </span><span>get_name </span><span style=color:#5fb3b3>= </span><span style=color:#69c>view</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>))</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// and you can also do this with `set` and `over`
-</span></code></pre><p>Enough of that. Going back to our test, let's try <code>over</code>. Let's transform the name to uppercase.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>upper </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>str </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span style=color:#5fb3b3>();
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>uppercase_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#cccece>upper</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);
-
+</span></code></pre><p>Enough of that. Going back to our test, let's try <code>over</code>. Let's transform the name to uppercase.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span style=color:#69c>upper </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>str </span><span style=color:#c594c5>=&gt; </span><span>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span>()</span><span style=color:#5fb3b3>;
+</span><span style=color:#c594c5>const </span><span>uppercase_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, </span><span>upper</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// see?
-</span><span style=color:#69c>get_name</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>uppercase_alice</span><span style=color:#5fb3b3>) </span><span style=color:#5f6364>// =&gt; &quot;ALICE JONES&quot;
-
-</span><span style=color:#69c>get_name</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>)           </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
-</span></code></pre><p>It's <code>set</code>'s turn.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>alice_smith </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;), &#39;</span><span style=color:#99c794>Alice smith</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);
-
-</span><span style=color:#69c>get_name</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>alice_smith</span><span style=color:#5fb3b3>) </span><span style=color:#5f6364>// =&gt; &quot;Alice smith&quot;
-
-</span><span style=color:#69c>get_name</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>)       </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
-</span></code></pre><p>That's all nice but the name is just one property, what about nested object keys or arrays? Ah, you see now that is where it gets awkward with our current implementation. Right now you could do the following.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>let </span><span style=color:#cccece>dog </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(
-  </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;)(</span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>)),
-  </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;)(</span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>))
-);
-
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &quot;joker&quot;
-
-// or bring a `compose` utility
-
-</span><span style=color:#cccece>dog </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(
-  </span><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&quot;), </span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&quot;)),
-  </span><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&quot;), </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(&quot;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&quot;))
-);
-
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &quot;joker&quot;
-</span></code></pre><p>I hear you. Don't worry, I wouldn't let you write stuff like that. It is because of situations like this one that people say stuff like "just use <a href=https://ramdajs.com/>Ramda</a>" (and those people are right) But what makes ramda so special?<h2 id=making-it-special>Making it special</h2><p>If you go to ramda's documentation and search "lens" you'll see that they have a <code>lensProp</code> function which is basically our <code>Lprop</code>. And if you go to the source you'll see something like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>lensProp</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>k</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>prop</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>k</span><span style=color:#5fb3b3>), </span><span style=color:#69c>assoc</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>k</span><span style=color:#5fb3b3>));
-}
-</span></code></pre><p>Look at that. But now the comments on their source and documentation suggest that it also works with just one property. Let's go back to our "lens" search on their site. Now we will check that curious <code>lensPath</code> function. It is exactly what we want. Once again we check out the source.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>lensPath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>p</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>path</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>p</span><span style=color:#5fb3b3>), </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>p</span><span style=color:#5fb3b3>));
-}
-
+</span><span style=color:#69c>get_name</span><span>(uppercase_alice) </span><span style=color:#5f6364>// =&gt; &quot;ALICE JONES&quot;
+</span><span>
+</span><span style=color:#69c>get_name</span><span>(alice)           </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
+</span></code></pre><p>It's <code>set</code>'s turn.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>alice_smith </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>name</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>Alice smith</span><span style=color:#5fb3b3>&#39;, </span><span>alice)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#69c>get_name</span><span>(alice_smith) </span><span style=color:#5f6364>// =&gt; &quot;Alice smith&quot;
+</span><span>
+</span><span style=color:#69c>get_name</span><span>(alice)       </span><span style=color:#5f6364>// =&gt; &quot;Alice Jones&quot;
+</span></code></pre><p>That's all nice but the name is just one property, what about nested object keys or arrays? Ah, you see now that is where it gets awkward with our current implementation. Right now you could do the following.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>let </span><span>dog </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lens</span><span>(
+</span><span>  </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>prop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;</span><span>)(</span><span style=color:#69c>prop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;</span><span>)(obj))</span><span style=color:#5fb3b3>,
+</span><span>  </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>assoc</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;</span><span>)(</span><span style=color:#69c>assoc</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;</span><span>)(obj))
+</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#69c>view</span><span>(dog</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &quot;joker&quot;
+</span><span>
+</span><span style=color:#5f6364>// or bring a `compose` utility
+</span><span>
+</span><span>dog </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lens</span><span>(
+</span><span>  </span><span style=color:#69c>compose</span><span>(</span><span style=color:#69c>prop</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&quot;</span><span>)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>prop</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&quot;</span><span>))</span><span style=color:#5fb3b3>,
+</span><span>  </span><span style=color:#69c>compose</span><span>(</span><span style=color:#69c>assoc</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&quot;</span><span>)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assoc</span><span>(</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&quot;</span><span>))
+</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#69c>view</span><span>(dog</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &quot;joker&quot;
+</span></code></pre><p>I hear you. Don't worry, I wouldn't let you write stuff like that. It is because of situations like this one that people say stuff like "just use <a rel=noopener target=_blank href=https://ramdajs.com/>Ramda</a>" (and those people are right) But what makes ramda so special?<h2 id=making-it-special>Making it special</h2><p>If you go to ramda's documentation and search "lens" you'll see that they have a <code>lensProp</code> function which is basically our <code>Lprop</code>. And if you go to the source you'll see something like this.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>lensProp</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>k</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(</span><span style=color:#69c>prop</span><span>(k)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assoc</span><span>(k))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>Look at that. But now the comments on their source and documentation suggest that it also works with just one property. Let's go back to our "lens" search on their site. Now we will check that curious <code>lensPath</code> function. It is exactly what we want. Once again we check out the source.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>lensPath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>p</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(</span><span style=color:#69c>path</span><span>(p)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assocPath</span><span>(p))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#5f6364>// Welcome to functional programming, y&#39;all.
-</span></code></pre><p>The secret sauce it's made of other functions that don't have any specific ties to lenses. Isn't that just nice?<p>What is in that <code>path</code> function? Let's check it out. I'll show you a slightly different version, but it works just the same.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>path</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#5f6364>// this is for currying
-    // they do this by wrapping `path`
-    // with a helper function
-    // but this is what happens
-    // they return a function that remembers `keys`
-    // and expects `obj`
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>path</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>);
-  }
-
-  </span><span style=color:#c594c5>var </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>;
-  </span><span style=color:#c594c5>var </span><span style=color:#cccece>idx </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>;
-  </span><span style=color:#c594c5>while </span><span style=color:#5fb3b3>(</span><span style=color:#cccece>idx </span><span style=color:#5fb3b3>&lt; </span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#5f6364>// we don&#39;t like null
-    </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#cccece>result </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>null</span><span style=color:#5fb3b3>) {
-      </span><span style=color:#c594c5>return</span><span style=color:#5fb3b3>;
-    }
-    
-    </span><span style=color:#5f6364>// this is how we get the nested keys
-    </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>idx</span><span style=color:#5fb3b3>]];
-    </span><span style=color:#cccece>idx </span><span style=color:#5fb3b3>+= </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>;
-  }
-
-  </span><span style=color:#c594c5>return </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>;
-}
-</span></code></pre><p>I'll do the same with <code>assocPath</code>. For this one they make use of some internal helpers but again this is what happens.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>path</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>value</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#5f6364>// again with the currying stuff
-  // this is why they have a helper function
-  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>assocPath</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>path</span><span style=color:#5fb3b3>);
-  } </span><span style=color:#c594c5>else if </span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>2</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>assocPath</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span style=color:#5fb3b3>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>path</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>);
-  }
-
-  </span><span style=color:#5f6364>// check for an empty list
-  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#cccece>path</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-  }
-
-  </span><span style=color:#c594c5>var </span><span style=color:#cccece>index </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>path</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>];
-
-  </span><span style=color:#5f6364>// Beware: recursion ahead.
-  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(</span><span style=color:#cccece>path</span><span style=color:#5fb3b3>.</span><span style=color:#cccece>length </span><span style=color:#5fb3b3>&gt; </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>) {
-    </span><span style=color:#c594c5>var </span><span style=color:#cccece>is_empty </span><span style=color:#5fb3b3>=
-      typeof </span><span style=color:#cccece>obj </span><span style=color:#5fb3b3>!== &#39;</span><span style=color:#99c794>object</span><span style=color:#5fb3b3>&#39; || </span><span style=color:#cccece>obj </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>null </span><span style=color:#5fb3b3>|| !</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>hasOwnProperty</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>index</span><span style=color:#5fb3b3>);
-
-    </span><span style=color:#5f6364>// if the current object is &quot;empty&quot;
-    // we need to create a new one
-    // otherwise we pick the object at `index`
-    </span><span style=color:#c594c5>var </span><span style=color:#cccece>next </span><span style=color:#5fb3b3>= </span><span style=color:#cccece>is_empty
-      </span><span style=color:#5fb3b3>? typeof </span><span style=color:#cccece>path</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>1</span><span style=color:#5fb3b3>] === &#39;</span><span style=color:#99c794>number</span><span style=color:#5fb3b3>&#39;
-        ? []
-        : {}
-      : </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>index</span><span style=color:#5fb3b3>];
-
-    </span><span style=color:#5f6364>// we start again the process
-    // but now with a reduced `path`
-    // and `next` as the new `obj`
-    </span><span style=color:#cccece>value </span><span style=color:#5fb3b3>= </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#fac863>Array</span><span style=color:#5fb3b3>.</span><span style=color:#f99157>prototype</span><span style=color:#5fb3b3>.</span><span style=color:#69c>slice</span><span style=color:#5fb3b3>.</span><span style=color:#69c>call</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>path</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>), </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>next</span><span style=color:#5fb3b3>);
-  }
-
-  </span><span style=color:#5f6364>// the base cases
-  // we either have to copy an array
-  // or an object
-  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>(typeof </span><span style=color:#cccece>index </span><span style=color:#5fb3b3>=== &#39;</span><span style=color:#99c794>number</span><span style=color:#5fb3b3>&#39; &amp;&amp; </span><span style=color:#fac863>Array</span><span style=color:#5fb3b3>.</span><span style=color:#69c>isArray</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>)) {
-    </span><span style=color:#5f6364>// make a &#39;copy&#39; of the array
-    </span><span style=color:#c594c5>var </span><span style=color:#cccece>arr </span><span style=color:#5fb3b3>= [].</span><span style=color:#69c>concat</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-
-    </span><span style=color:#cccece>arr</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>index</span><span style=color:#5fb3b3>] = </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>arr</span><span style=color:#5fb3b3>;
-  } </span><span style=color:#c594c5>else </span><span style=color:#5fb3b3>{
-    </span><span style=color:#5f6364>// old school &#39;copy&#39;
-    </span><span style=color:#c594c5>var </span><span style=color:#cccece>result </span><span style=color:#5fb3b3>= {};
-    </span><span style=color:#c594c5>for </span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>var </span><span style=color:#cccece>p </span><span style=color:#5fb3b3>in </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>) {
-      </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>p</span><span style=color:#5fb3b3>] = </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>p</span><span style=color:#5fb3b3>];
-    }
-
-    </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>[</span><span style=color:#cccece>index</span><span style=color:#5fb3b3>] = </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>result</span><span style=color:#5fb3b3>;
-  }
-}
-</span></code></pre><p>With our new found knowledge we can create an <code>Lpath</code> function and improve <code>Lprop</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Lpath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>path</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>), </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>));
-}
-
+</span></code></pre><p>The secret sauce it's made of other functions that don't have any specific ties to lenses. Isn't that just nice?<p>What is in that <code>path</code> function? Let's check it out. I'll show you a slightly different version, but it works just the same.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>path</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>if </span><span>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span>) </span><span style=color:#5fb3b3>{
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// this is for currying
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// they do this by wrapping `path`
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// with a helper function
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// but this is what happens
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// they return a function that remembers `keys`
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// and expects `obj`
+</span><span>    </span><span style=color:#c594c5>return </span><span>path</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span>keys)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>  </span><span style=color:#c594c5>var </span><span>result </span><span style=color:#5fb3b3>= </span><span>obj</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>var </span><span>idx </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>0</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>while </span><span>(idx </span><span style=color:#5fb3b3>&lt; </span><span>keys</span><span style=color:#5fb3b3>.</span><span>length) </span><span style=color:#5fb3b3>{
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// we don&#39;t like null
+</span><span>    </span><span style=color:#c594c5>if </span><span>(result </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>null</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>      </span><span style=color:#c594c5>return</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#5fb3b3>}
+</span><span>    
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// this is how we get the nested keys
+</span><span>    result </span><span style=color:#5fb3b3>= </span><span>result[keys[idx]]</span><span style=color:#5fb3b3>;
+</span><span>    idx </span><span style=color:#5fb3b3>+= </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>  </span><span style=color:#c594c5>return </span><span>result</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>I'll do the same with <code>assocPath</code>. For this one they make use of some internal helpers but again this is what happens.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>path</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>value</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// again with the currying stuff
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// this is why they have a helper function
+</span><span>  </span><span style=color:#c594c5>if </span><span>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>1</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>return </span><span>assocPath</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span>path)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>} </span><span style=color:#c594c5>else if </span><span>(</span><span style=color:#ec5f67>arguments</span><span style=color:#5fb3b3>.</span><span>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>2</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>return </span><span>assocPath</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bind</span><span>(</span><span style=color:#ec5f67>this</span><span style=color:#5fb3b3>, </span><span>path</span><span style=color:#5fb3b3>, </span><span>value)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// check for an empty list
+</span><span>  </span><span style=color:#c594c5>if </span><span>(path</span><span style=color:#5fb3b3>.</span><span>length </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>0</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>return </span><span>value</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>  </span><span style=color:#c594c5>var </span><span>index </span><span style=color:#5fb3b3>= </span><span>path[</span><span style=color:#f99157>0</span><span>]</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// Beware: recursion ahead.
+</span><span>  </span><span style=color:#c594c5>if </span><span>(path</span><span style=color:#5fb3b3>.</span><span>length </span><span style=color:#5fb3b3>&gt; </span><span style=color:#f99157>1</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>var </span><span>is_empty </span><span style=color:#5fb3b3>=
+</span><span>      </span><span style=color:#5fb3b3>typeof </span><span>obj </span><span style=color:#5fb3b3>!== &#39;</span><span style=color:#99c794>object</span><span style=color:#5fb3b3>&#39; || </span><span>obj </span><span style=color:#5fb3b3>=== </span><span style=color:#f99157>null </span><span style=color:#5fb3b3>|| !</span><span>obj</span><span style=color:#5fb3b3>.</span><span style=color:#69c>hasOwnProperty</span><span>(index)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// if the current object is &quot;empty&quot;
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// we need to create a new one
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// otherwise we pick the object at `index`
+</span><span>    </span><span style=color:#c594c5>var </span><span>next </span><span style=color:#5fb3b3>= </span><span>is_empty
+</span><span>      </span><span style=color:#5fb3b3>? typeof </span><span>path[</span><span style=color:#f99157>1</span><span>] </span><span style=color:#5fb3b3>=== &#39;</span><span style=color:#99c794>number</span><span style=color:#5fb3b3>&#39;
+</span><span>        </span><span style=color:#5fb3b3>? </span><span>[]
+</span><span>        </span><span style=color:#5fb3b3>: {}
+</span><span>      </span><span style=color:#5fb3b3>: </span><span>obj[index]</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// we start again the process
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// but now with a reduced `path`
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// and `next` as the new `obj`
+</span><span>    value </span><span style=color:#5fb3b3>= </span><span style=color:#69c>assocPath</span><span>(</span><span style=color:#fac863>Array</span><span style=color:#5fb3b3>.</span><span style=color:#69c>prototype</span><span style=color:#5fb3b3>.</span><span>slice</span><span style=color:#5fb3b3>.</span><span style=color:#69c>call</span><span>(path</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>1</span><span>)</span><span style=color:#5fb3b3>, </span><span>value</span><span style=color:#5fb3b3>, </span><span>next)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// the base cases
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// we either have to copy an array
+</span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// or an object
+</span><span>  </span><span style=color:#c594c5>if </span><span>(</span><span style=color:#5fb3b3>typeof </span><span>index </span><span style=color:#5fb3b3>=== &#39;</span><span style=color:#99c794>number</span><span style=color:#5fb3b3>&#39; &amp;&amp; </span><span style=color:#fac863>Array</span><span style=color:#5fb3b3>.</span><span style=color:#69c>isArray</span><span>(obj)) </span><span style=color:#5fb3b3>{
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// make a &#39;copy&#39; of the array
+</span><span>    </span><span style=color:#c594c5>var </span><span>arr </span><span style=color:#5fb3b3>= </span><span>[]</span><span style=color:#5fb3b3>.</span><span style=color:#69c>concat</span><span>(obj)</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span>    arr[index] </span><span style=color:#5fb3b3>= </span><span>value</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>return </span><span>arr</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>} </span><span style=color:#c594c5>else </span><span style=color:#5fb3b3>{
+</span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// old school &#39;copy&#39;
+</span><span>    </span><span style=color:#c594c5>var </span><span>result </span><span style=color:#5fb3b3>= {};
+</span><span>    </span><span style=color:#c594c5>for </span><span>(</span><span style=color:#c594c5>var </span><span>p </span><span style=color:#5fb3b3>in </span><span>obj) </span><span style=color:#5fb3b3>{
+</span><span>      result[p] </span><span style=color:#5fb3b3>= </span><span>obj[p]</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#5fb3b3>}
+</span><span>
+</span><span>    result[index] </span><span style=color:#5fb3b3>= </span><span>value</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>return </span><span>result</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>}
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>With our new found knowledge we can create an <code>Lpath</code> function and improve <code>Lprop</code>.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Lpath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>path</span><span>(keys)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assocPath</span><span>(keys))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>path</span><span style=color:#5fb3b3>([</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>]), </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>([</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>]));
-}
-</span></code></pre><p>Now we can do more stuff, like playing with <code>alice</code> pets.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>dog_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lpath</span><span style=color:#5fb3b3>([&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;]);
-
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);     </span><span style=color:#5f6364>// =&gt; &#39;joker&#39;
-
-</span><span style=color:#c594c5>let </span><span style=color:#cccece>new_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>upper</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_alice</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &#39;JOKER&#39;
-
-</span><span style=color:#cccece>new_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>Joker</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dog_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_alice</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &#39;Joker&#39;
-</span></code></pre><p>All of this works great but there is just one tiny detail, the lenses that the current constructor creates aren't composable. Imagine that we have three lenses from differents files or something and we want to combine them like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>pet_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>imaginary_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>);
-</span></code></pre><p>This wouldn't work because <code>compose</code> expects a list of functions and our lenses are objects. But we can fix this (in a very funny way) with some functional programming trickery.<p>Let's start with our lenses constructor. Instead of returning an object we are going to return a "curried" function that takes a callback, an object and returns a <strong>Functor</strong> (a thing that has <code>map</code> method and follows <a href=https://github.com/fantasyland/fantasy-land#functor>this rules</a>)<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#f99157>fn </span><span style=color:#c594c5>=&gt; </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
-    </span><span style=color:#c594c5>const </span><span style=color:#cccece>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>focus </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>focus</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-    </span><span style=color:#c594c5>const </span><span style=color:#cccece>functor </span><span style=color:#5fb3b3>= </span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#69c>getter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>));
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>functor</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>apply</span><span style=color:#5fb3b3>);
-  };
-}
-</span></code></pre><p>What's with the a <code>fn => obj =></code> stuff? That is going to help us with our <code>compose</code> situation. Now after you provide the <code>getter</code> and <code>setter</code> you get a function, and that is what makes <code>compose</code> happy.<p>And <code>functor.map</code>? That is going to make sure that we can still use a lens as unit (like <code>Lprop('pets')</code>) but also a part of a chain using <code>compose</code>.<p>In case you are wondering what the good folks at ramda do different, they use their own bulletproof implementation of <code>map</code>.<p>Now we modify <code>view</code> and <code>over</code>. Starting with <code>view</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>constant </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>constant</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>) });
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>constant</span><span style=color:#5fb3b3>)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>).</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-}
-</span></code></pre><p>That <code>constant</code> thing might look like is too much, but it does the job. Things can get crazy in those <code>compose</code> chains, that just makes sure the value you want stays safe.<p>What about <code>over</code>? It will do almost the same thing, except that in this case we do need to use the <code>setter</code> function.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>identity </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>setter </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span style=color:#5fb3b3>(</span><span style=color:#69c>setter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>)) });
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>val </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span style=color:#5fb3b3>(</span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>val</span><span style=color:#5fb3b3>));
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>apply</span><span style=color:#5fb3b3>)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>).</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-}
-</span></code></pre><p>And now we should have a mostly adequate <code>Lens</code> implementation. The whole thing without dependencies (<code>path</code> and <code>assocPath</code>) should look like this.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#f99157>fn </span><span style=color:#c594c5>=&gt; </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
-    </span><span style=color:#c594c5>const </span><span style=color:#cccece>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>focus </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>focus</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-    </span><span style=color:#c594c5>const </span><span style=color:#cccece>functor </span><span style=color:#5fb3b3>= </span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#69c>getter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>));
-    </span><span style=color:#c594c5>return </span><span style=color:#cccece>functor</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>apply</span><span style=color:#5fb3b3>);
-  };
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>path</span><span>([key])</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assocPath</span><span>([key]))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>Now we can do more stuff, like playing with <code>alice</code> pets.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>dog_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lpath</span><span>([</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>dog</span><span style=color:#5fb3b3>&#39;</span><span>])</span><span style=color:#5fb3b3>;
+</span><span>
+</span><span style=color:#69c>view</span><span>(dog_lens</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>;     </span><span style=color:#5f6364>// =&gt; &#39;joker&#39;
+</span><span>
+</span><span style=color:#c594c5>let </span><span>new_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span>(dog_lens</span><span style=color:#5fb3b3>, </span><span>upper</span><span style=color:#5fb3b3>, </span><span>alice)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(dog_lens</span><span style=color:#5fb3b3>, </span><span>new_alice)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;JOKER&#39;
+</span><span>
+</span><span>new_alice </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span>(dog_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>Joker</span><span style=color:#5fb3b3>&#39;, </span><span>alice)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(dog_lens</span><span style=color:#5fb3b3>, </span><span>new_alice)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &#39;Joker&#39;
+</span></code></pre><p>All of this works great but there is just one tiny detail, the lenses that the current constructor creates aren't composable. Imagine that we have three lenses from differents files or something and we want to combine them like this.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#69c>compose</span><span>(pet_lens</span><span style=color:#5fb3b3>, </span><span>imaginary_lens</span><span style=color:#5fb3b3>, </span><span>dragon_lens)</span><span style=color:#5fb3b3>;
+</span></code></pre><p>This wouldn't work because <code>compose</code> expects a list of functions and our lenses are objects. But we can fix this (in a very funny way) with some functional programming trickery.<p>Let's start with our lenses constructor. Instead of returning an object we are going to return a "curried" function that takes a callback, an object and returns a <strong>Functor</strong> (a thing that has <code>map</code> method and follows <a rel=noopener target=_blank href=https://github.com/fantasyland/fantasy-land#functor>this rules</a>)<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#f99157>fn </span><span style=color:#c594c5>=&gt; </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>const </span><span style=color:#69c>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>focus </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setter</span><span>(focus</span><span style=color:#5fb3b3>, </span><span>obj)</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>const </span><span>functor </span><span style=color:#5fb3b3>= </span><span style=color:#69c>fn</span><span>(</span><span style=color:#69c>getter</span><span>(obj))</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>return </span><span>functor</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span>(apply)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>What's with the a <code>fn => obj =></code> stuff? That is going to help us with our <code>compose</code> situation. Now after you provide the <code>getter</code> and <code>setter</code> you get a function, and that is what makes <code>compose</code> happy.<p>And <code>functor.map</code>? That is going to make sure that we can still use a lens as unit (like <code>Lprop('pets')</code>) but also a part of a chain using <code>compose</code>.<p>In case you are wondering what the good folks at ramda do different, they use their own bulletproof implementation of <code>map</code>.<p>Now we modify <code>view</code> and <code>over</code>. Starting with <code>view</code>.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>constant </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span>(</span><span style=color:#5fb3b3>{ </span><span>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>constant</span><span>(value) </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(constant)(obj)</span><span style=color:#5fb3b3>.</span><span>value</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>That <code>constant</code> thing might look like is too much, but it does the job. Things can get crazy in those <code>compose</code> chains, that just makes sure the value you want stays safe.<p>What about <code>over</code>? It will do almost the same thing, except that in this case we do need to use the <code>setter</code> function.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>identity </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span>(</span><span style=color:#5fb3b3>{ </span><span>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>setter </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span>(</span><span style=color:#69c>setter</span><span>(value)) </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>val </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span>(</span><span style=color:#69c>fn</span><span>(val))</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(apply)(obj)</span><span style=color:#5fb3b3>.</span><span>value</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>And now we should have a mostly adequate <code>Lens</code> implementation. The whole thing without dependencies (<code>path</code> and <code>assocPath</code>) should look like this.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>function </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>getter</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>setter</span><span style=color:#5fb3b3>) {
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#f99157>fn </span><span style=color:#c594c5>=&gt; </span><span style=color:#f99157>obj </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>const </span><span style=color:#69c>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>focus </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>setter</span><span>(focus</span><span style=color:#5fb3b3>, </span><span>obj)</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>const </span><span>functor </span><span style=color:#5fb3b3>= </span><span style=color:#69c>fn</span><span>(</span><span style=color:#69c>getter</span><span>(obj))</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#c594c5>return </span><span>functor</span><span style=color:#5fb3b3>.</span><span style=color:#69c>map</span><span>(apply)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#5fb3b3>};
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>constant </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>constant</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>) });
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>constant</span><span style=color:#5fb3b3>)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>).</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-}
-
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>constant </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span>(</span><span style=color:#5fb3b3>{ </span><span>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>constant</span><span>(value) </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(constant)(obj)</span><span style=color:#5fb3b3>.</span><span>value</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>fn</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>identity </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span style=color:#5fb3b3>({ </span><span style=color:#cccece>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>setter </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span style=color:#5fb3b3>(</span><span style=color:#69c>setter</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>)) });
-  </span><span style=color:#c594c5>const </span><span style=color:#cccece>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>val </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span style=color:#5fb3b3>(</span><span style=color:#69c>fn</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>val</span><span style=color:#5fb3b3>));
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>apply</span><span style=color:#5fb3b3>)(</span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>).</span><span style=color:#cccece>value</span><span style=color:#5fb3b3>;
-}
-
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>identity </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>value </span><span style=color:#c594c5>=&gt; </span><span>(</span><span style=color:#5fb3b3>{ </span><span>value</span><span style=color:#5fb3b3>, </span><span style=color:#69c>map</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>setter </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span>(</span><span style=color:#69c>setter</span><span>(value)) </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>const </span><span style=color:#69c>apply </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>val </span><span style=color:#c594c5>=&gt; </span><span style=color:#69c>identity</span><span>(</span><span style=color:#69c>fn</span><span>(val))</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>lens</span><span>(apply)(obj)</span><span style=color:#5fb3b3>.</span><span>value</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>lens</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>val</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>obj</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>always</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>val</span><span style=color:#5fb3b3>), </span><span style=color:#cccece>obj</span><span style=color:#5fb3b3>);
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>over</span><span>(lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>always</span><span>(val)</span><span style=color:#5fb3b3>, </span><span>obj)</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>key</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>path</span><span style=color:#5fb3b3>([</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>]), </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>([</span><span style=color:#cccece>key</span><span style=color:#5fb3b3>]));
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>path</span><span>([key])</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assocPath</span><span>([key]))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>Lpath</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>keys</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span style=color:#5fb3b3>(</span><span style=color:#69c>path</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>), </span><span style=color:#69c>assocPath</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>keys</span><span style=color:#5fb3b3>));
-}
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#69c>Lens</span><span>(</span><span style=color:#69c>path</span><span>(keys)</span><span style=color:#5fb3b3>, </span><span style=color:#69c>assocPath</span><span>(keys))</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>always</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>val</span><span style=color:#5fb3b3>) {
-  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>val</span><span style=color:#5fb3b3>;
-}
-</span></code></pre><p>But can you believe me if I said it works? You shouldn't. Let's make some tests. We'll bring back <code>alice</code> and add her sister <code>calie</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>alice </span><span style=color:#5fb3b3>= {
-  </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Alice Jones</span><span style=color:#5fb3b3>&quot;,
-  </span><span style=color:#cccece>address</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&quot;],
-  </span><span style=color:#cccece>pets</span><span style=color:#5fb3b3>: { </span><span style=color:#cccece>dog</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>joker</span><span style=color:#5fb3b3>&quot;, </span><span style=color:#cccece>cat</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>batman</span><span style=color:#5fb3b3>&quot;, </span><span style=color:#cccece>imaginary</span><span style=color:#5fb3b3>: { </span><span style=color:#cccece>dragon</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>harley</span><span style=color:#5fb3b3>&quot; } }
-};
-
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>calie </span><span style=color:#5fb3b3>= {
-  </span><span style=color:#cccece>name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>calie Jones</span><span style=color:#5fb3b3>&quot;,
-  </span><span style=color:#cccece>address</span><span style=color:#5fb3b3>: [&quot;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&quot;],
-  </span><span style=color:#cccece>pets</span><span style=color:#5fb3b3>: { </span><span style=color:#cccece>dog</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>riddler</span><span style=color:#5fb3b3>&quot;, </span><span style=color:#cccece>cat</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>ivy</span><span style=color:#5fb3b3>&quot;, </span><span style=color:#cccece>imaginary</span><span style=color:#5fb3b3>: { </span><span style=color:#cccece>dragon</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>hush</span><span style=color:#5fb3b3>&quot; } },
-  </span><span style=color:#cccece>friend</span><span style=color:#5fb3b3>: [</span><span style=color:#cccece>alice</span><span style=color:#5fb3b3>]
-};
-</span></code></pre><p>And because we planned ahead we have some lenses already available.<pre style=background-color:#2b2c2f>
-<code><span style=color:#5f6364>// some generic lens
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>head_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>);
-
+</span><span>  </span><span style=color:#c594c5>return </span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=&gt; </span><span>val</span><span style=color:#5fb3b3>;
+</span><span style=color:#5fb3b3>}
+</span></code></pre><p>But can you believe me if I said it works? You shouldn't. Let's make some tests. We'll bring back <code>alice</code> and add her sister <code>calie</code>.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>alice </span><span style=color:#5fb3b3>= {
+</span><span>  name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>Alice Jones</span><span style=color:#5fb3b3>&quot;,
+</span><span>  address</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&quot;</span><span>]</span><span style=color:#5fb3b3>,
+</span><span>  pets</span><span style=color:#5fb3b3>: { </span><span>dog</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>joker</span><span style=color:#5fb3b3>&quot;, </span><span>cat</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>batman</span><span style=color:#5fb3b3>&quot;, </span><span>imaginary</span><span style=color:#5fb3b3>: { </span><span>dragon</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>harley</span><span style=color:#5fb3b3>&quot; } }
+</span><span style=color:#5fb3b3>};
+</span><span>
+</span><span style=color:#c594c5>const </span><span>calie </span><span style=color:#5fb3b3>= {
+</span><span>  name</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>calie Jones</span><span style=color:#5fb3b3>&quot;,
+</span><span>  address</span><span style=color:#5fb3b3>: </span><span>[</span><span style=color:#5fb3b3>&quot;</span><span style=color:#99c794>22 Walnut St</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>San Francisco</span><span style=color:#5fb3b3>&quot;, &quot;</span><span style=color:#99c794>CA</span><span style=color:#5fb3b3>&quot;</span><span>]</span><span style=color:#5fb3b3>,
+</span><span>  pets</span><span style=color:#5fb3b3>: { </span><span>dog</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>riddler</span><span style=color:#5fb3b3>&quot;, </span><span>cat</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>ivy</span><span style=color:#5fb3b3>&quot;, </span><span>imaginary</span><span style=color:#5fb3b3>: { </span><span>dragon</span><span style=color:#5fb3b3>: &quot;</span><span style=color:#99c794>hush</span><span style=color:#5fb3b3>&quot; } },
+</span><span>  friend</span><span style=color:#5fb3b3>: </span><span>[alice]
+</span><span style=color:#5fb3b3>};
+</span></code></pre><p>And because we planned ahead we have some lenses already available.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#5f6364>// some generic lens
+</span><span style=color:#c594c5>const </span><span>head_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#f99157>0</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// specific lens
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>bff_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>friend</span><span style=color:#5fb3b3>&#39;), </span><span style=color:#cccece>head_lens</span><span style=color:#5fb3b3>); 
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>imaginary_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lpath</span><span style=color:#5fb3b3>([&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>imaginary</span><span style=color:#5fb3b3>&#39;]);
-</span></code></pre><p>Say that we want to do something with their <code>dragons</code>, all we have to do is <code>compose</code>.<pre style=background-color:#2b2c2f>
-<code><span style=color:#c594c5>const </span><span style=color:#cccece>dragon_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>imaginary_lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>Lprop</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>dragon</span><span style=color:#5fb3b3>&#39;));
-
+</span><span style=color:#c594c5>const </span><span>bff_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span>(</span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>friend</span><span style=color:#5fb3b3>&#39;</span><span>)</span><span style=color:#5fb3b3>, </span><span>head_lens)</span><span style=color:#5fb3b3>; 
+</span><span style=color:#c594c5>const </span><span>imaginary_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>Lpath</span><span>([</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>pets</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>imaginary</span><span style=color:#5fb3b3>&#39;</span><span>])</span><span style=color:#5fb3b3>;
+</span></code></pre><p>Say that we want to do something with their <code>dragons</code>, all we have to do is <code>compose</code>.<pre data-lang=javascript style=background-color:#2b2c2f;color:#cccece class=language-javascript><code class=language-javascript data-lang=javascript><span style=color:#c594c5>const </span><span>dragon_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span>(imaginary_lens</span><span style=color:#5fb3b3>, </span><span style=color:#69c>Lprop</span><span>(</span><span style=color:#5fb3b3>&#39;</span><span style=color:#99c794>dragon</span><span style=color:#5fb3b3>&#39;</span><span>))</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// just for fun
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>bff_dragon_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>); 
-
+</span><span style=color:#c594c5>const </span><span>bff_dragon_lens </span><span style=color:#5fb3b3>= </span><span style=color:#69c>compose</span><span>(bff_lens</span><span style=color:#5fb3b3>, </span><span>dragon_lens)</span><span style=color:#5fb3b3>; 
+</span><span>
 </span><span style=color:#5f6364>// demo
-</span><span style=color:#c594c5>const </span><span style=color:#cccece>upper </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>str </span><span style=color:#c594c5>=&gt; </span><span style=color:#cccece>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span style=color:#5fb3b3>();
-
+</span><span style=color:#c594c5>const </span><span style=color:#69c>upper </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>str </span><span style=color:#c594c5>=&gt; </span><span>str</span><span style=color:#5fb3b3>.</span><span style=color:#69c>toUpperCase</span><span>()</span><span style=color:#5fb3b3>;
+</span><span>
 </span><span style=color:#5f6364>// view
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);         </span><span style=color:#5f6364>// =&gt; &quot;hush&quot;
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);     </span><span style=color:#5f6364>// =&gt; &quot;harley&quot;
-
-// over
-</span><span style=color:#c594c5>let </span><span style=color:#cccece>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>upper</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_calie</span><span style=color:#5fb3b3>);     </span><span style=color:#5f6364>// =&gt; &quot;HUSH&quot;
-
-</span><span style=color:#cccece>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>upper</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_calie</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &quot;HARLEY&quot;
-
-// set
-</span><span style=color:#cccece>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>fluffykins</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_calie</span><span style=color:#5fb3b3>);     </span><span style=color:#5f6364>// =&gt; &quot;fluffykins&quot;
-
-</span><span style=color:#cccece>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_dragon_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>pumpkin</span><span style=color:#5fb3b3>&#39;, </span><span style=color:#cccece>calie</span><span style=color:#5fb3b3>);
-</span><span style=color:#69c>view</span><span style=color:#5fb3b3>(</span><span style=color:#cccece>bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span style=color:#cccece>new_calie</span><span style=color:#5fb3b3>); </span><span style=color:#5f6364>// =&gt; &quot;pumpkin&quot;
-</span></code></pre><p>So we just manipulated a deeply nested object property by composing lenses. If you're not excited then I don't know what to tell you. We just solve a problem by composing functions!<p>These things can be hard to sell because they require for you to write in a certain style in order to make the most out of it. And for people who write javascript there are libraries out there that solve the same problem in a more convenient way, or at least in a way that is more suitable for their style.<p>Anyway, if you're still interested in seeing lenses in a non trivial context checkout <a href=https://github.com/kwasniew/hyperapp-realworld-example-app>this repository</a>, it is a <a href=https://github.com/gothinkster/realworld>real world example app</a> (kinda like medium.com clone) that uses hyperapp to handle the frontend. In it the author chose to use lenses to handle state of the app.<h2 id=sources>Sources</h2><ul><li><a href=https://ramdajs.com/docs/>ramda - docs</a><li><a href=https://gist.github.com/branneman/f06bd451f74e5bc1725db23be682d4fe>fp-lenses.js</a><li><a href="https://www.youtube.com/watch?v=IoVaArsh6tM">Lambda World 2018 - Functional Lenses in JavaScript (video)</a></ul><hr><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://www.buymeacoffee.com/vonheikemen style=display:flex;justify-content:center target=_blank><img src=https://cdn.buymeacoffee.com/buttons/v2/default-blue.png alt="Buy Me A Coffee" style=height:60px!important;width:217px!important></a></div></div>
+</span><span style=color:#69c>view</span><span>(dragon_lens</span><span style=color:#5fb3b3>, </span><span>calie)</span><span style=color:#5fb3b3>;         </span><span style=color:#5f6364>// =&gt; &quot;hush&quot;
+</span><span style=color:#69c>view</span><span>(bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span>calie)</span><span style=color:#5fb3b3>;     </span><span style=color:#5f6364>// =&gt; &quot;harley&quot;
+</span><span>
+</span><span style=color:#5f6364>// over
+</span><span style=color:#c594c5>let </span><span>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span>(dragon_lens</span><span style=color:#5fb3b3>, </span><span>upper</span><span style=color:#5fb3b3>, </span><span>calie)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(dragon_lens</span><span style=color:#5fb3b3>, </span><span>new_calie)</span><span style=color:#5fb3b3>;     </span><span style=color:#5f6364>// =&gt; &quot;HUSH&quot;
+</span><span>
+</span><span>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>over</span><span>(bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span>upper</span><span style=color:#5fb3b3>, </span><span>calie)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span>new_calie)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &quot;HARLEY&quot;
+</span><span>
+</span><span style=color:#5f6364>// set
+</span><span>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span>(dragon_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>fluffykins</span><span style=color:#5fb3b3>&#39;, </span><span>calie)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(dragon_lens</span><span style=color:#5fb3b3>, </span><span>new_calie)</span><span style=color:#5fb3b3>;     </span><span style=color:#5f6364>// =&gt; &quot;fluffykins&quot;
+</span><span>
+</span><span>new_calie </span><span style=color:#5fb3b3>= </span><span style=color:#69c>set</span><span>(bff_dragon_lens</span><span style=color:#5fb3b3>, &#39;</span><span style=color:#99c794>pumpkin</span><span style=color:#5fb3b3>&#39;, </span><span>calie)</span><span style=color:#5fb3b3>;
+</span><span style=color:#69c>view</span><span>(bff_dragon_lens</span><span style=color:#5fb3b3>, </span><span>new_calie)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// =&gt; &quot;pumpkin&quot;
+</span></code></pre><p>So we just manipulated a deeply nested object property by composing lenses. If you're not excited then I don't know what to tell you. We just solve a problem by composing functions!<p>These things can be hard to sell because they require for you to write in a certain style in order to make the most out of it. And for people who write javascript there are libraries out there that solve the same problem in a more convenient way, or at least in a way that is more suitable for their style.<p>Anyway, if you're still interested in seeing lenses in a non trivial context checkout <a rel=noopener target=_blank href=https://github.com/kwasniew/hyperapp-realworld-example-app>this repository</a>, it is a <a rel=noopener target=_blank href=https://github.com/gothinkster/realworld>real world example app</a> (kinda like medium.com clone) that uses hyperapp to handle the frontend. In it the author chose to use lenses to handle state of the app.<h2 id=sources>Sources</h2><ul><li><a rel=noopener target=_blank href=https://ramdajs.com/docs/>ramda - docs</a><li><a rel=noopener target=_blank href=https://gist.github.com/branneman/f06bd451f74e5bc1725db23be682d4fe>fp-lenses.js</a><li><a rel=noopener target=_blank href="https://www.youtube.com/watch?v=IoVaArsh6tM">Lambda World 2018 - Functional Lenses in JavaScript (video)</a></ul><hr><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://www.buymeacoffee.com/vonheikemen style=display:flex;justify-content:center target=_blank><img src=https://cdn.buymeacoffee.com/buttons/v2/default-blue.png alt="Buy Me A Coffee" style=height:60px!important;width:217px!important></a></div></div>
