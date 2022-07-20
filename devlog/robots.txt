@@ -1,3 +1,4 @@
 User-agent: *
+Disallow:
 Allow: /
 Sitemap: https://vonheikemen.github.io/devlog/sitemap.xml
