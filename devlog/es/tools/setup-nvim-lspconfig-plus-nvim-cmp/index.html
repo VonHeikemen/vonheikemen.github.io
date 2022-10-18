@@ -61,7 +61,7 @@
 </span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>(&#39;</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>]d</span><span style=color:#5fb3b3>&#39;, &#39;</span><span style=color:#99c794>&lt;cmd&gt;lua vim.diagnostic.goto_next()&lt;cr&gt;</span><span style=color:#5fb3b3>&#39;)
 </span><span style=color:#69c>  </span><span style=color:#c594c5>end
 </span><span style=color:#5fb3b3>})
-</span></code></pre><p>Con esto nuestros atajos serán creado cada vez que Neovim vincule un servidor LSP a un archivo.<p>Para terminar con esta sección aquí tienen la configuración completa para <code>lspconfig</code>.<pre data-lang=lua style=background-color:#2b2c2f;color:#cccece class=language-lua><code class=language-lua data-lang=lua><span style=color:#5f6364>---
+</span></code></pre><p>Con esto nuestros atajos serán creado cada vez que Neovim vincule un servidor LSP a un archivo.<blockquote><p>Nota: si están usando Neovim v0.7.2 o menor, tienen que crear una función y asignarla a la opción <code>on_attach</code> de cada servidor LSP. En la documentación de lspconfig pueden encontrar un ejemplo, ejecuten el comando <code>:help lspconfig-keybindings</code>.</blockquote><p>Para terminar con esta sección aquí tienen la configuración completa para <code>lspconfig</code>.<pre data-lang=lua style=background-color:#2b2c2f;color:#cccece class=language-lua><code class=language-lua data-lang=lua><span style=color:#5f6364>---
 </span><span style=color:#5f6364>-- Configuración global
 </span><span style=color:#5f6364>---
 </span><span>
