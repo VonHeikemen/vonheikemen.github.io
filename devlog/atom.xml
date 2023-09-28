@@ -770,7 +770,7 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rockerBOO&#x2F;awesome-neovim&quot;&gt;awesome-neovim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;neovimcraft.com&#x2F;&quot;&gt;neovimcraft&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;this-week-in-neovim.org&#x2F;&quot;&gt;this week in neovim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;dotfyle.com&#x2F;this-week-in-neovim&quot;&gt;this week in neovim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
 &lt;p&gt;What did we do today? We looked at several colorschemes for Neovim. We learned about plugins we can use to bring features of other editors to Neovim. Like with &lt;code&gt;bufferline&lt;&#x2F;code&gt; we can have a tab per open file. Nvim-tree provides a tree-style file manager. We can use &lt;code&gt;gitsigns&lt;&#x2F;code&gt; and &lt;code&gt;fugitive&lt;&#x2F;code&gt; to integrate with git. We can search for all kinds of things with telescope. We can manipulate text in cool ways with plugins like &lt;code&gt;nvim-treesitter&lt;&#x2F;code&gt; and &lt;code&gt;vim-surround&lt;&#x2F;code&gt;. With all of this we can have a really good experience with Neovim.&lt;&#x2F;p&gt;
