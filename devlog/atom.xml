@@ -474,47 +474,36 @@
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;h3 id=&quot;indent-blankline-nvim&quot;&gt;indent-blankline.nvim&lt;&#x2F;h3&gt;
-&lt;p&gt;Github: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;lukas-reineke&#x2F;indent-blankline.nvim&quot;&gt;lukas-reineke&#x2F;indent-blankline.nvim&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Github: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;lukas-reineke&#x2F;indent-blankline.nvim&quot;&gt;lukas-reineke&#x2F;indent-blankline.nvim&lt;&#x2F;a&gt;
+Version: 3.x&lt;&#x2F;p&gt;
 &lt;p&gt;Adds indent guides in the current file.&lt;&#x2F;p&gt;
-&lt;p&gt;This plugin in particular can be configured in several ways. We can tweak its behavior modifying global variables, like this.&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;g&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;indent_blankline_char &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;▏&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Or if you prefer vimscript.&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;vim&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-vim &quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span&gt;g: indent_blankline_char = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;#39;▏&amp;#39;
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;You can find the complete list of variables in the help page.&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;vim&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-vim &quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span&gt;:help indent-blankline-variables
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;There is a third option: use the &lt;code&gt;.setup()&lt;&#x2F;code&gt; function of the &lt;code&gt;indent_blankline&lt;&#x2F;code&gt; module.&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;indent_blankline&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;char &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;▏&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;,
+&lt;p&gt;To configure it use the &lt;code&gt;.setup()&lt;&#x2F;code&gt; function of the &lt;code&gt;ibl&lt;&#x2F;code&gt; module.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;ibl&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;indent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;char &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;▏&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;})
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Notice we don&#x27;t need the prefix &lt;code&gt;indent_blankline_&lt;&#x2F;code&gt; when using &lt;code&gt;.setup()&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;I prefer to use &lt;code&gt;.setup()&lt;&#x2F;code&gt;. And here the options I find interesting.&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;indent_blankline&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;char &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;▏&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;,
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;show_trailing_blankline_indent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;show_first_indent_level &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;use_treesitter &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;show_current_context &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;false
+&lt;p&gt;And here the options I find interesting.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;ibl&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;enabled &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;scope &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;enabled &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;indent &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= {
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;char &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;▏&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;},
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;})
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;char&lt;&#x2F;code&gt;: Is the character that will appear on the screen.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;enabled&lt;&#x2F;code&gt;: Is used to determine if indent guides should be enabled when opening a file&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;show_trailing_blankline_indent&lt;&#x2F;code&gt;: Show indent guides in blank lines.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;scope.enabled&lt;&#x2F;code&gt;: If enabled is &lt;code&gt;true&lt;&#x2F;code&gt;, the indent guide for the current scope will be highlighted.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;code&gt;show_first_indent_level&lt;&#x2F;code&gt;: Show an indent guide on the first column.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;use_treesitter&lt;&#x2F;code&gt;: Use treesitter to determine where the indent guide should be.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;code&gt;show_current_context&lt;&#x2F;code&gt;: Highlight the indent level where the cursor is at.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;indent.char&lt;&#x2F;code&gt;: Is the character that will appear on the screen.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;h3 id=&quot;treesitter&quot;&gt;Treesitter&lt;&#x2F;h3&gt;
