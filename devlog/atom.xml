@@ -72,7 +72,7 @@
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Inside this new file we are going to execute the function that enables intelephense.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;root-directory&quot;&gt;Root directory&lt;&#x2F;h2&gt;
-&lt;p&gt;The last thing piece of information we need is the root directory. We just have to tell the language server where is our project folder.&lt;&#x2F;p&gt;
+&lt;p&gt;The last piece of information we need is the root directory. We just have to tell the language server where is our project folder.&lt;&#x2F;p&gt;
 &lt;p&gt;In our filetype plugin we are going to use a function called &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;neovim.io&#x2F;doc&#x2F;user&#x2F;lua.html#vim.fs.find()&quot;&gt;vim.fs.find()&lt;&#x2F;a&gt;. We will give it a list of files and it will return the path of the first match it finds.&lt;&#x2F;p&gt;
 &lt;p&gt;What do we look for? We search for common configuration files that projects have in their root folder. So, in php is very common to have a &lt;code&gt;composer.json&lt;&#x2F;code&gt; file. Javascript projects usually have a &lt;code&gt;package.json&lt;&#x2F;code&gt;. Rust projects have a &lt;code&gt;cargo.toml&lt;&#x2F;code&gt;. We feed this information to &lt;code&gt;vim.fs.find()&lt;&#x2F;code&gt; and it should give us a path we can use.&lt;&#x2F;p&gt;
 &lt;p&gt;We can make a test already by adding this piece of code in the newly created &lt;code&gt;php.lua&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
