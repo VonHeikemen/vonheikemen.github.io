@@ -11,7 +11,7 @@
         <published>2023-12-25T00:00:00+00:00</published>
         <updated>2024-01-18T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/neovim-lsp-client-guide/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/neovim-lsp-client-guide/</id>
@@ -666,7 +666,7 @@
         <published>2023-01-15T00:00:00+00:00</published>
         <updated>2023-01-15T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/how-to-survive-without-multiple-cursors-in-vim/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/how-to-survive-without-multiple-cursors-in-vim/</id>
@@ -965,7 +965,7 @@
         <published>2022-09-03T00:00:00+00:00</published>
         <updated>2023-02-15T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/neovim-plugins-to-get-started/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/neovim-plugins-to-get-started/</id>
@@ -1426,7 +1426,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2022-07-04T00:00:00+00:00</published>
         <updated>2023-09-26T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/build-your-first-lua-config-for-neovim/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/build-your-first-lua-config-for-neovim/</id>
@@ -1910,7 +1910,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2022-06-09T00:00:00+00:00</published>
         <updated>2022-10-16T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/manage-neovim-lsp-client-without-plugins/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/manage-neovim-lsp-client-without-plugins/</id>
@@ -2164,7 +2164,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2022-05-23T00:00:00+00:00</published>
         <updated>2023-11-01T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/setup-nvim-lspconfig-plus-nvim-cmp/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/setup-nvim-lspconfig-plus-nvim-cmp/</id>
@@ -2640,7 +2640,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-10-26T00:00:00+00:00</published>
         <updated>2021-10-26T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/navigate-command-history/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/navigate-command-history/</id>
@@ -2737,7 +2737,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-10-20T00:00:00+00:00</published>
         <updated>2021-10-20T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/embed-env-variables-in-any-config-file/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/embed-env-variables-in-any-config-file/</id>
@@ -2809,7 +2809,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-10-03T00:00:00+00:00</published>
         <updated>2021-10-03T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/applicative-functors-and-form-validation/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/applicative-functors-and-form-validation/</id>
@@ -3172,7 +3172,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-08-22T00:00:00+00:00</published>
         <updated>2021-08-22T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/the-illusion-of-fast-startup-times-in-vim/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/the-illusion-of-fast-startup-times-in-vim/</id>
@@ -3262,7 +3262,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-08-01T00:00:00+00:00</published>
         <updated>2023-02-14T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/configuring-neovim-using-lua/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/configuring-neovim-using-lua/</id>
@@ -3679,7 +3679,7 @@ Version: 3.x&lt;&#x2F;p&gt;
         <published>2021-06-13T00:00:00+00:00</published>
         <updated>2021-06-13T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/vim-and-the-quickfix-list/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/vim-and-the-quickfix-list/</id>
@@ -4169,7 +4169,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2021-04-18T00:00:00+00:00</published>
         <updated>2021-04-18T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/extending-the-deno-cli-using-a-shell-function/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/extending-the-deno-cli-using-a-shell-function/</id>
@@ -4506,7 +4506,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2021-04-10T00:00:00+00:00</published>
         <updated>2021-04-10T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/vim-easy-mode/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/vim-easy-mode/</id>
@@ -4627,7 +4627,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2021-01-10T00:00:00+00:00</published>
         <updated>2021-01-10T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/using-netrw-vim-builtin-file-explorer/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/using-netrw-vim-builtin-file-explorer/</id>
@@ -4992,7 +4992,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-12-27T00:00:00+00:00</published>
         <updated>2020-12-27T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/transducers-in-javascript/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/transducers-in-javascript/</id>
@@ -5615,7 +5615,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-11-22T00:00:00+00:00</published>
         <updated>2020-11-22T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/the-case-for-reducers/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/the-case-for-reducers/</id>
@@ -5948,7 +5948,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-11-03T00:00:00+00:00</published>
         <updated>2020-11-03T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/using-vim-abbreviations/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/using-vim-abbreviations/</id>
@@ -6072,7 +6072,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-09-02T00:00:00+00:00</published>
         <updated>2020-09-02T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/an-introduction-to-monads-in-js/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/an-introduction-to-monads-in-js/</id>
@@ -6200,7 +6200,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-08-11T00:00:00+00:00</published>
         <updated>2020-08-11T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/applicative-functors/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/applicative-functors/</id>
@@ -6493,7 +6493,7 @@ comes with vim. It is very much like the good old &lt;a rel=&quot;noopener&quot;
         <published>2020-07-12T00:00:00+00:00</published>
         <updated>2020-07-12T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/zsh-global-aliases/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/tools/zsh-global-aliases/</id>
@@ -6582,7 +6582,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-06-12T00:00:00+00:00</published>
         <updated>2020-06-12T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/tagged-unions-and-fantasy-land/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/tagged-unions-and-fantasy-land/</id>
@@ -7118,7 +7118,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-04-21T00:00:00+00:00</published>
         <updated>2020-04-21T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/reduce-how-and-when/</id>
@@ -7437,7 +7437,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-04-03T00:00:00+00:00</published>
         <updated>2020-04-03T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/roadmap/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/roadmap/</id>
@@ -7515,7 +7515,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-04-02T00:00:00+00:00</published>
         <updated>2020-04-02T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/pure-functions/</id>
@@ -7573,7 +7573,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-03-30T00:00:00+00:00</published>
         <updated>2020-03-30T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/composition-techniques/</id>
@@ -8122,7 +8122,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-03-10T00:00:00+00:00</published>
         <updated>2020-03-10T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/partial-application/</id>
@@ -8394,7 +8394,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-02-16T00:00:00+00:00</published>
         <updated>2020-02-16T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/the-power-of-map/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/the-power-of-map/</id>
@@ -8714,7 +8714,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2020-01-05T00:00:00+00:00</published>
         <updated>2020-01-05T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/dealing-with-side-effects-and-pure-functions/</id>
@@ -8917,7 +8917,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2019-11-27T00:00:00+00:00</published>
         <updated>2019-11-27T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/lenses-a-k-a-composable-getters-and-setters/</id>
@@ -9351,7 +9351,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2019-11-07T00:00:00+00:00</published>
         <updated>2019-11-07T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/taking-a-look-at-finite-state-machine/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/taking-a-look-at-finite-state-machine/</id>
@@ -9834,7 +9834,7 @@ You can check with this.&lt;&#x2F;p&gt;
         <published>2019-10-28T00:00:00+00:00</published>
         <updated>2019-10-28T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/learn-fp/using-a-maybe/</id>
@@ -10307,7 +10307,7 @@ An event that happens suddenly or by chance without an apparent cause.&lt;&#x2F;
         <published>2018-08-12T00:00:00+00:00</published>
         <updated>2018-08-12T00:00:00+00:00</updated>
         <author>
-          <name>Unknown</name>
+          <name>Heiker Curiel</name>
         </author>
         <link rel="alternate" href="https://vonheikemen.github.io/devlog/web-development/homemade-observables/" type="text/html"/>
         <id>https://vonheikemen.github.io/devlog/web-development/homemade-observables/</id>
