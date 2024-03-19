@@ -4,7 +4,7 @@
     <link href="https://vonheikemen.github.io/devlog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://vonheikemen.github.io/devlog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2024-01-18T00:00:00+00:00</updated>
+    <updated>2024-03-19T00:00:00+00:00</updated>
     <id>https://vonheikemen.github.io/devlog/atom.xml</id>
     <entry xml:lang="en">
         <title>A guide on Neovim&#x27;s LSP client</title>
@@ -1424,7 +1424,7 @@ Version: 3.x&lt;&#x2F;p&gt;
     <entry xml:lang="en">
         <title>Build your first Neovim configuration in lua</title>
         <published>2022-07-04T00:00:00+00:00</published>
-        <updated>2023-09-26T00:00:00+00:00</updated>
+        <updated>2024-03-19T00:00:00+00:00</updated>
         <author>
           <name>Heiker Curiel</name>
         </author>
@@ -1890,10 +1890,10 @@ Version: 3.x&lt;&#x2F;p&gt;
 &lt;p&gt;If you want recommendations for plugins and other configurations I suggest you check these configuration templates.&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nvim-lua&#x2F;kickstart.nvim&quot;&gt;kickstart.nvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-starter&#x2F;tree&#x2F;xx-light&quot;&gt;nvim-starter - light&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;nvim-light&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;NvChad&#x2F;tinyvim&quot;&gt;tinyvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;glepnir&#x2F;dope&quot;&gt;dope&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;LunarVim&#x2F;nvim-basic-ide&quot;&gt;nvim-basic-ide&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;LunarVim&#x2F;Launch.nvim&quot;&gt;Launch.nvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;p&gt;You can also check my personal configuration if you like.&lt;&#x2F;p&gt;
 &lt;ul&gt;
@@ -3260,7 +3260,7 @@ Version: 3.x&lt;&#x2F;p&gt;
     <entry xml:lang="en">
         <title>Everything you need to know to configure neovim using lua</title>
         <published>2021-08-01T00:00:00+00:00</published>
-        <updated>2023-02-14T00:00:00+00:00</updated>
+        <updated>2024-03-19T00:00:00+00:00</updated>
         <author>
           <name>Heiker Curiel</name>
         </author>
@@ -3655,7 +3655,12 @@ Version: 3.x&lt;&#x2F;p&gt;
 &lt;p&gt;This one is not written in lua but I want to add it because it does offer a lua api. It offers more features than &lt;code&gt;paq&lt;&#x2F;code&gt; but not as much a &lt;code&gt;packer&lt;&#x2F;code&gt; or &lt;code&gt;lazy.nvim&lt;&#x2F;code&gt;, so if you are looking for a middle ground between those, this might be a good choice.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
 &lt;p&gt;Recap time. We learned how to use lua from vimscript. We now know how to use vimscript from lua. We have the tools to activate, deactivate and modify all sorts of options and variables in neovim. We got to know the methods we have available to create our keymaps. We learned about commands and autocommands. We figure out how to use plugin managers that aren&#x27;t written in lua, and saw a few alternatives that are written in lua. I say we are ready to use lua in neovim.&lt;&#x2F;p&gt;
-&lt;p&gt;For those who want to see a real world usage or whatever, I&#x27;ll share a link to my current config in github:&lt;&#x2F;p&gt;
+&lt;p&gt;For those who want to see a real world usage or whatever, I&#x27;ll share some links &lt;&#x2F;p&gt;
+&lt;p&gt;This is a &amp;quot;starter template&amp;quot; you can copy and use as your own config:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;nvim-light&lt;&#x2F;a&gt; &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;And this my personal config in github:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;dotfiles&#x2F;tree&#x2F;057f4d604e31ad121c4b4b36fd7e4148483d50c8&#x2F;my-configs&#x2F;neovim&quot;&gt;neovim (v0.6)&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;dotfiles&#x2F;tree&#x2F;18fb9ab01d171a3d862d2438cd0f8fd2612a3e52&#x2F;my-configs&#x2F;neovim&quot;&gt;neovim (v0.7)&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
