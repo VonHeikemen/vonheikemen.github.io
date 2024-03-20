@@ -1880,7 +1880,7 @@ Version: 3.x&lt;&#x2F;p&gt;
 &lt;&#x2F;ul&gt;
 &lt;h2 id=&quot;what-s-next&quot;&gt;What&#x27;s next?&lt;&#x2F;h2&gt;
 &lt;p&gt;Create a development environment that feels comfortable. Find out what plugins the Neovim community likes to use.&lt;&#x2F;p&gt;
-&lt;p&gt;I know is difficult to start from scratch so here is a &amp;quot;starter template&amp;quot; you can check, or even use as your own base configuration. This will give you a hint on what plugins people use.&lt;&#x2F;p&gt;
+&lt;p&gt;I know is difficult to start from scratch so here is a &amp;quot;starter template&amp;quot; you can check, or even use as your own base configuration.&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;nvim-light&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
