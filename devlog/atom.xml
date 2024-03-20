@@ -4,7 +4,7 @@
     <link href="https://vonheikemen.github.io/devlog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://vonheikemen.github.io/devlog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2024-03-19T00:00:00+00:00</updated>
+    <updated>2024-03-20T00:00:00+00:00</updated>
     <id>https://vonheikemen.github.io/devlog/atom.xml</id>
     <entry xml:lang="en">
         <title>A guide on Neovim&#x27;s LSP client</title>
@@ -1424,7 +1424,7 @@ Version: 3.x&lt;&#x2F;p&gt;
     <entry xml:lang="en">
         <title>Build your first Neovim configuration in lua</title>
         <published>2022-07-04T00:00:00+00:00</published>
-        <updated>2024-03-19T00:00:00+00:00</updated>
+        <updated>2024-03-20T00:00:00+00:00</updated>
         <author>
           <name>Heiker Curiel</name>
         </author>
@@ -1879,23 +1879,16 @@ Version: 3.x&lt;&#x2F;p&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-starter&#x2F;blob&#x2F;01-base&#x2F;init.lua&quot;&gt;init.lua&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;h2 id=&quot;what-s-next&quot;&gt;What&#x27;s next?&lt;&#x2F;h2&gt;
-&lt;p&gt;Maybe install some popular plugins to add fancy features to Neovim.&lt;&#x2F;p&gt;
+&lt;p&gt;Create a development environment that feels comfortable. Find out what plugins the Neovim community likes to use.&lt;&#x2F;p&gt;
+&lt;p&gt;I know is difficult to start from scratch so here is a &amp;quot;starter template&amp;quot; you can check, or even use as your own base configuration. This will give you a hint on what plugins people use.&lt;&#x2F;p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tools&#x2F;neovim-plugins-to-get-started&#x2F;&quot;&gt;Plugins to get started&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;If you feel prepared to tackle more advanced topics you can read this other tutorial. It teaches how to setup an autocompletion engine and also add support for LSP:&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;vonheikemen.github.io&#x2F;devlog&#x2F;tools&#x2F;setup-nvim-lspconfig-plus-nvim-cmp&#x2F;&quot;&gt;Setup nvim-lspconfig + nvim-cmp&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;If you want recommendations for plugins and other configurations I suggest you check these configuration templates.&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nvim-lua&#x2F;kickstart.nvim&quot;&gt;kickstart.nvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;nvim-light&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;NvChad&#x2F;tinyvim&quot;&gt;tinyvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;glepnir&#x2F;dope&quot;&gt;dope&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;LunarVim&#x2F;Launch.nvim&quot;&gt;Launch.nvim&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
-&lt;p&gt;You can also check my personal configuration if you like.&lt;&#x2F;p&gt;
+&lt;p&gt;Another great option is &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nvim-lua&#x2F;kickstart.nvim&quot;&gt;kickstart.nvim&lt;&#x2F;a&gt;. The author of this configuration has a video that explain every line of code in it. It&#x27;s a good resource to learn about popular plugins and how to configure them.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=m8C0Cq9Uv9o&quot;&gt;Complete Neovim setup guide&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;And if you want, you can check my personal configuration.&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;dotfiles&#x2F;tree&#x2F;master&#x2F;my-configs&#x2F;neovim&quot;&gt;neovim config&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
