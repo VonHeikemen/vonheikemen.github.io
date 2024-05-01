@@ -335,6 +335,7 @@
 </span><span>
 </span><span style=color:#c594c5>local function </span><span style=color:#6699cc>expand_snippet</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>event</span><span style=color:#5fb3b3>)
 </span><span>  </span><span style=color:#c594c5>local </span><span>comp </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>v</span><span style=color:#5fb3b3>.</span><span>completed_item
+</span><span>  </span><span style=color:#c594c5>local </span><span>kind </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span>protocol</span><span style=color:#5fb3b3>.</span><span>CompletionItemKind
 </span><span>  </span><span style=color:#c594c5>local </span><span>item </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>tbl_get</span><span style=color:#5fb3b3>(</span><span>comp</span><span style=color:#5fb3b3>, '</span><span style=color:#99c794>user_data</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>nvim</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>lsp</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>completion_item</span><span style=color:#5fb3b3>')
 </span><span>
 </span><span>  </span><span style=color:#5f6364>-- Verifica que el item es un snippet
@@ -342,7 +343,10 @@
 </span><span>    </span><span style=color:#5fb3b3>not </span><span>item
 </span><span>    </span><span style=color:#5fb3b3>or not </span><span>item</span><span style=color:#5fb3b3>.</span><span>insertTextFormat
 </span><span>    </span><span style=color:#5fb3b3>or </span><span>item</span><span style=color:#5fb3b3>.</span><span>insertTextFormat </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>1
-</span><span>    </span><span style=color:#5fb3b3>or not (</span><span>item</span><span style=color:#5fb3b3>.</span><span>kind </span><span style=color:#5fb3b3>== </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span>protocol</span><span style=color:#5fb3b3>.</span><span>CompletionItemKind</span><span style=color:#5fb3b3>.</span><span>Snippet</span><span style=color:#5fb3b3>)
+</span><span>    </span><span style=color:#5fb3b3>or not (
+</span><span>      item</span><span style=color:#5fb3b3>.</span><span>kind </span><span style=color:#5fb3b3>== </span><span>kind</span><span style=color:#5fb3b3>.</span><span>Snippet
+</span><span>      </span><span style=color:#5fb3b3>or </span><span>item</span><span style=color:#5fb3b3>.</span><span>kind </span><span style=color:#5fb3b3>== </span><span>kind</span><span style=color:#5fb3b3>.</span><span>Keyword
+</span><span>    </span><span style=color:#5fb3b3>)
 </span><span>  </span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>then
 </span><span>    </span><span style=color:#c594c5>return
 </span><span>  </span><span style=color:#c594c5>end
@@ -351,8 +355,18 @@
 </span><span>  </span><span style=color:#c594c5>local </span><span>cursor </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>nvim_win_get_cursor</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>)
 </span><span>  </span><span style=color:#c594c5>local </span><span>line </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>nvim_get_current_line</span><span style=color:#5fb3b3>()
 </span><span>  </span><span style=color:#c594c5>local </span><span>lnum </span><span style=color:#5fb3b3>= </span><span>cursor</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>1</span><span style=color:#5fb3b3>] - </span><span style=color:#f99157>1
-</span><span>  </span><span style=color:#c594c5>local </span><span>start_char </span><span style=color:#5fb3b3>= </span><span>cursor</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>2</span><span style=color:#5fb3b3>] - #</span><span>comp</span><span style=color:#5fb3b3>.</span><span>word
-</span><span>  vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>nvim_buf_set_text</span><span style=color:#5fb3b3>(</span><span>event</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>buf</span><span style=color:#5fb3b3>, </span><span>lnum</span><span style=color:#5fb3b3>, </span><span>start_char</span><span style=color:#5fb3b3>, </span><span>lnum</span><span style=color:#5fb3b3>, #</span><span>line</span><span style=color:#5fb3b3>, {''})
+</span><span>  </span><span style=color:#c594c5>local </span><span>start_col </span><span style=color:#5fb3b3>= </span><span>cursor</span><span style=color:#5fb3b3>[</span><span style=color:#f99157>2</span><span style=color:#5fb3b3>] - #</span><span>comp</span><span style=color:#5fb3b3>.</span><span>word
+</span><span>
+</span><span>  </span><span style=color:#c594c5>if </span><span>start_col </span><span style=color:#5fb3b3>< </span><span style=color:#f99157>0 </span><span style=color:#c594c5>then
+</span><span>    </span><span style=color:#c594c5>return
+</span><span>  </span><span style=color:#c594c5>end
+</span><span>
+</span><span>  </span><span style=color:#c594c5>local </span><span>set_text </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span>nvim_buf_set_text
+</span><span>  </span><span style=color:#c594c5>local </span><span>ok </span><span style=color:#5fb3b3>= </span><span style=color:#6699cc>pcall</span><span style=color:#5fb3b3>(</span><span>set_text</span><span style=color:#5fb3b3>, </span><span>bufnr</span><span style=color:#5fb3b3>, </span><span>lnum</span><span style=color:#5fb3b3>, </span><span>start_col</span><span style=color:#5fb3b3>, </span><span>lnum</span><span style=color:#5fb3b3>, #</span><span>line</span><span style=color:#5fb3b3>, {''})
+</span><span>
+</span><span>  </span><span style=color:#c594c5>if </span><span style=color:#5fb3b3>not </span><span>ok </span><span style=color:#c594c5>then
+</span><span>    </span><span style=color:#c594c5>return
+</span><span>  </span><span style=color:#c594c5>end
 </span><span>
 </span><span>  </span><span style=color:#5f6364>-- Insertar snippet
 </span><span>  </span><span style=color:#c594c5>local </span><span>snip_text </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#6699cc>tbl_get</span><span style=color:#5fb3b3>(</span><span>item</span><span style=color:#5fb3b3>, '</span><span style=color:#99c794>textEdit</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>newText</span><span style=color:#5fb3b3>') or </span><span>item</span><span style=color:#5fb3b3>.</span><span>insertText
