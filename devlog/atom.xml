@@ -4,8 +4,125 @@
     <link href="https://vonheikemen.github.io/devlog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://vonheikemen.github.io/devlog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2024-05-01T00:00:00+00:00</updated>
+    <updated>2024-07-27T00:00:00+00:00</updated>
     <id>https://vonheikemen.github.io/devlog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Neovim: Install plugins without a plugin manager</title>
+        <published>2024-07-27T00:00:00+00:00</published>
+        <updated>2024-07-27T00:00:00+00:00</updated>
+        <author>
+          <name>Heiker Curiel</name>
+        </author>
+        <link rel="alternate" href="https://vonheikemen.github.io/devlog/tools/installing-neovim-plugins-without-a-plugin-manager/" type="text/html"/>
+        <id>https://vonheikemen.github.io/devlog/tools/installing-neovim-plugins-without-a-plugin-manager/</id>
+        
+        <content type="html">&lt;p&gt;Yes, and all we have to do is download them in the right path.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;how-does-it-work&quot;&gt;How does it work?&lt;&#x2F;h2&gt;
+&lt;p&gt;Neovim and vim have this feature called &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;neovim.io&#x2F;doc&#x2F;user&#x2F;repeat.html#_using-vim-packages&quot;&gt;packages&lt;&#x2F;a&gt;. A package is a directory that can contain multiple plugins.&lt;&#x2F;p&gt;
+&lt;p&gt;The file structure of package can look like this:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;some-package
+&lt;&#x2F;span&gt;&lt;span&gt;├── colors
+&lt;&#x2F;span&gt;&lt;span&gt;│   ├── a-colorscheme.vim
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── some-colorscheme.lua
+&lt;&#x2F;span&gt;&lt;span&gt;├── doc
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── my-help-page.txt
+&lt;&#x2F;span&gt;&lt;span&gt;├── lua
+&lt;&#x2F;span&gt;&lt;span&gt;│   └── some-module
+&lt;&#x2F;span&gt;&lt;span&gt;│       └── some-file.lua
+&lt;&#x2F;span&gt;&lt;span&gt;└── plugin
+&lt;&#x2F;span&gt;&lt;span&gt;    ├── a-file.vim
+&lt;&#x2F;span&gt;&lt;span&gt;    └── some-file.lua
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;According to Neovim&#x27;s documentation, a &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;neovim.io&#x2F;doc&#x2F;user&#x2F;usr_05.html#_global-plugins&quot;&gt;plugin&lt;&#x2F;a&gt; is literally a script located in the plugin directory. They call it a &amp;quot;global plugin&amp;quot;. So in our example, &lt;code&gt;plugin&#x2F;a-file.vim&lt;&#x2F;code&gt; is one plugin and &lt;code&gt;plugin&#x2F;some-file.lua&lt;&#x2F;code&gt; is another plugin.&lt;&#x2F;p&gt;
+&lt;p&gt;Notice something interesting? This is the same file structure all Neovim plugins can have. So what we consider to be one plugin, Neovim&#x27;s documentation calls it a &lt;code&gt;package&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;But where should we add these things?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-pack-directory&quot;&gt;The pack directory&lt;&#x2F;h2&gt;
+&lt;p&gt;Every directory in the &lt;code&gt;packpath&lt;&#x2F;code&gt; option can contain a directory called &lt;code&gt;pack&lt;&#x2F;code&gt;. Inside &lt;code&gt;pack&lt;&#x2F;code&gt; we can group our packages.&lt;&#x2F;p&gt;
+&lt;p&gt;For example:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;pack
+&lt;&#x2F;span&gt;&lt;span&gt;└── vendor
+&lt;&#x2F;span&gt;&lt;span&gt;    ├── opt
+&lt;&#x2F;span&gt;&lt;span&gt;    │   └── package-one
+&lt;&#x2F;span&gt;&lt;span&gt;    └── start
+&lt;&#x2F;span&gt;&lt;span&gt;        ├── package-two
+&lt;&#x2F;span&gt;&lt;span&gt;        └── package-three
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;vendor&lt;&#x2F;code&gt; is just a random name I chose for this group. You can pick any name you want.&lt;&#x2F;p&gt;
+&lt;p&gt;Within our group we can have &lt;code&gt;opt&lt;&#x2F;code&gt; packages and &lt;code&gt;start&lt;&#x2F;code&gt; packages.&lt;&#x2F;p&gt;
+&lt;p&gt;Packages in the &lt;code&gt;start&lt;&#x2F;code&gt; directory will be available in the &lt;code&gt;runtimepath&lt;&#x2F;code&gt; during Neovim startup process.&lt;&#x2F;p&gt;
+&lt;p&gt;A package in the &lt;code&gt;opt&lt;&#x2F;code&gt; directory will only be added to the &lt;code&gt;runtimepath&lt;&#x2F;code&gt; after we call the command &lt;code&gt;:packadd&lt;&#x2F;code&gt;. This is the way we can lazy load plugins.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-download-path&quot;&gt;The download path&lt;&#x2F;h2&gt;
+&lt;p&gt;First, inspect the value of the option &lt;code&gt;packpath&lt;&#x2F;code&gt;. Execute this command in Neovim.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;vim&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-vim &quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt; packpath?
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you find that unreadable, you can try to print each path using lua. Execute this command.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt;lua vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;tbl_map&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;print&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;opt&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;packpath&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;get&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;())
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;That&#x27;s the list of directories where you can have a &lt;code&gt;pack&lt;&#x2F;code&gt; directory.&lt;&#x2F;p&gt;
+&lt;p&gt;Example time:&lt;&#x2F;p&gt;
+&lt;p&gt;By default Neovim&#x27;s configuration directory is a part of the packpath, so that&#x27;s a perfectly valid place to create a &lt;code&gt;pack&lt;&#x2F;code&gt; directory.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s pretend we are using linux and want to download &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim&quot;&gt;mini.nvim&lt;&#x2F;a&gt;. We could execute this command the terminal.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;git clone https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim \
+&lt;&#x2F;span&gt;&lt;span&gt;  ~&#x2F;.config&#x2F;nvim&#x2F;pack&#x2F;vendor&#x2F;start&#x2F;mini.nvim
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that after we download a plugin we need to generate the help tags using this command inside Neovim.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;vim&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-vim &quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span&gt;:helptags ALL
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;After we create the help tags we can use the &lt;code&gt;:help&lt;&#x2F;code&gt; command to navigate to the documentation of the plugin.&lt;&#x2F;p&gt;
+&lt;p&gt;Now that &lt;code&gt;mini.nvim&lt;&#x2F;code&gt; is available in Neovim&#x27;s runtimepath we can test it. We can try for example the module &lt;code&gt;mini.files&lt;&#x2F;code&gt; in our Neovim configuration.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s create a keyboard shortcut to toggle &lt;code&gt;mini.files&lt;&#x2F;code&gt; explorer.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;mini_files &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;mini.files&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;mini_files&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({})
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;lt;F2&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;mini_files&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;close&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span&gt;mini_files&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;open&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;end&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;a-little-command&quot;&gt;A little command&lt;&#x2F;h2&gt;
+&lt;p&gt;If you want, you can have a Neovim command that uses &lt;code&gt;git clone&lt;&#x2F;code&gt; to download plugins from github.&lt;&#x2F;p&gt;
+&lt;p&gt;This should work just fine:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;api&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;nvim_create_user_command&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;GitPlugin&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;repo &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;input&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fargs
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;url &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;%s&#x2F;%s.git&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;plugin_dir &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;stdpath&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;config&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;) 
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.. &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&#x2F;pack&#x2F;vendor&#x2F;start&#x2F;%s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;] == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;or &lt;&#x2F;span&gt;&lt;span&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;] == &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;msg &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Must provide user name and repository&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;notify&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;msg&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;levels&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;WARN&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;return
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;full_url &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;url&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;], &lt;&#x2F;span&gt;&lt;span&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;])
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span&gt;command &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= {&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &lt;&#x2F;span&gt;&lt;span&gt;full_url&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span&gt;plugin_dir&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;repo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f99157;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;])}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;on_done &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;cmd&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;packloadall! | helptags ALL&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;      &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;notify&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Done.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;notify&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Cloning repository...&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;    &lt;&#x2F;span&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;jobstart&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span&gt;command&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;, {&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;on_exit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;on_done&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;})
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#c594c5;&quot;&gt;end&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;,
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;nargs &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Going back to our previous example, now we could download &lt;code&gt;mini.nvim&lt;&#x2F;code&gt; using this command inside Neovim:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;GitPlugin echasnovski mini.nvim
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;You are ready to enjoy Neovim plugins available on github without a plugin manager.&lt;&#x2F;p&gt;
+&lt;p&gt;I want to clarify, I&#x27;m not saying plugin managers are useless. You probably still need one. Neovim doesn&#x27;t have a mechanism to update plugins, or remove them. The package feature only loads plugins into Neovim&#x27;s runtime. You still need to manage your plugins somehow.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>A guide on Neovim&#x27;s LSP client</title>
         <published>2023-12-25T00:00:00+00:00</published>
