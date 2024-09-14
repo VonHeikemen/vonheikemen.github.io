@@ -139,11 +139,13 @@
 &lt;ul&gt;
 &lt;li&gt;Install &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;neovim&#x2F;nvim-lspconfig&quot;&gt;nvim-lspconfig&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
+&lt;p&gt;We will use this plugin to help us enable IDE-like features.&lt;&#x2F;p&gt;
 &lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;git clone https:&#x2F;&#x2F;github.com&#x2F;neovim&#x2F;nvim-lspconfig
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ul&gt;
 &lt;li&gt;Install &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim&quot;&gt;mini.nvim&lt;&#x2F;a&gt; &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;code&gt;mini.nvim&lt;&#x2F;code&gt; is a collection of lua modules aim to solve common problems and enhance some of Neovim builtin features.&lt;&#x2F;p&gt;
 &lt;pre style=&quot;background-color:#2b2c2f;color:#cccece;&quot;&gt;&lt;code&gt;&lt;span&gt;git clone --filter=blob:none https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;After we install a plugin we have to generate the help tags.&lt;&#x2F;p&gt;
@@ -208,6 +210,30 @@
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This is kind of a wrapper around Neovim&#x27;s builtin completion mechanism. Neovim makes you press specific keybindings depending on the type of completion you want to get. And what &lt;code&gt;mini.completion&lt;&#x2F;code&gt; can do is take that burden away from you, by triggering the completion automatically as you type. In other words, it adds true autocompletion to Neovim.&lt;&#x2F;p&gt;
 &lt;p&gt;By default you just get suggestions based on words of the current file. But whenever possible it&#x27;ll try to use the LSP client to provide smart code completion.&lt;&#x2F;p&gt;
+&lt;p&gt;To control the completion menu we use Neovim&#x27;s default keybindings:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Down&amp;gt;&lt;&#x2F;code&gt;: Select the next item on the list.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Up&amp;gt;&lt;&#x2F;code&gt;:  Select previous item on the list.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Ctrl-n&amp;gt;&lt;&#x2F;code&gt;: Select and insert text of the next item on the list.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Ctrl-p&amp;gt;&lt;&#x2F;code&gt;: Select and insert text of the previous item on the list.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Ctrl-y&amp;gt;&lt;&#x2F;code&gt;: Confirm selected item.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Ctrl-e&amp;gt;&lt;&#x2F;code&gt;: Cancel the completion.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;&amp;lt;Enter&amp;gt;&lt;&#x2F;code&gt;: If item was selected using &lt;code&gt;&amp;lt;Up&amp;gt;&lt;&#x2F;code&gt; or &lt;code&gt;&amp;lt;Down&amp;gt;&lt;&#x2F;code&gt; it confirms selection. If no item is selected, hides completion menu. Else, inserts a newline character.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
 &lt;h2 id=&quot;the-lsp-client&quot;&gt;The LSP client&lt;&#x2F;h2&gt;
 &lt;p&gt;Neovim&#x27;s LSP client is the thing that enables the nice IDE-like features people like so much. Things like go to definition, rename variable, inspect function signature. You get the idea. But this &amp;quot;client&amp;quot; doesn&#x27;t work on its own, it needs a server. In this case a &amp;quot;server&amp;quot; is an external program that implements the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;microsoft.github.io&#x2F;language-server-protocol&#x2F;overviews&#x2F;lsp&#x2F;overview&#x2F;&quot;&gt;LSP specification&lt;&#x2F;a&gt;. If you want to know more details about LSP and language servers, watch this video by TJ DeVries: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=LaS32vctfOY&quot;&gt;LSP explained (5 min)&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;What do we need to do here? We follow these 3 steps.&lt;&#x2F;p&gt;
