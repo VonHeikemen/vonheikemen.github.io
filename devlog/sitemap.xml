@@ -7,6 +7,39 @@
         <loc>https://vonheikemen.github.io/devlog/es/</loc>
     </url>
     <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/aprendizaje/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/deno/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/hoy-aprendi/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/javascript/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/neovim/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/paradigma-funcional/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/paradigma-reactivo/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/shell/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/vim/</loc>
+    </url>
+    <url>
+        <loc>https://vonheikemen.github.io/devlog/es/tags/zsh/</loc>
+    </url>
+    <url>
         <loc>https://vonheikemen.github.io/devlog/es/tools/</loc>
     </url>
     <url>
@@ -43,7 +76,7 @@
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/es/tools/neovim-lsp-client-guide/</loc>
-        <lastmod>2024-10-05</lastmod>
+        <lastmod>2024-11-13</lastmod>
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/es/tools/neovim-plugins-to-get-started/</loc>
@@ -155,9 +188,6 @@
         <loc>https://vonheikemen.github.io/devlog/tags/</loc>
     </url>
     <url>
-        <loc>https://vonheikemen.github.io/devlog/tags/aprendizaje/</loc>
-    </url>
-    <url>
         <loc>https://vonheikemen.github.io/devlog/tags/beginners/</loc>
     </url>
     <url>
@@ -167,9 +197,6 @@
         <loc>https://vonheikemen.github.io/devlog/tags/functional-programming/</loc>
     </url>
     <url>
-        <loc>https://vonheikemen.github.io/devlog/tags/hoy-aprendi/</loc>
-    </url>
-    <url>
         <loc>https://vonheikemen.github.io/devlog/tags/javascript/</loc>
     </url>
     <url>
@@ -177,12 +204,6 @@
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/tags/neovim/</loc>
-    </url>
-    <url>
-        <loc>https://vonheikemen.github.io/devlog/tags/paradigma-funcional/</loc>
-    </url>
-    <url>
-        <loc>https://vonheikemen.github.io/devlog/tags/paradigma-reactivo/</loc>
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/tags/reactive-programming/</loc>
@@ -236,7 +257,7 @@
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/tools/neovim-lsp-client-guide/</loc>
-        <lastmod>2024-10-05</lastmod>
+        <lastmod>2024-11-13</lastmod>
     </url>
     <url>
         <loc>https://vonheikemen.github.io/devlog/tools/neovim-plugins-to-get-started/</loc>
