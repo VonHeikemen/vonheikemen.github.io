@@ -4,12 +4,12 @@
     <link rel="self" type="application/atom+xml" href="https://vonheikemen.github.io/devlog/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://vonheikemen.github.io/devlog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2025-03-07T00:00:00+00:00</updated>
+    <updated>2025-03-08T00:00:00+00:00</updated>
     <id>https://vonheikemen.github.io/devlog/atom.xml</id>
     <entry xml:lang="en">
         <title>Simple Neovim config</title>
         <published>2024-09-12T00:00:00+00:00</published>
-        <updated>2025-03-07T00:00:00+00:00</updated>
+        <updated>2025-03-08T00:00:00+00:00</updated>
         
         <author>
           <name>
@@ -206,6 +206,9 @@
 &lt;p&gt;That took me to &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim&#x2F;blob&#x2F;main&#x2F;doc&#x2F;mini-files.txt&quot;&gt;the help page of mini.files&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;Remember when we installed the plugins? We generated some called help tags. These tags allow you to navigate to the &quot;offline&quot; documentation of the plugin: the help page.&lt;&#x2F;p&gt;
 &lt;p&gt;The tab complete feature of the &lt;code&gt;:help&lt;&#x2F;code&gt; command is really good too. You can type &lt;code&gt;:help mini&lt;&#x2F;code&gt; and then press the &lt;code&gt;Tab&lt;&#x2F;code&gt; key, Neovim will show you all the help tags that start with &lt;code&gt;mini&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;One more thing, if the font on your terminal doesn&#x27;t support &quot;icons&quot; then you can add the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;echasnovski&#x2F;mini.nvim&#x2F;blob&#x2F;main&#x2F;readmes&#x2F;mini-icons.md&quot;&gt;mini.icons&lt;&#x2F;a&gt; module. Set the &lt;code&gt;style&lt;&#x2F;code&gt; property to &lt;code&gt;ascii&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;mini.icons&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;({&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;style &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;ascii&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;})
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;h2 id=&quot;navigating-between-files&quot;&gt;Navigating between files&lt;&#x2F;h2&gt;
 &lt;p&gt;For educational purposes only, I will tell you what I do when I don&#x27;t have plugins installed: I use the &lt;code&gt;files&lt;&#x2F;code&gt; command to list the open files, then use the &lt;code&gt;buffer&lt;&#x2F;code&gt; command to navigate the file I want. And to make it convenient I make a keymap.&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;lt;leader&amp;gt;&amp;lt;space&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;lt;cmd&amp;gt;files&amp;lt;cr&amp;gt;:buffer &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;, {&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;desc &lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;= &amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;Search open files&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;})
