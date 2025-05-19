@@ -626,7 +626,7 @@
         <id>https://vonheikemen.github.io/devlog/tools/neovim-lsp-client-guide/</id>
         
         <content type="html" xml:base="https://vonheikemen.github.io/devlog/tools/neovim-lsp-client-guide/">&lt;p&gt;Maybe I should have called this &quot;How to enable IDE-like features without third party plugins.&quot; Sounds interesting, right? That&#x27;s basically what I want to show you here.&lt;&#x2F;p&gt;
-&lt;p&gt;I&#x27;m going to explain how to use the new configuration method that was introduced in Neovim v0.11. And I want to show it works because it&#x27;s basically a layer on top of existing features. This way you can make your own setup even on older Neovim versions.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;m going to explain how to use the new configuration method that was introduced in Neovim v0.11. And I want to show how it works because it&#x27;s basically a layer on top of existing features. This way you can make your own setup even on older Neovim versions.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;requirements&quot;&gt;Requirements&lt;&#x2F;h2&gt;
 &lt;ol&gt;
 &lt;li&gt;Neovim v0.8 or greater.&lt;&#x2F;li&gt;
