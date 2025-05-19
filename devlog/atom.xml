@@ -612,7 +612,7 @@
     <entry xml:lang="en">
         <title>A guide on Neovim&#x27;s LSP client</title>
         <published>2023-12-25T00:00:00+00:00</published>
-        <updated>2024-11-13T00:00:00+00:00</updated>
+        <updated>2025-05-19T00:00:00+00:00</updated>
         
         <author>
           <name>
@@ -3875,7 +3875,7 @@ Version: 3.x&lt;&#x2F;p&gt;
     <entry xml:lang="en">
         <title>Everything you need to know to configure neovim using lua</title>
         <published>2021-08-01T00:00:00+00:00</published>
-        <updated>2025-05-19T00:00:00+00:00</updated>
+        <updated>2024-07-27T00:00:00+00:00</updated>
         
         <author>
           <name>
