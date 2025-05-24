@@ -4,7 +4,7 @@
     <link rel="self" type="application/atom+xml" href="https://vonheikemen.github.io/devlog/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://vonheikemen.github.io/devlog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2025-05-19T00:00:00+00:00</updated>
+    <updated>2025-05-23T00:00:00+00:00</updated>
     <id>https://vonheikemen.github.io/devlog/atom.xml</id>
     <entry xml:lang="en">
         <title>Simple Neovim config</title>
@@ -612,7 +612,7 @@
     <entry xml:lang="en">
         <title>A guide on Neovim&#x27;s LSP client</title>
         <published>2023-12-25T00:00:00+00:00</published>
-        <updated>2025-05-19T00:00:00+00:00</updated>
+        <updated>2025-05-23T00:00:00+00:00</updated>
         
         <author>
           <name>
@@ -731,7 +731,7 @@
 &lt;&#x2F;span&gt;&lt;span&gt;
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;lua&lt;&#x2F;span&gt;&lt;span&gt; vim.lsp.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;enable&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;&amp;#39;gleam&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;&lt;em&gt;But why init.vim? What year is it, 2010?!&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;em&gt;But why init.vim?&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;I just wanted an excuse to show is possible to execute lua code inside vimscript. Some Vim users think they have to delete their vimscript config to use lua. That&#x27;s just not true.&lt;&#x2F;p&gt;
 &lt;p&gt;Anyway, next time we open Neovim it will look for a file that matches the pattern &lt;code&gt;lsp&#x2F;gleam.lua&lt;&#x2F;code&gt; inside the &lt;code&gt;runtimepath&lt;&#x2F;code&gt;. Then it will create an autocommand using the list we provided in the &lt;code&gt;filetypes&lt;&#x2F;code&gt; property. So whenever we open a file with the type &lt;code&gt;gleam&lt;&#x2F;code&gt; Neovim will try to enable the language server.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;em&gt;What about LuaLS?&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
@@ -766,6 +766,9 @@
 &lt;p&gt;Look for the lines that start with &lt;code&gt;[ERROR]&lt;&#x2F;code&gt;. Maybe there is an error message with some useful information.&lt;&#x2F;p&gt;
 &lt;p&gt;If you want the logs to have more details, increase the log level using this function.&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;lsp&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6699cc;&quot;&gt;set_log_level&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;(&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#99c794;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span style=&quot;color:#5fb3b3;&quot;&gt;&amp;#39;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And since &lt;strong&gt;Neovim v0.10&lt;&#x2F;strong&gt; you can do a &quot;health check&quot; with this command:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;vim&quot; style=&quot;background-color:#2b2c2f;color:#cccece;&quot; class=&quot;language-vim &quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span&gt;:checkhealth lsp
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;h2 id=&quot;execute-on-filetype&quot;&gt;Execute on filetype&lt;&#x2F;h2&gt;
 &lt;p&gt;Turns out &lt;code&gt;vim.lsp.enable()&lt;&#x2F;code&gt; is actually a layer on top of things we already had. We can still use a language server without plugins on older Neovim versions, we just need to know how to put the pieces together.&lt;&#x2F;p&gt;
