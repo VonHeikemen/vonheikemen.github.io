@@ -77,7 +77,7 @@
 </span><span>    </span><span style=color:#c594c5>let </span><span>current_value </span><span style=color:#5fb3b3>= </span><span>fns[</span><span style=color:#f99157>0</span><span>](</span><span style=color:#5fb3b3>...</span><span>args)</span><span style=color:#5fb3b3>;
 </span><span>
 </span><span style=color:#5fb3b3>    </span><span style=color:#5f6364>// loop through the rest in the original order
-</span><span>    </span><span style=color:#c594c5>for </span><span>(</span><span style=color:#c594c5>let </span><span>i </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>; </span><span>i </span><span style=color:#5fb3b3>< </span><span>fns</span><span style=color:#5fb3b3>.</span><span>length</span><span style=color:#5fb3b3>; </span><span>i</span><span style=color:#5fb3b3>++</span><span>) </span><span style=color:#5fb3b3>{
+</span><span>    </span><span style=color:#c594c5>for </span><span>(</span><span style=color:#c594c5>let </span><span>i </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>1</span><span style=color:#5fb3b3>; </span><span>i </span><span style=color:#5fb3b3>&lt; </span><span>fns</span><span style=color:#5fb3b3>.</span><span>length</span><span style=color:#5fb3b3>; </span><span>i</span><span style=color:#5fb3b3>++</span><span>) </span><span style=color:#5fb3b3>{
 </span><span>      current_value </span><span style=color:#5fb3b3>= </span><span>fns[i](current_value)</span><span style=color:#5fb3b3>;
 </span><span>    </span><span style=color:#5fb3b3>}
 </span><span>

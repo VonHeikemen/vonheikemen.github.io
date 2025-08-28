@@ -90,41 +90,41 @@
 </span><span style=color:#69c>    </span><span style=color:#c594c5>end
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Muestra información sobre símbolo debajo del cursor
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>K</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.hover()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>K</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.hover()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Saltar a definición
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gd</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.definition()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gd</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.definition()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Saltar a declaración
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gD</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.declaration()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gD</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.declaration()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Mostrar implementaciones
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gi</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.implementation()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gi</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.implementation()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Saltar a definición de tipo
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>go</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.type_definition()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>go</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.type_definition()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Listar referencias
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gr</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.references()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gr</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.references()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Mostrar argumentos de función
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTC-k></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.signature_help()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;C-k></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.signature_help()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Renombrar símbolo
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTF2></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.rename()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F2></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.rename()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Listar "code actions" disponibles en la posición del cursor
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTF4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.code_action()&LTcr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>x</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTF4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.lsp.buf.range_code_action()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.code_action()&lt;cr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>x</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.range_code_action()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Mostrar diagnósticos de la línea actual
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gl</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.diagnostic.open_float()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gl</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.open_float()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Saltar al diagnóstico anterior
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>[d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.diagnostic.goto_prev()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>[d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.goto_prev()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>
 </span><span style=color:#69c>    </span><span style=color:#5f6364>-- Saltar al siguiente diagnóstico
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>]d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&LTcmd>lua vim.diagnostic.goto_next()&LTcr></span><span style=color:#5fb3b3>')
+</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>]d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.goto_next()&lt;cr></span><span style=color:#5fb3b3>')
 </span><span style=color:#69c>  </span><span style=color:#c594c5>end
 </span><span style=color:#5fb3b3>})
 </span></code></pre><h2 id=codigo-completo>Código completo</h2><p>Si aplicamos todos estos cambios a nuestro ejemplo obtendremos esto.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span style=color:#69c>launch_tsserver </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()

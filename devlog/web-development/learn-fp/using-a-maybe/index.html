@@ -9,20 +9,20 @@
 </span><span>    
 </span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>Paris</span><span style=color:#5fb3b3>"</span><span>: [</span><span style=color:#5fb3b3>"</span><span style=color:#99c794>The capital and largest city of France.</span><span style=color:#5fb3b3>"</span><span>]
 </span><span>  </span><span style=color:#5fb3b3>}
-</span></code></pre><p>We want a form that lets a user search one of this words and then shows the meaning(s). This is simple, right? What could possibly go wrong?<p>Because everyone loves HTML we'll start with that.<pre class=language-html data-lang=html style=color:#cccece;background-color:#2b2c2f><code class=language-html data-lang=html><span style=color:#5fb3b3><</span><span style=color:#eb606b>form </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_form</span><span style=color:#5fb3b3>">
-</span><span>  </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>label </span><span style=color:#bb80b3>for</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_input</span><span style=color:#5fb3b3>"></span><span>Search a word</span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>label</span><span style=color:#5fb3b3>>
-</span><span>  </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>input </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_input</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>type</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>text</span><span style=color:#5fb3b3>">
-</span><span>  </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>button </span><span style=color:#bb80b3>type</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>submit</span><span style=color:#5fb3b3>"></span><span>Submit</span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>button</span><span style=color:#5fb3b3>>
-</span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>form</span><span style=color:#5fb3b3>>
+</span></code></pre><p>We want a form that lets a user search one of this words and then shows the meaning(s). This is simple, right? What could possibly go wrong?<p>Because everyone loves HTML we'll start with that.<pre class=language-html data-lang=html style=color:#cccece;background-color:#2b2c2f><code class=language-html data-lang=html><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>form </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_form</span><span style=color:#5fb3b3>">
+</span><span>  </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>label </span><span style=color:#bb80b3>for</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_input</span><span style=color:#5fb3b3>"></span><span>Search a word</span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>label</span><span style=color:#5fb3b3>>
+</span><span>  </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>input </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>search_input</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>type</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>text</span><span style=color:#5fb3b3>">
+</span><span>  </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>button </span><span style=color:#bb80b3>type</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>submit</span><span style=color:#5fb3b3>"></span><span>Submit</span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>button</span><span style=color:#5fb3b3>>
+</span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>form</span><span style=color:#5fb3b3>>
 </span><span>
-</span><span style=color:#5fb3b3><</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>result</span><span style=color:#5fb3b3>">&LT/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
+</span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>result</span><span style=color:#5fb3b3>">&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
 </span></code></pre><p>In the first version we will just try get one those values based on the user input.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#5f6364>// main.js
 </span><span>
 </span><span style=color:#5f6364>// magically retrieve the data from a file or whatever
 </span><span style=color:#c594c5>const </span><span>entries </span><span style=color:#5fb3b3>= </span><span style=color:#69c>data</span><span>()</span><span style=color:#5fb3b3>;
 </span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>format</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>results</span><span style=color:#5fb3b3>) {
-</span><span>  </span><span style=color:#c594c5>return </span><span>results</span><span style=color:#5fb3b3>.</span><span style=color:#69c>join</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&LTbr></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// I regret nothing
+</span><span>  </span><span style=color:#c594c5>return </span><span>results</span><span style=color:#5fb3b3>.</span><span style=color:#69c>join</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&lt;br></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>; </span><span style=color:#5f6364>// I regret nothing
 </span><span style=color:#5fb3b3>}
 </span><span>
 </span><span style=color:#69c>window</span><span style=color:#5fb3b3>.</span><span>search_form</span><span style=color:#5fb3b3>.</span><span style=color:#69c>addEventListener</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>submit</span><span style=color:#5fb3b3>', </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>ev</span><span style=color:#5fb3b3>) {
@@ -142,7 +142,7 @@
 </span><span style=color:#5fb3b3>}
 </span><span>
 </span><span style=color:#c594c5>function </span><span style=color:#69c>format</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>results</span><span style=color:#5fb3b3>) {
-</span><span>  </span><span style=color:#c594c5>return </span><span>results</span><span style=color:#5fb3b3>.</span><span style=color:#69c>join</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&LTbr></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>;
+</span><span>  </span><span style=color:#c594c5>return </span><span>results</span><span style=color:#5fb3b3>.</span><span style=color:#69c>join</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&lt;br></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>;
 </span><span style=color:#5fb3b3>}
 </span><span>
 </span><span style=color:#c594c5>const </span><span>search </span><span style=color:#5fb3b3>= </span><span style=color:#69c>create_search</span><span>(entries</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>true</span><span>)</span><span style=color:#5fb3b3>;
@@ -220,7 +220,7 @@
 </span><span>    is_just</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>false</span><span style=color:#5fb3b3>,
 </span><span>    is_nothing</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>false</span><span style=color:#5fb3b3>,
 </span><span>    is_future</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>true</span><span style=color:#5fb3b3>,
-</span><span>    </span><span style=color:#69c>inspect</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=> </span><span style=color:#5fb3b3>`</span><span style=color:#99c794>&LTPromise></span><span style=color:#5fb3b3>`
+</span><span>    </span><span style=color:#69c>inspect</span><span style=color:#5fb3b3>: () </span><span style=color:#c594c5>=> </span><span style=color:#5fb3b3>`</span><span style=color:#99c794>&lt;Promise></span><span style=color:#5fb3b3>`
 </span><span>  </span><span style=color:#5fb3b3>};
 </span><span style=color:#5fb3b3>}
 </span></code></pre><p>If we remove the noise maybe we could understand better.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#5f6364>// In it's very core is callbacks all the way.

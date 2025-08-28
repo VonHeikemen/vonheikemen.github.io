@@ -82,7 +82,7 @@
 </span><span>  </span><span style=color:#c594c5>const </span><span>delay </span><span style=color:#5fb3b3>= </span><span style=color:#69c>random_number</span><span>(</span><span style=color:#f99157>3</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>5</span><span>) </span><span style=color:#5fb3b3>* </span><span style=color:#f99157>1000</span><span style=color:#5fb3b3>;
 </span><span>
 </span><span>  </span><span style=color:#c594c5>const </span><span>promise </span><span style=color:#5fb3b3>= new </span><span>Promise(</span><span style=color:#f99157>res </span><span style=color:#c594c5>=> </span><span style=color:#5fb3b3>{
-</span><span>    </span><span style=color:#69c>setTimeout</span><span>(</span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=> </span><span style=color:#69c>res</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&LTquote></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>, </span><span>delay)</span><span style=color:#5fb3b3>;
+</span><span>    </span><span style=color:#69c>setTimeout</span><span>(</span><span style=color:#5fb3b3>() </span><span style=color:#c594c5>=> </span><span style=color:#69c>res</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>&lt;quote></span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>, </span><span>delay)</span><span style=color:#5fb3b3>;
 </span><span>  </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
 </span><span>  
 </span><span style=color:#5fb3b3>  </span><span style=color:#5f6364>// nomás pa' ver
@@ -107,7 +107,7 @@
 </span><span>
 </span><span>// Esperen unos segundos...
 </span><span>
-</span><span>&LTquote>
+</span><span>&lt;quote>
 </span><span>idle
 </span></code></pre><p>Espero que estas alturas se estén preguntando ¿Y dónde guardamos los datos? <code>createMachine</code> nos deja definir un "contexto" que estará disponible para nosotros en las función que apliquemos en las transiciones.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span style=color:#69c>context </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>ev </span><span style=color:#c594c5>=> </span><span>(</span><span style=color:#5fb3b3>{
 </span><span>  data</span><span style=color:#5fb3b3>: {},
@@ -149,28 +149,28 @@
 </span><span>
 </span><span>// esperen unos segundos...
 </span><span>
-</span><span>{'state':'idle','context':{'data':'&LTquote>'}}
-</span></code></pre><p>Estamos listos. Mostremos algo en el navegador.<pre class=language-html data-lang=html style=color:#cccece;background-color:#2b2c2f><code class=language-html data-lang=html><span style=color:#5fb3b3><</span><span style=color:#eb606b>main </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>app</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>">
-</span><span>  </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>section </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__content</span><span style=color:#5fb3b3>">
-</span><span>     </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__body</span><span style=color:#5fb3b3>">
-</span><span>        </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__quote</span><span style=color:#5fb3b3>">
+</span><span>{'state':'idle','context':{'data':'&lt;quote>'}}
+</span></code></pre><p>Estamos listos. Mostremos algo en el navegador.<pre class=language-html data-lang=html style=color:#cccece;background-color:#2b2c2f><code class=language-html data-lang=html><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>main </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>app</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>">
+</span><span>  </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>section </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__content</span><span style=color:#5fb3b3>">
+</span><span>     </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__body</span><span style=color:#5fb3b3>">
+</span><span>        </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__quote</span><span style=color:#5fb3b3>">
 </span><span>          quote
-</span><span>        </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
+</span><span>        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
 </span><span>
-</span><span>        </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__author</span><span style=color:#5fb3b3>">
+</span><span>        </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__author</span><span style=color:#5fb3b3>">
 </span><span>          -- author
-</span><span>        </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
-</span><span>      </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
-</span><span>      </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__footer</span><span style=color:#5fb3b3>">
-</span><span>        </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>button </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>load_btn</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>btn btn--new</span><span style=color:#5fb3b3>">
+</span><span>        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
+</span><span>      </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>>
+</span><span>      </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>div </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>card__footer</span><span style=color:#5fb3b3>">
+</span><span>        </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>button </span><span style=color:#bb80b3>id</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>load_btn</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>btn btn--new</span><span style=color:#5fb3b3>">
 </span><span>          More
-</span><span>        </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>button</span><span style=color:#5fb3b3>>
-</span><span>        </span><span style=color:#5fb3b3><</span><span style=color:#eb606b>a </span><span style=color:#bb80b3>href</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>#</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>target</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>_blank</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>btn btn--tweet</span><span style=color:#5fb3b3>">
+</span><span>        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>button</span><span style=color:#5fb3b3>>
+</span><span>        </span><span style=color:#5fb3b3>&lt;</span><span style=color:#eb606b>a </span><span style=color:#bb80b3>href</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>#</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>target</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>_blank</span><span style=color:#5fb3b3>" </span><span style=color:#bb80b3>class</span><span style=color:#5fb3b3>="</span><span style=color:#99c794>btn btn--tweet</span><span style=color:#5fb3b3>">
 </span><span>          Tweet
-</span><span>        </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>a</span><span style=color:#5fb3b3>>
-</span><span>      </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>> 
-</span><span>  </span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>section</span><span style=color:#5fb3b3>> 
-</span><span style=color:#5fb3b3>&LT/</span><span style=color:#eb606b>main</span><span style=color:#5fb3b3>>
+</span><span>        </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>a</span><span style=color:#5fb3b3>>
+</span><span>      </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>div</span><span style=color:#5fb3b3>> 
+</span><span>  </span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>section</span><span style=color:#5fb3b3>> 
+</span><span style=color:#5fb3b3>&lt;/</span><span style=color:#eb606b>main</span><span style=color:#5fb3b3>>
 </span></code></pre><pre class=language-css data-lang=css style=color:#cccece;background-color:#2b2c2f><code class=language-css data-lang=css><span style=color:#eb606b>body </span><span style=color:#5fb3b3>{
 </span><span>  </span><span style=color:#fac863>display</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>flex</span><span style=color:#5fb3b3>;
 </span><span>  </span><span style=color:#fac863>justify-content</span><span style=color:#5fb3b3>: </span><span style=color:#f99157>center</span><span style=color:#5fb3b3>;
@@ -293,31 +293,31 @@
 </span><span>     )
 </span><span>   ),
 </span><span> }, context);
-</span></code></pre><p>Funciona. Pero se ve mal cuando carga por primera vez. Hagamos otra transición de carga, una que esconda la carta mientras se carga la primera frase.<p>Empecemos por el HTML.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span> &LTmain id="app" class="card">
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &LTsection class="card__content card__content--loader"> 
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    &LTp>Loading&LT/p> 
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &LT/section>
-</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  &LTsection id="card" class="card__content">
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &LTsection id="card" class="hide card__content">
-</span><span>     &LTdiv class="card__body">
-</span><span>       &LTdiv class="card__quote">
+</span></code></pre><p>Funciona. Pero se ve mal cuando carga por primera vez. Hagamos otra transición de carga, una que esconda la carta mientras se carga la primera frase.<p>Empecemos por el HTML.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span> &lt;main id="app" class="card">
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;section class="card__content card__content--loader"> 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>    &lt;p>Loading&lt;/p> 
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;/section>
+</span><span style=color:#5fb3b3>-</span><span style=color:#ec5f67>  &lt;section id="card" class="card__content">
+</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>  &lt;section id="card" class="hide card__content">
+</span><span>     &lt;div class="card__body">
+</span><span>       &lt;div class="card__quote">
 </span><span>         quote
-</span><span>       &LT/div>
+</span><span>       &lt;/div>
 </span><span>
-</span><span>       &LTdiv class="card__author">
+</span><span>       &lt;div class="card__author">
 </span><span>          -- author
-</span><span>       &LT/div>
-</span><span>     &LT/div>
-</span><span>     &LTdiv class="card__footer">
-</span><span>       &LTbutton id="load_btn" class="btn btn--new">
+</span><span>       &lt;/div>
+</span><span>     &lt;/div>
+</span><span>     &lt;div class="card__footer">
+</span><span>       &lt;button id="load_btn" class="btn btn--new">
 </span><span>         More
-</span><span>       &LT/button>
-</span><span>       &LTa href="#" target="_blank" class="btn btn--tweet">
+</span><span>       &lt;/button>
+</span><span>       &lt;a href="#" target="_blank" class="btn btn--tweet">
 </span><span>         Tweet
-</span><span>       &LT/a>
-</span><span>     &LT/div> 
-</span><span>   &LT/section> 
-</span><span> &LT/main>
+</span><span>       &lt;/a>
+</span><span>     &lt;/div> 
+</span><span>   &lt;/section> 
+</span><span> &lt;/main>
 </span></code></pre><p>Creamos otro estado, <code>empty</code>. Podemos reusar la lógica del estado <code>loading</code> para esto. Creamos una función que crea transiciones.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span style=color:#69c>load_quote </span><span style=color:#5fb3b3>= (...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=>
 </span><span>  </span><span style=color:#69c>invoke</span><span>(
 </span><span>    get_quote</span><span style=color:#5fb3b3>,
