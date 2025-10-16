@@ -4327,10 +4327,6 @@
 &lt;ul&gt;
 &lt;li&gt;nvim-light: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&#x2F;blob&#x2F;main&#x2F;init.lua&quot;&gt;init.lua&lt;&#x2F;a&gt; | &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;github link&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
-&lt;p&gt;And this my personal config in github:&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;dotfiles&#x2F;tree&#x2F;master&#x2F;my-configs&#x2F;neovim&quot;&gt;neovim (v0.10)&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
 &lt;h2 id=&quot;sources&quot;&gt;Sources&lt;&#x2F;h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;learnxinyminutes.com&#x2F;docs&#x2F;lua&#x2F;&quot;&gt;learn x in y minutes: where X=lua&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
