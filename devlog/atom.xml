@@ -2565,7 +2565,6 @@
 &lt;ul&gt;
 &lt;li&gt;nvim-light: &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;VonHeikemen&#x2F;nvim-light&quot;&gt;github link&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
-&lt;p&gt;Another great option is &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nvim-lua&#x2F;kickstart.nvim&quot;&gt;kickstart.nvim&lt;&#x2F;a&gt;. It&#x27;s a good resource to learn about popular plugins and how to configure them.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
 &lt;p&gt;Now we know how to configure some basic options in Neovim. We learned how to create our very own keybindings. We know how to get plugins from github. We manage to configure a couple of plugins, a lua plugin and one written in vimscript. We took a brief look at some advance topics like recursive mappings, user commands, autocommands and lua modules.&lt;&#x2F;p&gt;
 &lt;p&gt;I&#x27;d say you have everything you need to start exploring plugins, read other people&#x27;s config and learn from them.&lt;&#x2F;p&gt;
