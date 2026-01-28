@@ -1,200 +1,193 @@
 <!doctype html><html lang=en><head><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=utf-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1.0,maximum-scale=1,viewport-fit=cover" name=viewport><meta content="interest-cohort=()" http-equiv=Permissions-Policy><title>
   Can we manage neovim's LSP client without plugins? | Devlog
-</title><link href=https://vonheikemen.github.io/devlog/print.css media=print rel=stylesheet><link href=https://vonheikemen.github.io/devlog/styles.css rel=stylesheet><link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface" rel=stylesheet><link href=https://vonheikemen.github.io/devlog/atom.xml rel=alternate title=RSS type=application/atom+xml><link href=https://hachyderm.io/@vonheikemen rel=me><link href=https://twitter.com/VonHeikemen_ rel=me><meta content="vim, neovim, shell, software, coding, development" name=keywords><meta content="Let's learn what does it take to use neovim's LSP client in project" name=description><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/atom.xml>RSS</a></ul> © 2020-2026 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Can we manage neovim's LSP client without plugins?</h1><span class=post-date>2022-06-09 | 3 min read | <a href=https://vonheikemen.github.io/devlog/es/tools/manage-neovim-lsp-client-without-plugins/> Leer en español </a> </span><blockquote>Last updated: 2022-10-16</blockquote><p>Yes, we can. The complexity of the setup will depend on what you want to achieve in your workflow. But if you know your way around lua you should be able to understand the "boilerplate" needed to get a decent setup.<p>Let's figure out how to make it work.<h2 id=the-building-blocks>The building blocks</h2><p>It turns out we only need two functions. One to initialize the language server. One that notifies text changes to the server:<ul><li><p><code>vim.lsp.start_client()</code>: This function creates a "client object" that handles all communications with a language server.</p><li><p><code>vim.lsp.buf_attach_client()</code>: It notifies all text changes to the language server.</p></ul><p>A minimal and inefficient example using typescript's language server would look like this.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span style=color:#69c>launch_tsserver </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>  </span><span style=color:#c594c5>local </span><span>config </span><span style=color:#5fb3b3>= {
-</span><span>    </span><span style=color:#99c794>cmd </span><span style=color:#5fb3b3>= {'</span><span style=color:#99c794>typescript-language-server</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>--stdio</span><span style=color:#5fb3b3>'},
-</span><span>    </span><span style=color:#99c794>name </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>tsserver</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#99c794>root_dir </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>fn</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getcwd</span><span style=color:#5fb3b3>(),
-</span><span>    </span><span style=color:#99c794>capabilities </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span>protocol</span><span style=color:#5fb3b3>.</span><span style=color:#69c>make_client_capabilities</span><span style=color:#5fb3b3>(),
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  </span><span style=color:#c594c5>local </span><span>client_id </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>start_client</span><span style=color:#5fb3b3>(</span><span>config</span><span style=color:#5fb3b3>)
-</span><span>
-</span><span>  </span><span style=color:#c594c5>if </span><span>client_id </span><span style=color:#c594c5>then
-</span><span>    vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>buf_attach_client</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span>client_id</span><span style=color:#5fb3b3>)
-</span><span>  </span><span style=color:#c594c5>end
-</span><span style=color:#c594c5>end
-</span><span>
-</span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_user_command</span><span style=color:#5fb3b3>(
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>LaunchTsserver</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>  </span><span>launch_tsserver</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>{</span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>Start tsserver</span><span style=color:#5fb3b3>'}
-</span><span style=color:#5fb3b3>)
-</span></code></pre><p>Now with the command <code>LaunchTsserver</code> we would be able to start a <code>typescript-language-server</code> process and get diagnostics in the current file.<p>Why is this inefficient? Because it would only work on a single file. It'll spawn a new process each time we use it. What you really want is to "share" a single process of <code>typescript-language-server</code> for your project.<h2 id=project-setup>Project setup</h2><p>So what's the missing piece that would make this usable in a project? An autocommand. We need to tell neovim we want to attach the server to a buffer everytime we open a new file of a specific filetype.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span>filetypes </span><span style=color:#5fb3b3>= {
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascriptreact</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript.jsx</span><span style=color:#5fb3b3>'
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescriptreact</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript.tsx</span><span style=color:#5fb3b3>',
-</span><span style=color:#5fb3b3>}
-</span><span>
-</span><span style=color:#c594c5>local </span><span style=color:#69c>buf_attach </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>  vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>buf_attach_client</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span>client_id</span><span style=color:#5fb3b3>)
-</span><span style=color:#c594c5>end
-</span><span>
-</span><span>autocmd_id </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_autocmd</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>FileType</span><span style=color:#5fb3b3>', {
-</span><span style=color:#69c>  </span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>string</span><span style=color:#5fb3b3>.</span><span style=color:#69c>format</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>Attach LSP: %s</span><span style=color:#5fb3b3>', </span><span>client_name</span><span style=color:#5fb3b3>),
-</span><span style=color:#69c>  </span><span style=color:#99c794>pattern </span><span style=color:#5fb3b3>= </span><span>filetypes</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>  </span><span style=color:#99c794>callback </span><span style=color:#5fb3b3>= </span><span>buf_attach
-</span><span style=color:#5fb3b3>})
-</span></code></pre><p>When we create an autocommand with <code>nvim_create_autocmd</code> we get an id, which can be used to delete it later on. To delete the autocommand we would call <code>nvim_del_autocmd</code>.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_del_autocmd</span><span style=color:#5fb3b3>(</span><span>autocmd_id</span><span style=color:#5fb3b3>)
-</span></code></pre><p>But what would be the best time to create this autocommand? After the server is ready, of course. We can use the <code>on_init</code> hook to setup the autocommand and <code>on_exit</code> to clean it up.<p>If we apply all this knowledge to our <code>launch_tsserver</code> function we would have this.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span style=color:#69c>launch_tsserver </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>  </span><span style=color:#c594c5>local </span><span>autocmd
-</span><span>  </span><span style=color:#c594c5>local </span><span>filetypes </span><span style=color:#5fb3b3>= {
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascriptreact</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript.jsx</span><span style=color:#5fb3b3>'
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescriptreact</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript.tsx</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  </span><span style=color:#c594c5>local </span><span>config </span><span style=color:#5fb3b3>= {
-</span><span>    </span><span style=color:#99c794>cmd </span><span style=color:#5fb3b3>= {'</span><span style=color:#99c794>typescript-language-server</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>--stdio</span><span style=color:#5fb3b3>'},
-</span><span>    </span><span style=color:#99c794>name </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>tsserver</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#99c794>root_dir </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>fn</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getcwd</span><span style=color:#5fb3b3>(),
-</span><span>    </span><span style=color:#99c794>capabilities </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span>protocol</span><span style=color:#5fb3b3>.</span><span style=color:#69c>make_client_capabilities</span><span style=color:#5fb3b3>(),
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  config</span><span style=color:#5fb3b3>.</span><span style=color:#69c>on_init </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>client</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>results</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>local </span><span style=color:#69c>buf_attach </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>      vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>buf_attach_client</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span>client</span><span style=color:#5fb3b3>.</span><span style=color:#69c>id</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>end
-</span><span>
-</span><span>    autocmd </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_autocmd</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>FileType</span><span style=color:#5fb3b3>', {
-</span><span style=color:#69c>      </span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>string</span><span style=color:#5fb3b3>.</span><span style=color:#69c>format</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>Attach LSP: %s</span><span style=color:#5fb3b3>', </span><span>client</span><span style=color:#5fb3b3>.</span><span style=color:#69c>name</span><span style=color:#5fb3b3>),
-</span><span style=color:#69c>      </span><span style=color:#99c794>pattern </span><span style=color:#5fb3b3>= </span><span>filetypes</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>      </span><span style=color:#99c794>callback </span><span style=color:#5fb3b3>= </span><span>buf_attach
-</span><span style=color:#69c>    </span><span style=color:#5fb3b3>})
-</span><span>
-</span><span>    </span><span style=color:#c594c5>if </span><span>vim</span><span style=color:#5fb3b3>.</span><span>v</span><span style=color:#5fb3b3>.</span><span>vim_did_enter </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>1 </span><span style=color:#5fb3b3>and
-</span><span>      vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>tbl_contains</span><span style=color:#5fb3b3>(</span><span>filetypes</span><span style=color:#5fb3b3>, </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bo</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filetype</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>then
-</span><span>      </span><span style=color:#69c>buf_attach</span><span style=color:#5fb3b3>()
-</span><span>    </span><span style=color:#c594c5>end
-</span><span>  </span><span style=color:#c594c5>end
-</span><span>
-</span><span>  config</span><span style=color:#5fb3b3>.</span><span>on_exit </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>schedule_wrap</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>code</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>signal</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>client_id</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>    </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_del_autocmd</span><span style=color:#5fb3b3>(</span><span>autocmd</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>  </span><span style=color:#c594c5>end</span><span style=color:#5fb3b3>)
-</span><span>
-</span><span>  vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>start_client</span><span style=color:#5fb3b3>(</span><span>config</span><span style=color:#5fb3b3>)
-</span><span style=color:#c594c5>end
-</span></code></pre><h2 id=what-about-some-keybindings>What about some keybindings?</h2><p>Right? I mean, you probably want to use some of those LSP features with just a few keystrokes. How do we proceed? The documentation says we can use an autocommand with the event <code>LspAttach</code>. So you can define your keybindings anywhere you want.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_autocmd</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>LspAttach</span><span style=color:#5fb3b3>', {
-</span><span style=color:#69c>  </span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>LSP actions</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>  callback </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span style=color:#69c>    </span><span style=color:#c594c5>local </span><span style=color:#69c>bufmap </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>mode</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>lhs</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>rhs</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>      </span><span style=color:#c594c5>local </span><span>opts </span><span style=color:#5fb3b3>= {</span><span style=color:#99c794>buffer </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>true</span><span style=color:#5fb3b3>}
-</span><span style=color:#69c>      </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>keymap</span><span style=color:#5fb3b3>.</span><span style=color:#69c>set</span><span style=color:#5fb3b3>(</span><span>mode</span><span style=color:#5fb3b3>, </span><span>lhs</span><span style=color:#5fb3b3>, </span><span>rhs</span><span style=color:#5fb3b3>, </span><span>opts</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>    </span><span style=color:#c594c5>end
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Displays hover information about the symbol under the cursor
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>K</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.hover()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Jump to the definition
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gd</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.definition()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Jump to declaration
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gD</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.declaration()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Lists all the implementations for the symbol under the cursor
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gi</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.implementation()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Jumps to the definition of the type symbol
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>go</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.type_definition()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Lists all the references 
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gr</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.references()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Displays a function's signature information
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;C-k></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.signature_help()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Renames all references to the symbol under the cursor
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F2></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.rename()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Selects a code action available at the current cursor position
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.code_action()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>x</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;F4></span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.lsp.buf.range_code_action()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Show diagnostics in a floating window
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>gl</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.open_float()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Move to the previous diagnostic
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>[d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.goto_prev()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>
-</span><span style=color:#69c>    </span><span style=color:#5f6364>-- Move to the next diagnostic
-</span><span style=color:#69c>    bufmap</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>n</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>]d</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>&lt;cmd>lua vim.diagnostic.goto_next()&lt;cr></span><span style=color:#5fb3b3>')
-</span><span style=color:#69c>  </span><span style=color:#c594c5>end
-</span><span style=color:#5fb3b3>})
-</span></code></pre><h2 id=complete-code>Complete code</h2><p>And now if we apply the new changes to our example this would be it.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span style=color:#69c>launch_tsserver </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>  </span><span style=color:#c594c5>local </span><span>autocmd
-</span><span>  </span><span style=color:#c594c5>local </span><span>filetypes </span><span style=color:#5fb3b3>= {
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascriptreact</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript.jsx</span><span style=color:#5fb3b3>'
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescriptreact</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript.tsx</span><span style=color:#5fb3b3>',
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  </span><span style=color:#c594c5>local </span><span>config </span><span style=color:#5fb3b3>= {
-</span><span>    </span><span style=color:#99c794>cmd </span><span style=color:#5fb3b3>= {'</span><span style=color:#99c794>typescript-language-server</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>--stdio</span><span style=color:#5fb3b3>'},
-</span><span>    </span><span style=color:#99c794>name </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>tsserver</span><span style=color:#5fb3b3>',
-</span><span>    </span><span style=color:#99c794>root_dir </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>fn</span><span style=color:#5fb3b3>.</span><span style=color:#69c>getcwd</span><span style=color:#5fb3b3>(),
-</span><span>    </span><span style=color:#99c794>capabilities </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span>protocol</span><span style=color:#5fb3b3>.</span><span style=color:#69c>make_client_capabilities</span><span style=color:#5fb3b3>(),
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  config</span><span style=color:#5fb3b3>.</span><span style=color:#69c>on_init </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>client</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>results</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>local </span><span style=color:#69c>buf_attach </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>      vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>buf_attach_client</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>0</span><span style=color:#5fb3b3>, </span><span>client</span><span style=color:#5fb3b3>.</span><span style=color:#69c>id</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>end
-</span><span>
-</span><span>    autocmd </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_autocmd</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>FileType</span><span style=color:#5fb3b3>', {
-</span><span style=color:#69c>      </span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= </span><span style=color:#f99157>string</span><span style=color:#5fb3b3>.</span><span style=color:#69c>format</span><span style=color:#5fb3b3>('</span><span style=color:#99c794>Attach LSP: %s</span><span style=color:#5fb3b3>', </span><span>client</span><span style=color:#5fb3b3>.</span><span style=color:#69c>name</span><span style=color:#5fb3b3>),
-</span><span style=color:#69c>      </span><span style=color:#99c794>pattern </span><span style=color:#5fb3b3>= </span><span>filetypes</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>      </span><span style=color:#99c794>callback </span><span style=color:#5fb3b3>= </span><span>buf_attach
-</span><span style=color:#69c>    </span><span style=color:#5fb3b3>})
-</span><span>
-</span><span>    </span><span style=color:#c594c5>if </span><span>vim</span><span style=color:#5fb3b3>.</span><span>v</span><span style=color:#5fb3b3>.</span><span>vim_did_enter </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>1 </span><span style=color:#5fb3b3>and
-</span><span>      vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>tbl_contains</span><span style=color:#5fb3b3>(</span><span>filetypes</span><span style=color:#5fb3b3>, </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>bo</span><span style=color:#5fb3b3>.</span><span style=color:#69c>filetype</span><span style=color:#5fb3b3>)
-</span><span>    </span><span style=color:#c594c5>then
-</span><span>      </span><span style=color:#69c>buf_attach</span><span style=color:#5fb3b3>()
-</span><span>    </span><span style=color:#c594c5>end
-</span><span>  </span><span style=color:#c594c5>end
-</span><span>
-</span><span>  config</span><span style=color:#5fb3b3>.</span><span>on_exit </span><span style=color:#5fb3b3>= </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>schedule_wrap</span><span style=color:#5fb3b3>(</span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>code</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>signal</span><span style=color:#5fb3b3>, </span><span style=color:#f99157>client_id</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>    </span><span>vim</span><span style=color:#5fb3b3>.</span><span style=color:#69c>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_del_autocmd</span><span style=color:#5fb3b3>(</span><span>autocmd</span><span style=color:#5fb3b3>)
-</span><span style=color:#69c>  </span><span style=color:#c594c5>end</span><span style=color:#5fb3b3>)
-</span><span>
-</span><span>  vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>start_client</span><span style=color:#5fb3b3>(</span><span>config</span><span style=color:#5fb3b3>)
-</span><span style=color:#c594c5>end
-</span><span>
-</span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_user_command</span><span style=color:#5fb3b3>(
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>LaunchTsserver</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>  </span><span>launch_tsserver</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>{</span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>Start tsserver</span><span style=color:#5fb3b3>'}
-</span><span style=color:#5fb3b3>)
-</span></code></pre><h2 id=can-we-do-better>Can we do better?</h2><p>Sure. I mean, you can hide almost all the boilerplate inside another function and reduce the noise.<p>Just imagine this.<pre class=language-lua data-lang=lua style=color:#cccece;background-color:#2b2c2f><code class=language-lua data-lang=lua><span style=color:#c594c5>local </span><span style=color:#69c>launch_tsserver </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>function</span><span style=color:#5fb3b3>()
-</span><span>  </span><span style=color:#c594c5>local </span><span>config </span><span style=color:#5fb3b3>= </span><span style=color:#69c>make_config</span><span style=color:#5fb3b3>({
-</span><span style=color:#69c>    </span><span style=color:#99c794>cmd </span><span style=color:#5fb3b3>= {'</span><span style=color:#99c794>typescript-language-server</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>--stdio</span><span style=color:#5fb3b3>'},
-</span><span style=color:#69c>    </span><span style=color:#99c794>name </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>tsserver</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>    </span><span style=color:#99c794>filetypes </span><span style=color:#5fb3b3>= {
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascriptreact</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>javascript.jsx</span><span style=color:#5fb3b3>'
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescriptreact</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>      </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>typescript.tsx</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>    </span><span style=color:#5fb3b3>}
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>})
-</span><span>
-</span><span>  vim</span><span style=color:#5fb3b3>.</span><span>lsp</span><span style=color:#5fb3b3>.</span><span style=color:#69c>start_client</span><span style=color:#5fb3b3>(</span><span>config</span><span style=color:#5fb3b3>)
-</span><span style=color:#c594c5>end
-</span><span>
-</span><span>vim</span><span style=color:#5fb3b3>.</span><span>api</span><span style=color:#5fb3b3>.</span><span style=color:#69c>nvim_create_user_command</span><span style=color:#5fb3b3>(
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>LaunchTsserver</span><span style=color:#5fb3b3>',
-</span><span style=color:#69c>  </span><span>launch_tsserver</span><span style=color:#5fb3b3>,
-</span><span style=color:#69c>  </span><span style=color:#5fb3b3>{</span><span style=color:#99c794>desc </span><span style=color:#5fb3b3>= '</span><span style=color:#99c794>Start tsserver</span><span style=color:#5fb3b3>'}
-</span><span style=color:#5fb3b3>)
-</span></code></pre><p>How does <code>make_config</code> look like? Well... that's homework, my friend. You can implement it anyway you want. I've already showed you all the code you need to make it possible.<p>You really want to know how I would do it? The answer is in this github repository: <a href=https://github.com/VonHeikemen/nvim-lsp-sans-plugins rel=noopener target=_blank>VonHeikemen/nvim-lsp-sans-plugins</a><h2 id=conclusion>Conclusion</h2><p>We learned enough about neovim's builtin LSP client to create our own little setup. We know how to initialize the language server. We can "share" the same server across multiple files. In the process we worked with autocommands, now we know how to create and delete them. We could totally manage some LSP servers without plugins.<h2 id=sources>Sources</h2><ul><li><a href=https://neovim.io/doc/user/lsp.html#vim.lsp.start_client() rel=noopener target=_blank>:help vim.lsp.start_client()</a><li><a href=https://neovim.io/doc/user/lsp.html#vim.lsp.buf_attach_client() rel=noopener target=_blank>:help vim.lsp.buf_attach_client()</a><li><a href=https://github.com/neovim/nvim-lspconfig/wiki rel=noopener target=_blank>What is nvim-lspconfig?</a></ul><hr><p>Have any question? Feel free to leave a comment in one of these platform where I have shared this:<ul><li><a href=https://dev.to/vonheikemen/can-we-manage-neovims-lsp-client-without-plugins-3mge rel=noopener target=_blank>dev.to</a><li><a href=https://vonheikemen.hashnode.dev/manage-neovim-lsp-client-without-plugins rel=noopener target=_blank>Hashnode</a></ul><p>You can reach out to me on social media:<ul><li>Twitter <a rel="noopener me" href=https://twitter.com/VonHeikemen_ target=_blank> @VonHeikemen_ </a><li>Bluesky <a rel="noopener me" href=https://bsky.app/profile/vonheikemen.bsky.social target=_blank> @vonheikemen.bsky.social </a><li>Mastodon <a rel="noopener me" href=https://hachyderm.io/@vonheikemen target=_blank> @vonheikemen@hachyderm.io </a></ul><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://ko-fi.com/vonheikemen style=justify-content:center;display:flex target=_blank> <img alt="Buy Me A Coffee" src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" style=width:217px!important;height:60px!important> </a></div></div>
+</title><link href=https://vonheikemen.github.io/devlog/print.css media=print rel=stylesheet><link href=https://vonheikemen.github.io/devlog/styles.css rel=stylesheet><link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface" rel=stylesheet><link href=https://vonheikemen.github.io/devlog/atom.xml rel=alternate title=RSS type=application/atom+xml><link href=https://hachyderm.io/@vonheikemen rel=me><link href=https://twitter.com/VonHeikemen_ rel=me><meta content="vim, neovim, shell, software, coding, development" name=keywords><meta content="Let's learn what does it take to use neovim's LSP client in project" name=description><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/tags/>Explore tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/>Devlog en español</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/atom.xml>RSS</a></ul> © 2020-2026 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Can we manage neovim's LSP client without plugins?</h1><span class=post-date>2022-06-09 | 3 min read | <a href=https://vonheikemen.github.io/devlog/es/tools/manage-neovim-lsp-client-without-plugins/> Leer en español </a> </span><blockquote>Last updated: 2022-10-16</blockquote><p>Yes, we can. The complexity of the setup will depend on what you want to achieve in your workflow. But if you know your way around lua you should be able to understand the "boilerplate" needed to get a decent setup.<p>Let's figure out how to make it work.<h2 id=the-building-blocks>The building blocks</h2><p>It turns out we only need two functions. One to initialize the language server. One that notifies text changes to the server:<ul><li><p><code>vim.lsp.start_client()</code>: This function creates a "client object" that handles all communications with a language server.</p><li><p><code>vim.lsp.buf_attach_client()</code>: It notifies all text changes to the language server.</p></ul><p>A minimal and inefficient example using typescript's language server would look like this.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>local</span><span style=color:#7e9cd8> launch_tsserver</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>  local config</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span>    cmd</span><span style=color:#e6c384> =</span><span> {</span><span style=color:#98bb6c>'typescript-language-server'</span><span>, </span><span style=color:#98bb6c>'--stdio'</span><span>},</span></span>
+<span class=giallo-l><span>    name</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'tsserver'</span><span>,</span></span>
+<span class=giallo-l><span>    root_dir</span><span style=color:#e6c384> =</span><span> vim.fn.</span><span style=color:#7e9cd8>getcwd</span><span>(),</span></span>
+<span class=giallo-l><span>    capabilities</span><span style=color:#e6c384> =</span><span> vim.lsp.protocol.</span><span style=color:#7e9cd8>make_client_capabilities</span><span>(),</span></span>
+<span class=giallo-l><span>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  local client_id</span><span style=color:#e6c384> =</span><span> vim.lsp.</span><span style=color:#7e9cd8>start_client</span><span>(config)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  if</span><span> client_id</span><span style=color:#957fb8> then</span></span>
+<span class=giallo-l><span>    vim.lsp.</span><span style=color:#7e9cd8>buf_attach_client</span><span>(</span><span style=color:#d27e99>0</span><span>, client_id)</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span></span>
+<span class=giallo-l><span style=color:#957fb8>end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>vim.api.</span><span style=color:#7e9cd8>nvim_create_user_command</span><span>(</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'LaunchTsserver'</span><span>,</span></span>
+<span class=giallo-l><span>  launch_tsserver,</span></span>
+<span class=giallo-l><span>  {desc</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'Start tsserver'</span><span>}</span></span>
+<span class=giallo-l><span>)</span></span></code></pre><p>Now with the command <code>LaunchTsserver</code> we would be able to start a <code>typescript-language-server</code> process and get diagnostics in the current file.<p>Why is this inefficient? Because it would only work on a single file. It'll spawn a new process each time we use it. What you really want is to "share" a single process of <code>typescript-language-server</code> for your project.<h2 id=project-setup>Project setup</h2><p>So what's the missing piece that would make this usable in a project? An autocommand. We need to tell neovim we want to attach the server to a buffer everytime we open a new file of a specific filetype.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>local filetypes</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'javascript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'javascriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'javascript.jsx'</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'typescript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'typescriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'typescript.tsx'</span><span>,</span></span>
+<span class=giallo-l><span>}</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>local</span><span style=color:#7e9cd8> buf_attach</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>  vim.lsp.</span><span style=color:#7e9cd8>buf_attach_client</span><span>(</span><span style=color:#d27e99>0</span><span>, client_id)</span></span>
+<span class=giallo-l><span style=color:#957fb8>end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>autocmd_id</span><span style=color:#e6c384> =</span><span> vim.api.</span><span style=color:#7e9cd8>nvim_create_autocmd</span><span>(</span><span style=color:#98bb6c>'FileType'</span><span>, {</span></span>
+<span class=giallo-l><span>  desc</span><span style=color:#e6c384> =</span><span style=color:#7e9cd8> string.format</span><span>(</span><span style=color:#98bb6c>'Attach LSP: %s'</span><span>, client_name),</span></span>
+<span class=giallo-l><span>  pattern</span><span style=color:#e6c384> =</span><span> filetypes,</span></span>
+<span class=giallo-l><span>  callback</span><span style=color:#e6c384> =</span><span> buf_attach</span></span>
+<span class=giallo-l><span>})</span></span></code></pre><p>When we create an autocommand with <code>nvim_create_autocmd</code> we get an id, which can be used to delete it later on. To delete the autocommand we would call <code>nvim_del_autocmd</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>vim.api.</span><span style=color:#7e9cd8>nvim_del_autocmd</span><span>(autocmd_id)</span></span></code></pre><p>But what would be the best time to create this autocommand? After the server is ready, of course. We can use the <code>on_init</code> hook to setup the autocommand and <code>on_exit</code> to clean it up.<p>If we apply all this knowledge to our <code>launch_tsserver</code> function we would have this.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>local</span><span style=color:#7e9cd8> launch_tsserver</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>  local autocmd</span></span>
+<span class=giallo-l><span>  local filetypes</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascript.jsx'</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescript.tsx'</span><span>,</span></span>
+<span class=giallo-l><span>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  local config</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span>    cmd</span><span style=color:#e6c384> =</span><span> {</span><span style=color:#98bb6c>'typescript-language-server'</span><span>, </span><span style=color:#98bb6c>'--stdio'</span><span>},</span></span>
+<span class=giallo-l><span>    name</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'tsserver'</span><span>,</span></span>
+<span class=giallo-l><span>    root_dir</span><span style=color:#e6c384> =</span><span> vim.fn.</span><span style=color:#7e9cd8>getcwd</span><span>(),</span></span>
+<span class=giallo-l><span>    capabilities</span><span style=color:#e6c384> =</span><span> vim.lsp.protocol.</span><span style=color:#7e9cd8>make_client_capabilities</span><span>(),</span></span>
+<span class=giallo-l><span>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  config.</span><span style=color:#7e9cd8>on_init</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>(</span><span>client</span><span style=color:#9cabca>,</span><span> results</span><span style=color:#9cabca>)</span></span>
+<span class=giallo-l><span>    local</span><span style=color:#7e9cd8> buf_attach</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>      vim.lsp.</span><span style=color:#7e9cd8>buf_attach_client</span><span>(</span><span style=color:#d27e99>0</span><span>, client.id)</span></span>
+<span class=giallo-l><span style=color:#957fb8>    end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    autocmd</span><span style=color:#e6c384> =</span><span> vim.api.</span><span style=color:#7e9cd8>nvim_create_autocmd</span><span>(</span><span style=color:#98bb6c>'FileType'</span><span>, {</span></span>
+<span class=giallo-l><span>      desc</span><span style=color:#e6c384> =</span><span style=color:#7e9cd8> string.format</span><span>(</span><span style=color:#98bb6c>'Attach LSP: %s'</span><span>, client.name),</span></span>
+<span class=giallo-l><span>      pattern</span><span style=color:#e6c384> =</span><span> filetypes,</span></span>
+<span class=giallo-l><span>      callback</span><span style=color:#e6c384> =</span><span> buf_attach</span></span>
+<span class=giallo-l><span>    })</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>    if</span><span> vim.v.vim_did_enter</span><span style=color:#e6c384> ==</span><span style=color:#d27e99> 1</span><span style=color:#e6c384> and</span></span>
+<span class=giallo-l><span>      vim.</span><span style=color:#7e9cd8>tbl_contains</span><span>(filetypes, vim.bo.filetype)</span></span>
+<span class=giallo-l><span style=color:#957fb8>    then</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      buf_attach</span><span>()</span></span>
+<span class=giallo-l><span style=color:#957fb8>    end</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  config.on_exit</span><span style=color:#e6c384> =</span><span> vim.</span><span style=color:#7e9cd8>schedule_wrap</span><span>(</span><span style=color:#957fb8>function</span><span style=color:#9cabca>(</span><span>code</span><span style=color:#9cabca>,</span><span> signal</span><span style=color:#9cabca>,</span><span> client_id</span><span style=color:#9cabca>)</span></span>
+<span class=giallo-l><span>    vim.api.</span><span style=color:#7e9cd8>nvim_del_autocmd</span><span>(autocmd)</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  vim.lsp.</span><span style=color:#7e9cd8>start_client</span><span>(config)</span></span>
+<span class=giallo-l><span style=color:#957fb8>end</span></span></code></pre><h2 id=what-about-some-keybindings>What about some keybindings?</h2><p>Right? I mean, you probably want to use some of those LSP features with just a few keystrokes. How do we proceed? The documentation says we can use an autocommand with the event <code>LspAttach</code>. So you can define your keybindings anywhere you want.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>vim.api.</span><span style=color:#7e9cd8>nvim_create_autocmd</span><span>(</span><span style=color:#98bb6c>'LspAttach'</span><span>, {</span></span>
+<span class=giallo-l><span>  desc</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'LSP actions'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  callback</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>    local</span><span style=color:#7e9cd8> bufmap</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>(</span><span>mode</span><span style=color:#9cabca>,</span><span> lhs</span><span style=color:#9cabca>,</span><span> rhs</span><span style=color:#9cabca>)</span></span>
+<span class=giallo-l><span>      local opts</span><span style=color:#e6c384> =</span><span> {buffer</span><span style=color:#e6c384> =</span><span style=color:#ffa066> true</span><span>}</span></span>
+<span class=giallo-l><span>      vim.keymap.</span><span style=color:#7e9cd8>set</span><span>(mode, lhs, rhs, opts)</span></span>
+<span class=giallo-l><span style=color:#957fb8>    end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Displays hover information about the symbol under the cursor</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'K'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.hover()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Jump to the definition</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'gd'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.definition()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Jump to declaration</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'gD'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.declaration()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Lists all the implementations for the symbol under the cursor</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'gi'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.implementation()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Jumps to the definition of the type symbol</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'go'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.type_definition()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Lists all the references </span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'gr'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.references()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Displays a function's signature information</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'&lt;C-k>'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.signature_help()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Renames all references to the symbol under the cursor</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'&lt;F2>'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.rename()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Selects a code action available at the current cursor position</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'&lt;F4>'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.code_action()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'x'</span><span>, </span><span style=color:#98bb6c>'&lt;F4>'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.lsp.buf.range_code_action()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Show diagnostics in a floating window</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'gl'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.diagnostic.open_float()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Move to the previous diagnostic</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>'[d'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.diagnostic.goto_prev()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#727169>    -- Move to the next diagnostic</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    bufmap</span><span>(</span><span style=color:#98bb6c>'n'</span><span>, </span><span style=color:#98bb6c>']d'</span><span>, </span><span style=color:#98bb6c>'&lt;cmd>lua vim.diagnostic.goto_next()&lt;cr>'</span><span>)</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span></span>
+<span class=giallo-l><span>})</span></span></code></pre><h2 id=complete-code>Complete code</h2><p>And now if we apply the new changes to our example this would be it.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>local</span><span style=color:#7e9cd8> launch_tsserver</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>  local autocmd</span></span>
+<span class=giallo-l><span>  local filetypes</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'javascript.jsx'</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>    'typescript.tsx'</span><span>,</span></span>
+<span class=giallo-l><span>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  local config</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span>    cmd</span><span style=color:#e6c384> =</span><span> {</span><span style=color:#98bb6c>'typescript-language-server'</span><span>, </span><span style=color:#98bb6c>'--stdio'</span><span>},</span></span>
+<span class=giallo-l><span>    name</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'tsserver'</span><span>,</span></span>
+<span class=giallo-l><span>    root_dir</span><span style=color:#e6c384> =</span><span> vim.fn.</span><span style=color:#7e9cd8>getcwd</span><span>(),</span></span>
+<span class=giallo-l><span>    capabilities</span><span style=color:#e6c384> =</span><span> vim.lsp.protocol.</span><span style=color:#7e9cd8>make_client_capabilities</span><span>(),</span></span>
+<span class=giallo-l><span>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  config.</span><span style=color:#7e9cd8>on_init</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>(</span><span>client</span><span style=color:#9cabca>,</span><span> results</span><span style=color:#9cabca>)</span></span>
+<span class=giallo-l><span>    local</span><span style=color:#7e9cd8> buf_attach</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>      vim.lsp.</span><span style=color:#7e9cd8>buf_attach_client</span><span>(</span><span style=color:#d27e99>0</span><span>, client.id)</span></span>
+<span class=giallo-l><span style=color:#957fb8>    end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    autocmd</span><span style=color:#e6c384> =</span><span> vim.api.</span><span style=color:#7e9cd8>nvim_create_autocmd</span><span>(</span><span style=color:#98bb6c>'FileType'</span><span>, {</span></span>
+<span class=giallo-l><span>      desc</span><span style=color:#e6c384> =</span><span style=color:#7e9cd8> string.format</span><span>(</span><span style=color:#98bb6c>'Attach LSP: %s'</span><span>, client.name),</span></span>
+<span class=giallo-l><span>      pattern</span><span style=color:#e6c384> =</span><span> filetypes,</span></span>
+<span class=giallo-l><span>      callback</span><span style=color:#e6c384> =</span><span> buf_attach</span></span>
+<span class=giallo-l><span>    })</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>    if</span><span> vim.v.vim_did_enter</span><span style=color:#e6c384> ==</span><span style=color:#d27e99> 1</span><span style=color:#e6c384> and</span></span>
+<span class=giallo-l><span>      vim.</span><span style=color:#7e9cd8>tbl_contains</span><span>(filetypes, vim.bo.filetype)</span></span>
+<span class=giallo-l><span style=color:#957fb8>    then</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      buf_attach</span><span>()</span></span>
+<span class=giallo-l><span style=color:#957fb8>    end</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  config.on_exit</span><span style=color:#e6c384> =</span><span> vim.</span><span style=color:#7e9cd8>schedule_wrap</span><span>(</span><span style=color:#957fb8>function</span><span style=color:#9cabca>(</span><span>code</span><span style=color:#9cabca>,</span><span> signal</span><span style=color:#9cabca>,</span><span> client_id</span><span style=color:#9cabca>)</span></span>
+<span class=giallo-l><span>    vim.api.</span><span style=color:#7e9cd8>nvim_del_autocmd</span><span>(autocmd)</span></span>
+<span class=giallo-l><span style=color:#957fb8>  end</span><span>)</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  vim.lsp.</span><span style=color:#7e9cd8>start_client</span><span>(config)</span></span>
+<span class=giallo-l><span style=color:#957fb8>end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>vim.api.</span><span style=color:#7e9cd8>nvim_create_user_command</span><span>(</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'LaunchTsserver'</span><span>,</span></span>
+<span class=giallo-l><span>  launch_tsserver,</span></span>
+<span class=giallo-l><span>  {desc</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'Start tsserver'</span><span>}</span></span>
+<span class=giallo-l><span>)</span></span></code></pre><h2 id=can-we-do-better>Can we do better?</h2><p>Sure. I mean, you can hide almost all the boilerplate inside another function and reduce the noise.<p>Just imagine this.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=lua><span class=giallo-l><span>local</span><span style=color:#7e9cd8> launch_tsserver</span><span style=color:#e6c384> =</span><span style=color:#957fb8> function</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span>  local config</span><span style=color:#e6c384> =</span><span style=color:#7e9cd8> make_config</span><span>({</span></span>
+<span class=giallo-l><span>    cmd</span><span style=color:#e6c384> =</span><span> {</span><span style=color:#98bb6c>'typescript-language-server'</span><span>, </span><span style=color:#98bb6c>'--stdio'</span><span>},</span></span>
+<span class=giallo-l><span>    name</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'tsserver'</span><span>,</span></span>
+<span class=giallo-l><span>    filetypes</span><span style=color:#e6c384> =</span><span> {</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'javascript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'javascriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'javascript.jsx'</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'typescript'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'typescriptreact'</span><span>,</span></span>
+<span class=giallo-l><span style=color:#98bb6c>      'typescript.tsx'</span><span>,</span></span>
+<span class=giallo-l><span>    }</span></span>
+<span class=giallo-l><span>  })</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>  vim.lsp.</span><span style=color:#7e9cd8>start_client</span><span>(config)</span></span>
+<span class=giallo-l><span style=color:#957fb8>end</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>vim.api.</span><span style=color:#7e9cd8>nvim_create_user_command</span><span>(</span></span>
+<span class=giallo-l><span style=color:#98bb6c>  'LaunchTsserver'</span><span>,</span></span>
+<span class=giallo-l><span>  launch_tsserver,</span></span>
+<span class=giallo-l><span>  {desc</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'Start tsserver'</span><span>}</span></span>
+<span class=giallo-l><span>)</span></span></code></pre><p>How does <code>make_config</code> look like? Well... that's homework, my friend. You can implement it anyway you want. I've already showed you all the code you need to make it possible.<p>You really want to know how I would do it? The answer is in this github repository: <a rel="noopener external" href=https://github.com/VonHeikemen/nvim-lsp-sans-plugins target=_blank>VonHeikemen/nvim-lsp-sans-plugins</a><h2 id=conclusion>Conclusion</h2><p>We learned enough about neovim's builtin LSP client to create our own little setup. We know how to initialize the language server. We can "share" the same server across multiple files. In the process we worked with autocommands, now we know how to create and delete them. We could totally manage some LSP servers without plugins.<h2 id=sources>Sources</h2><ul><li><a rel="noopener external" href=https://neovim.io/doc/user/lsp.html#vim.lsp.start_client() target=_blank>:help vim.lsp.start_client()</a><li><a rel="noopener external" href=https://neovim.io/doc/user/lsp.html#vim.lsp.buf_attach_client() target=_blank>:help vim.lsp.buf_attach_client()</a><li><a rel="noopener external" href=https://github.com/neovim/nvim-lspconfig/wiki target=_blank>What is nvim-lspconfig?</a></ul><hr><p>Have any question? Feel free to leave a comment in one of these platform where I have shared this:<ul><li><a href=https://dev.to/vonheikemen/can-we-manage-neovims-lsp-client-without-plugins-3mge rel=noopener target=_blank>dev.to</a><li><a href=https://vonheikemen.hashnode.dev/manage-neovim-lsp-client-without-plugins rel=noopener target=_blank>Hashnode</a></ul><p>You can reach out to me on social media:<ul><li>Twitter <a rel="noopener me" href=https://twitter.com/VonHeikemen_ target=_blank> @VonHeikemen_ </a><li>Bluesky <a rel="noopener me" href=https://bsky.app/profile/vonheikemen.bsky.social target=_blank> @vonheikemen.bsky.social </a><li>Mastodon <a rel="noopener me" href=https://hachyderm.io/@vonheikemen target=_blank> @vonheikemen@hachyderm.io </a></ul><p>Thank you for reading. If you find this article useful and want to support my efforts, buy me a coffee ☕</p><a href=https://ko-fi.com/vonheikemen style=justify-content:center;display:flex target=_blank> <img alt="Buy Me A Coffee" src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" style=width:217px!important;height:60px!important> </a></div></div>

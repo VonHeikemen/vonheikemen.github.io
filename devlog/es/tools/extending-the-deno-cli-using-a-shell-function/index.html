@@ -1,255 +1,231 @@
 <!doctype html><html lang=es><head><meta content="IE=edge" http-equiv=X-UA-Compatible><meta content="text/html; charset=utf-8" http-equiv=content-type><meta content="width=device-width,initial-scale=1.0,maximum-scale=1,viewport-fit=cover" name=viewport><meta content="interest-cohort=()" http-equiv=Permissions-Policy><title>
   Extendiendo deno cli usando una función | Devlog
-</title><link href=https://vonheikemen.github.io/devlog/print.css media=print rel=stylesheet><link href=https://vonheikemen.github.io/devlog/styles.css rel=stylesheet><link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface" rel=stylesheet><link href=https://hachyderm.io/@vonheikemen rel=me><link href=https://twitter.com/VonHeikemen_ rel=me><meta content="shell, deno, hoy-aprendi, software, coding, development" name=keywords><meta content="Mejorando la interfaz de comandos de deno con un poco de magia" name=description><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/es/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/tags/>Explorar tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/>Devlog in english</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/atom.xml>RSS</a></ul> © 2020-2026 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Extendiendo deno cli usando una función</h1><span class=post-date>2021-04-18 | 5 minutos | <a href=https://vonheikemen.github.io/devlog/tools/extending-the-deno-cli-using-a-shell-function/> Read in english </a> </span><p>Estos días he estado usando <code>deno</code> con más frecuencia y debo decirles que aún hay un par de cosas que me molestan. Sí logré resolver algunos de esos problemas "agregando" algunos sub-comandos. No, no es magia negra, sólo un pequeño truco que aprendí hace tiempo y hoy voy a decirles cómo funciona.<h2 id=que-necesitamos>¿Qué necesitamos?</h2><p>En teoría cualquier intérprete que nos permita crear funciones debería ser suficiente. En este artículo les estaré mostrando los ejemplos usando una sintaxis compatibles con intérpretes que obedecen el estándar POSIX (piensen en "shells" como <code>zsh</code>, <code>bash</code>, <code>ash</code>, etc...).<h2 id=que-queremos-lograr>¿Qué queremos lograr?</h2><p>Personalmente a mí me encantaría que <code>deno</code> tuviera algún equivalente nativo a los <code>npm scripts</code>, pero parece que no tendremos nada de eso aún. Quisiera poder hacer algo así.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno start hello world
-</span></code></pre><p>También me gustaría poder inicializar esos scripts, porque deben existir en algún lado.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno init
-</span></code></pre><p>Como ya deben saber los sub-comandos <code>start</code> e <code>init</code> no existen y vamos a arreglar eso (casi).<h2 id=empecemos>Empecemos</h2><p>El primer paso sería ubicar el archivo que su intérprete favorito ejecuta cada vez que lo invocan. En <code>zsh</code> por ejemplo, pueden usar <code>~/.zshrc</code>. En <code>bash</code> pueden usar <code>~/.bashrc</code>. Esos dos son los únicos que conozco, si usan otro intérprete busquen en su documentación algún equivalente.<h3 id=la-definicion>La Definición</h3><p>¿Están listos? Ahora deben crear una función en ese archivo.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
-</span><span style=color:#5fb3b3>{
-</span><span>  </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>Hola</span><span style=color:#5fb3b3>"
-</span><span style=color:#5fb3b3>}
-</span></code></pre><p>Ahora si reinician el intérprete (o "recargan" su configuración) e invocan el comando <code>deno</code> deberían obtener <code>Hola</code> como resultado. Genial, hemos creado un problema, no podemos usar el comando <code>deno</code>. No teman, vamos por buen camino.<h3 id=vuelve-a-mi-deno>Vuelve a mi, deno</h3><p>Si quisieramos invocar el <strong>comando</strong> <code>deno</code> lo único que tenemos que hacer es usar el comando <code>command</code> así:<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>command deno --version
-</span></code></pre><p>Eso debería mostrarle la información de <code>deno</code>.<pre style=color:#cccece;background-color:#2b2c2f><code><span>deno x.x.x (release, x86_64-unknown-linux-gnu)
-</span><span>v8 x
-</span><span>typescript x.x
-</span></code></pre><p>Con este nuevo conocimiento podemos resolver nuestro problema. Vamos a hacer una prueba.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
-</span><span style=color:#5fb3b3>{
-</span><span>  </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>Estás usando</span><span style=color:#5fb3b3>"
-</span><span>  </span><span style=color:#69c>command deno --version
-</span><span style=color:#5fb3b3>}
-</span></code></pre><p>Y esto es lo que debería ocurrir al invocarlo.<pre style=color:#cccece;background-color:#2b2c2f><code><span>$ deno
-</span><span>
-</span><span>Estás usando
-</span><span>deno x.x.x (release, x86_64-unknown-linux-gnu)
-</span><span>v8 x
-</span><span>typescript x.x
-</span></code></pre><h3 id=volviendo-a-la-normalidad>Volviendo a la normalidad</h3><p>Ahora que sabemos cómo llamar a <code>deno</code> lo que deberíamos hacer ahora es imitar el comportamiento de <code>deno</code> en nuestra función. Debemos hacer esto de una manera que nos deje espacio para agregar nuestros propios comandos, para esto vamos a usar la declaración <code>case</code>.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
-</span><span style=color:#5fb3b3>{
-</span><span style=color:#69c>  </span><span style=color:#c594c5>local </span><span>cmd</span><span style=color:#5fb3b3>=$</span><span>1</span><span style=color:#5fb3b3>; </span><span style=color:#69c>shift</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span>  </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>"$</span><span>cmd</span><span style=color:#5fb3b3>" </span><span style=color:#c594c5>in
-</span><span>    </span><span style=color:#5fb3b3>*</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno </span><span style=color:#5fb3b3>$</span><span>cmd </span><span style=color:#5fb3b3>$</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>  </span><span style=color:#c594c5>esac
-</span><span style=color:#5fb3b3>}
-</span></code></pre><p>La primera línea lo que hace es asignar el primer parámetro (<code>$1</code>) a la variable <code>cmd</code> y luego lo elimina de la lista de argumentos (<code>$@</code>). Después lo que hacemos es comparar <code>cmd</code> con un patrón. Por ahora el único patrón que tenemos es <code>*</code>, que actúa como un comodín que coincide con todo, básicamente es nuestro default. Probemos.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3> --</span><span style=color:#f99157>version
-</span></code></pre><p>Bien, pero ahora si intentamos usar <code>deno</code> sin argumentos nos dará un error. Para arreglar eso vamos verificar si el primer parámetro está vacío, si ese es el caso sólo llamamos <code>deno</code>.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
-</span><span style=color:#5fb3b3>{
-</span><span>  </span><span style=color:#c594c5>if </span><span style=color:#69c>[ </span><span style=color:#5fb3b3>-</span><span style=color:#f99157>z </span><span style=color:#5fb3b3>"$</span><span>1</span><span style=color:#5fb3b3>" </span><span style=color:#69c>]</span><span style=color:#5fb3b3>;</span><span style=color:#c594c5>then
-</span><span>    </span><span style=color:#69c>command deno
-</span><span>    </span><span style=color:#c594c5>return
-</span><span>  </span><span style=color:#c594c5>fi
-</span><span>
-</span><span style=color:#69c>  </span><span style=color:#c594c5>local </span><span>cmd</span><span style=color:#5fb3b3>=$</span><span>1</span><span style=color:#5fb3b3>; </span><span style=color:#69c>shift</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span>  </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>"$</span><span>cmd</span><span style=color:#5fb3b3>" </span><span style=color:#c594c5>in
-</span><span>    </span><span style=color:#5fb3b3>*</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno </span><span style=color:#5fb3b3>$</span><span>cmd </span><span style=color:#5fb3b3>$</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>  </span><span style=color:#c594c5>esac
-</span><span style=color:#5fb3b3>}
-</span></code></pre><h3 id=invocando-sub-comandos>Invocando sub-comandos</h3><p>Ya estamos en el lugar que queremos, finalmente podremos agregar nuestros propios sub-comandos. Veamos cómo funcionaría.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span>  deno()
-</span><span>  {
-</span><span>    if [ -z "$1" ];then
-</span><span>      command deno
-</span><span>      return
-</span><span>    fi
-</span><span>
-</span><span>    local cmd=$1; shift;
-</span><span>
-</span><span>    case "$cmd" in
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     hola)
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       command deno eval "console.log('deno dice hola')"
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     ;;
-</span><span>      *)
-</span><span>        command deno $cmd $@
-</span><span>      ;;
-</span><span>    esac
-</span><span>  }
-</span></code></pre><p>Si invocamos el comando <code>hola</code>:<pre style=color:#cccece;background-color:#2b2c2f><code><span>$ deno hola
-</span><span>
-</span><span>deno dice hola
-</span></code></pre><p>Ahora estamos seguros que funciona.<h3 id=deno-scripts>deno scripts</h3><p>Ya podemos comenzar con lo más importante, nuestro reemplazo para los <code>npm scripts</code>. Lo que quiero hacer primero es crear el comando <code>start</code>, el cual es el más común que usaría.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span>  deno()
-</span><span>  {
-</span><span>    if [ -z "$1" ];then
-</span><span>      command deno
-</span><span>      return
-</span><span>    fi
-</span><span>
-</span><span>    local cmd=$1; shift;
-</span><span>
-</span><span>    case "$cmd" in
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     start)
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       command deno run --allow-run ./Taskfile.js start $@
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     ;;
-</span><span>      *)
-</span><span>        command deno $cmd $@
-</span><span>      ;;
-</span><span>    esac
-</span><span>  }
-</span></code></pre><p>Esto lo que hará será ejecutar un archivo llamado <code>Taskfile.js</code> usando <code>deno</code>. <code>--allow-run</code> nos permitirá usar <code>Deno.run</code> en nuestro código para poder llamar comandos externos dentro de <code>Taskfile.js</code>. Ahora vamos a usarlo.<p>Creamos <code>Taskfile.js</code>.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>cmd </span><span style=color:#5fb3b3>= </span><span>[</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>echo</span><span style=color:#5fb3b3>', '</span><span style=color:#99c794>Taskfile: </span><span style=color:#5fb3b3>', ...</span><span>Deno</span><span style=color:#5fb3b3>.</span><span>args]</span><span style=color:#5fb3b3>;
-</span><span>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>run</span><span>(</span><span style=color:#5fb3b3>{ </span><span>cmd </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
-</span></code></pre><p>Y llamamos <code>start</code> de esta manera.<pre style=color:#cccece;background-color:#2b2c2f><code><span>$ deno start hola
-</span><span>
-</span><span>Taskfile start hola
-</span></code></pre><p>Genial. El siguiente paso sería crear un <code>Taskfile.js</code> "más inteligente," que sea capaz de ejecutar varias tareas. Ya he hecho algo así en el pasado (pueden encontrar los detalles <a href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g rel=noopener target=_blank>aquí</a>), así que les mostraré el código que yo usaría.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#c594c5>const </span><span>entrypoint </span><span style=color:#5fb3b3>= "</span><span style=color:#99c794>./src/main.js</span><span style=color:#5fb3b3>";
-</span><span>
-</span><span style=color:#69c>run</span><span>(Deno</span><span style=color:#5fb3b3>.</span><span>args</span><span style=color:#5fb3b3>, {
-</span><span>  </span><span style=color:#69c>start</span><span style=color:#5fb3b3>(...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) {
-</span><span>    </span><span style=color:#69c>exec</span><span>([</span><span style=color:#5fb3b3>"</span><span style=color:#99c794>deno</span><span style=color:#5fb3b3>", "</span><span style=color:#99c794>run</span><span style=color:#5fb3b3>", </span><span>entrypoint</span><span style=color:#5fb3b3>, ...</span><span>args])</span><span style=color:#5fb3b3>;
-</span><span>  </span><span style=color:#5fb3b3>},
-</span><span>  </span><span style=color:#69c>list</span><span style=color:#5fb3b3>() {
-</span><span>    </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>Available tasks: </span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>;
-</span><span>    </span><span style=color:#fac863>Object</span><span style=color:#5fb3b3>.</span><span style=color:#69c>keys</span><span>(</span><span style=color:#ec5f67>this</span><span>)</span><span style=color:#5fb3b3>.</span><span style=color:#69c>forEach</span><span>(</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>k</span><span style=color:#5fb3b3>) </span><span style=color:#c594c5>=> </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(</span><span style=color:#5fb3b3>`</span><span style=color:#99c794>* </span><span style=color:#5fb3b3>${</span><span>k</span><span style=color:#5fb3b3>}`</span><span>))</span><span style=color:#5fb3b3>;
-</span><span>  </span><span style=color:#5fb3b3>},
-</span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span style=color:#c594c5>function </span><span style=color:#69c>run</span><span style=color:#5fb3b3>([</span><span style=color:#f99157>name</span><span style=color:#5fb3b3>, ...</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>], </span><span style=color:#f99157>tasks</span><span style=color:#5fb3b3>) {
-</span><span>  </span><span style=color:#c594c5>if</span><span>(tasks[name]) </span><span style=color:#5fb3b3>{
-</span><span>    tasks[name](</span><span style=color:#5fb3b3>...</span><span>args)</span><span style=color:#5fb3b3>;
-</span><span>  </span><span style=color:#5fb3b3>} </span><span style=color:#c594c5>else </span><span style=color:#5fb3b3>{
-</span><span>    </span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(</span><span style=color:#5fb3b3>`</span><span style=color:#99c794>Task "</span><span style=color:#5fb3b3>${</span><span>name</span><span style=color:#5fb3b3>}</span><span style=color:#99c794>" not found</span><span style=color:#5fb3b3>\n`</span><span>)</span><span style=color:#5fb3b3>;
-</span><span>    tasks</span><span style=color:#5fb3b3>.</span><span style=color:#69c>list</span><span>()</span><span style=color:#5fb3b3>;
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span style=color:#5fb3b3>}
-</span><span>
-</span><span style=color:#c594c5>async function </span><span style=color:#69c>exec</span><span style=color:#5fb3b3>(</span><span style=color:#f99157>args</span><span style=color:#5fb3b3>) {
-</span><span>  </span><span style=color:#c594c5>const </span><span>proc </span><span style=color:#5fb3b3>= </span><span style=color:#c594c5>await </span><span>Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>run</span><span>(</span><span style=color:#5fb3b3>{ </span><span>cmd</span><span style=color:#5fb3b3>: </span><span>args </span><span style=color:#5fb3b3>}</span><span>)</span><span style=color:#5fb3b3>.</span><span style=color:#69c>status</span><span>()</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span>  </span><span style=color:#c594c5>if </span><span>(proc</span><span style=color:#5fb3b3>.</span><span>success </span><span style=color:#5fb3b3>== </span><span style=color:#f99157>false</span><span>) </span><span style=color:#5fb3b3>{
-</span><span>    Deno</span><span style=color:#5fb3b3>.</span><span style=color:#69c>exit</span><span>(proc</span><span style=color:#5fb3b3>.</span><span>code)</span><span style=color:#5fb3b3>;
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span>
-</span><span>  </span><span style=color:#c594c5>return </span><span>proc</span><span style=color:#5fb3b3>;
-</span><span style=color:#5fb3b3>}
-</span></code></pre><p>Con esto podríamos ejecutar el archivo <code>./src/main.js</code> al invocar <code>deno start</code>. Ahora tenemos otro problema, no queremos escribir todo eso cada vez que queremos iniciar un proyecto. Lo que haremos será crear un comando <code>init</code> que copie esta plantilla en la carpeta de nuestro proyecto.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span>  deno()
-</span><span>  {
-</span><span>    if [ -z "$1" ];then
-</span><span>      command deno
-</span><span>      return
-</span><span>    fi
-</span><span>
-</span><span>    local cmd=$1; shift;
-</span><span>
-</span><span>    case "$cmd" in
-</span><span>      start)
-</span><span>        command deno run --allow-run ./Taskfile.js start $@
-</span><span>      ;;
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     init)
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       cp /path/to/template/Taskfile.js ./
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       echo "Taskfile.js created"
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     ;;
-</span><span>      *)
-</span><span>        command deno $cmd $@
-</span><span>      ;;
-</span><span>    esac
-</span><span>  }
-</span></code></pre><p>Ya tiene buena forma. La última cosa que nos quedaría por hacer es manejar otras tareas además de <code>start</code>. Con <code>npm</code> podemos invocar <code>npm run</code> para elegir qué script queremos ejecutar, nuestro equivalente se llamará <code>x</code>.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span>  deno()
-</span><span>  {
-</span><span>    if [ -z "$1" ];then
-</span><span>      command deno
-</span><span>      return
-</span><span>    fi
-</span><span>
-</span><span>    local cmd=$1; shift;
-</span><span>
-</span><span>    case "$cmd" in
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     x)
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       command deno run --allow-run ./Taskfile.js $@
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     ;;
-</span><span>      start)
-</span><span>        command deno run --allow-run ./Taskfile.js start $@
-</span><span>      ;;
-</span><span>      init)
-</span><span>        cp /path/to/template/Taskfile.js ./
-</span><span>        echo "Taskfile.js created"
-</span><span>      ;;
-</span><span>      *)
-</span><span>        command deno $cmd $@
-</span><span>      ;;
-</span><span>    esac
-</span><span>  }
-</span></code></pre><p>Ahora podríamos tener una "tarea" llamada <code>test:api</code> y llamarla de esta manera.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno x test:api
-</span></code></pre><h3 id=un-poco-mas-de-conveniencia>Un poco más de conveniencia</h3><p>Lo último que quiero hacer es crear una forma de ejecutar un script el cual pueda llamar las librerías que uso con más frecuencia sin usar su URL. Podemos hacer esto con el apoyo de un <a href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps rel=noopener target=_blank>import-map</a>, un archivo <code>.json</code> en el cual podemos vincular un "alias" a una URL.<p>Yo uso uno como este.<pre class=language-json data-lang=json style=color:#cccece;background-color:#2b2c2f><code class=language-json data-lang=json><span style=color:#5fb3b3>{
-</span><span>  </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>imports</span><span style=color:#5fb3b3>": {
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>@std/</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://deno.land/std@0.93.0/</span><span style=color:#5fb3b3>",
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>@npm/</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://jspm.dev/</span><span style=color:#5fb3b3>",
-</span><span>
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>ansi-colors</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://jspm.dev/ansi-colors@4.1.1</span><span style=color:#5fb3b3>",
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>arg</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://jspm.dev/arg@5.0.0</span><span style=color:#5fb3b3>",
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>cheerio</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://jspm.dev/cheerio@1.0.0-rc.5</span><span style=color:#5fb3b3>",
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>exec</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://deno.land/x/exec@0.0.5/mod.ts</span><span style=color:#5fb3b3>",
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>ramda</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>https://jspm.dev/ramda@0.27.1</span><span style=color:#5fb3b3>",
-</span><span>
-</span><span>    </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>@utils/</span><span style=color:#5fb3b3>": "</span><span style=color:#99c794>/path/to/deno/utils/</span><span style=color:#5fb3b3>"
-</span><span>  </span><span style=color:#5fb3b3>}
-</span><span style=color:#5fb3b3>}
-</span></code></pre><p><code>deno</code> puede leerlo si le pasamos el argumento <code>--import-map</code>. Ahora vamos a crear un comando para usarlo.<pre class=language-diff data-lang=diff style=color:#cccece;background-color:#2b2c2f><code class=language-diff data-lang=diff><span>  deno()
-</span><span>  {
-</span><span>    if [ -z "$1" ];then
-</span><span>      command deno
-</span><span>      return
-</span><span>    fi
-</span><span>
-</span><span>    local cmd=$1; shift;
-</span><span>
-</span><span>    case "$cmd" in
-</span><span>      x)
-</span><span>        command deno run --allow-run ./Taskfile.js $@
-</span><span>      ;;
-</span><span>      start)
-</span><span>        command deno run --allow-run ./Taskfile.js start $@
-</span><span>      ;;
-</span><span>      init)
-</span><span>        cp /path/to/template/Taskfile.js ./
-</span><span>        echo "Taskfile.js created"
-</span><span>      ;;
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     s|script)
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>       command deno run --import-map="/path/to/deno/import-map.json" $@
-</span><span style=color:#5fb3b3>+</span><span style=color:#99c794>     ;;
-</span><span>      *)
-</span><span>        command deno $cmd $@
-</span><span>      ;;
-</span><span>    esac
-</span><span>  }
-</span></code></pre><p>Como ya es costumbre, tenemos que probar esto. Vamos a crear un script de prueba con este contenido.<pre class=language-js data-lang=js style=color:#cccece;background-color:#2b2c2f><code class=language-js data-lang=js><span style=color:#c594c5>import </span><span>dayjs </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>@npm/dayjs</span><span style=color:#5fb3b3>';
-</span><span style=color:#c594c5>import </span><span>c </span><span style=color:#c594c5>from </span><span style=color:#5fb3b3>'</span><span style=color:#99c794>ansi-colors</span><span style=color:#5fb3b3>';
-</span><span>
-</span><span>c</span><span style=color:#5fb3b3>.</span><span>enabled </span><span style=color:#5fb3b3>= !</span><span>Deno</span><span style=color:#5fb3b3>.</span><span>noColor</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span style=color:#c594c5>const </span><span>date </span><span style=color:#5fb3b3>= </span><span style=color:#69c>dayjs</span><span>()</span><span style=color:#5fb3b3>.</span><span style=color:#69c>format</span><span>(</span><span style=color:#5fb3b3>'</span><span style=color:#99c794>{YYYY} MM-DDTHH:mm:ss SSS [Z] A</span><span style=color:#5fb3b3>'</span><span>)</span><span style=color:#5fb3b3>;
-</span><span>
-</span><span style=color:#fac863>console</span><span style=color:#5fb3b3>.</span><span style=color:#69c>log</span><span>(c</span><span style=color:#5fb3b3>.</span><span style=color:#69c>green</span><span>(date))</span><span style=color:#5fb3b3>;
-</span></code></pre><blockquote><p>Tal vez quieran especificar la versión de la librería que están usando con <code>@npm</code>, en ese caso harían esto <code>@npm/dayjs@1.10.4</code></blockquote><p>Lo ejecutamos.<pre style=color:#cccece;background-color:#2b2c2f><code><span>$ deno script ./test.js
-</span><span>
-</span><span>Download https://jspm.dev/dayjs@1.10.4
-</span><span>Download https://jspm.dev/npm:dayjs@1.10.4!cjs
-</span><span>{2021} 04-18T11:28:05 929 Z AM
-</span></code></pre><p>¡Jaja! Ahora tengo todo lo que quiero.<h3 id=el-resultado-final>El resultado final</h3><p>Después de todo este proceso la función <code>deno</code> debería quedar así.<pre class=language-sh data-lang=sh style=color:#cccece;background-color:#2b2c2f><code class=language-sh data-lang=sh><span style=color:#69c>deno</span><span style=color:#5fb3b3>()
-</span><span style=color:#5fb3b3>{
-</span><span>  </span><span style=color:#c594c5>if </span><span style=color:#69c>[ </span><span style=color:#5fb3b3>-</span><span style=color:#f99157>z </span><span style=color:#5fb3b3>"$</span><span>1</span><span style=color:#5fb3b3>" </span><span style=color:#69c>]</span><span style=color:#5fb3b3>;</span><span style=color:#c594c5>then
-</span><span>    </span><span style=color:#69c>command deno
-</span><span>    </span><span style=color:#c594c5>return
-</span><span>  </span><span style=color:#c594c5>fi
-</span><span>
-</span><span style=color:#69c>  </span><span style=color:#c594c5>local </span><span>cmd</span><span style=color:#5fb3b3>=$</span><span>1</span><span style=color:#5fb3b3>; </span><span style=color:#69c>shift
-</span><span>
-</span><span>  </span><span style=color:#c594c5>case </span><span style=color:#5fb3b3>"$</span><span>cmd</span><span style=color:#5fb3b3>" </span><span style=color:#c594c5>in
-</span><span>    x</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno run --allow-run ./Taskfile.js </span><span style=color:#5fb3b3>$</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>    start</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno run --allow-run ./Taskfile.js start </span><span style=color:#5fb3b3>$</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>    init</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>cp /path/to/template/Taskfile.js ./
-</span><span>      </span><span style=color:#69c>echo </span><span style=color:#5fb3b3>"</span><span style=color:#99c794>Taskfile.js created</span><span style=color:#5fb3b3>"
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>    s</span><span style=color:#5fb3b3>|</span><span>script</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno run --import-map=</span><span style=color:#5fb3b3>"</span><span style=color:#99c794>/path/to/deno/import-map.json</span><span style=color:#5fb3b3>" $</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>    </span><span style=color:#5fb3b3>*</span><span style=color:#c594c5>)
-</span><span>      </span><span style=color:#69c>command deno </span><span style=color:#5fb3b3>$</span><span>cmd </span><span style=color:#5fb3b3>$</span><span style=color:#ec5f67>@
-</span><span>    </span><span style=color:#5fb3b3>;;
-</span><span>  </span><span style=color:#c594c5>esac
-</span><span style=color:#5fb3b3>}
-</span></code></pre><h2 id=conclusion>Conclusión</h2><p>Entonces, ¿qué hicimos hoy? "Escondimos" el comando <code>deno</code> detrás de una función para poder agregar "sub-comandos" creados por nosotros. Logramos crear una especie de equivalente de <code>npm run</code> para <code>deno</code> y finalmente usamos import maps para simplificar la declaración de dependencias en un script. No está mal para un día de trabajo.<hr><p>¿Tienen alguna pregunta? Pueden dejar un comentario en cualquiera de estas plataformas:<ul><li><a href=https://dev.to/vonheikemen/extendiendo-deno-cli-usando-una-funcion-1153 rel=noopener target=_blank>dev.to</a><li><a href=https://vonheikemen.hashnode.dev/extending-the-deno-cli-using-a-shell-function-es rel=noopener target=_blank>Hashnode</a></ul><p>Pueden contactarme por las redes sociales:<ul><li>Twitter <a rel="noopener me" href=https://twitter.com/VonHeikemen_ target=_blank> @VonHeikemen_ </a><li>Bluesky <a rel="noopener me" href=https://bsky.app/profile/vonheikemen.bsky.social target=_blank> @vonheikemen.bsky.social </a><li>Mastodon <a rel="noopener me" href=https://hachyderm.io/@vonheikemen target=_blank> @vonheikemen@hachyderm.io </a></ul><p>Gracias por su tiempo. Si este artículo les pareció útil y quieren apoyar mis esfuerzos para crear más contenido, pueden dejar una propina en buy me a coffee ☕.</p><a href=https://ko-fi.com/vonheikemen style=justify-content:center;display:flex target=_blank> <img alt="Buy Me A Coffee" src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" style=width:217px!important;height:60px!important> </a></div></div>
+</title><link href=https://vonheikemen.github.io/devlog/print.css media=print rel=stylesheet><link href=https://vonheikemen.github.io/devlog/styles.css rel=stylesheet><link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface" rel=stylesheet><link href=https://hachyderm.io/@vonheikemen rel=me><link href=https://twitter.com/VonHeikemen_ rel=me><meta content="shell, deno, hoy-aprendi, software, coding, development" name=keywords><meta content="Mejorando la interfaz de comandos de deno con un poco de magia" name=description><body class=theme-base-custom><div class=sidebar><div class="container sidebar-sticky"><div class=sidebar-about><a href=https://vonheikemen.github.io/devlog/es/><h1>Devlog</h1></a></div><ul class=sidebar-nav><li class=sidebar-nav-item><a href=/>whoami</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/es/tags/>Explorar tags</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/>Devlog in english</a><li class=sidebar-nav-item><a href=https://vonheikemen.github.io/devlog/atom.xml>RSS</a></ul> © 2020-2026 Heiker Curiel</div></div><div class="content container"><div class=post><h1 class=post-title>Extendiendo deno cli usando una función</h1><span class=post-date>2021-04-18 | 5 minutos | <a href=https://vonheikemen.github.io/devlog/tools/extending-the-deno-cli-using-a-shell-function/> Read in english </a> </span><p>Estos días he estado usando <code>deno</code> con más frecuencia y debo decirles que aún hay un par de cosas que me molestan. Sí logré resolver algunos de esos problemas "agregando" algunos sub-comandos. No, no es magia negra, sólo un pequeño truco que aprendí hace tiempo y hoy voy a decirles cómo funciona.<h2 id=que-necesitamos>¿Qué necesitamos?</h2><p>En teoría cualquier intérprete que nos permita crear funciones debería ser suficiente. En este artículo les estaré mostrando los ejemplos usando una sintaxis compatibles con intérpretes que obedecen el estándar POSIX (piensen en "shells" como <code>zsh</code>, <code>bash</code>, <code>ash</code>, etc...).<h2 id=que-queremos-lograr>¿Qué queremos lograr?</h2><p>Personalmente a mí me encantaría que <code>deno</code> tuviera algún equivalente nativo a los <code>npm scripts</code>, pero parece que no tendremos nada de eso aún. Quisiera poder hacer algo así.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7aa89f>deno</span><span style=color:#98bb6c> start hello world</span></span></code></pre><p>También me gustaría poder inicializar esos scripts, porque deben existir en algún lado.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7aa89f>deno</span><span style=color:#98bb6c> init</span></span></code></pre><p>Como ya deben saber los sub-comandos <code>start</code> e <code>init</code> no existen y vamos a arreglar eso (casi).<h2 id=empecemos>Empecemos</h2><p>El primer paso sería ubicar el archivo que su intérprete favorito ejecuta cada vez que lo invocan. En <code>zsh</code> por ejemplo, pueden usar <code>~/.zshrc</code>. En <code>bash</code> pueden usar <code>~/.bashrc</code>. Esos dos son los únicos que conozco, si usan otro intérprete busquen en su documentación algún equivalente.<h3 id=la-definicion>La Definición</h3><p>¿Están listos? Ahora deben crear una función en ese archivo.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>deno</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  echo</span><span style=color:#98bb6c> "Hola"</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><p>Ahora si reinician el intérprete (o "recargan" su configuración) e invocan el comando <code>deno</code> deberían obtener <code>Hola</code> como resultado. Genial, hemos creado un problema, no podemos usar el comando <code>deno</code>. No teman, vamos por buen camino.<h3 id=vuelve-a-mi-deno>Vuelve a mi, deno</h3><p>Si quisieramos invocar el <strong>comando</strong> <code>deno</code> lo único que tenemos que hacer es usar el comando <code>command</code> así:<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>command</span><span style=color:#98bb6c> deno --version</span></span></code></pre><p>Eso debería mostrarle la información de <code>deno</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=plain><span class=giallo-l><span>deno x.x.x (release, x86_64-unknown-linux-gnu)</span></span>
+<span class=giallo-l><span>v8 x</span></span>
+<span class=giallo-l><span>typescript x.x</span></span></code></pre><p>Con este nuevo conocimiento podemos resolver nuestro problema. Vamos a hacer una prueba.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>deno</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  echo</span><span style=color:#98bb6c> "Estás usando"</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  command</span><span style=color:#98bb6c> deno --version</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><p>Y esto es lo que debería ocurrir al invocarlo.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=plain><span class=giallo-l><span>$ deno</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>Estás usando</span></span>
+<span class=giallo-l><span>deno x.x.x (release, x86_64-unknown-linux-gnu)</span></span>
+<span class=giallo-l><span>v8 x</span></span>
+<span class=giallo-l><span>typescript x.x</span></span></code></pre><h3 id=volviendo-a-la-normalidad>Volviendo a la normalidad</h3><p>Ahora que sabemos cómo llamar a <code>deno</code> lo que deberíamos hacer ahora es imitar el comportamiento de <code>deno</code> en nuestra función. Debemos hacer esto de una manera que nos deje espacio para agregar nuestros propios comandos, para esto vamos a usar la declaración <code>case</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>deno</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#957fb8>  local</span><span> cmd</span><span style=color:#e6c384>=</span><span>$1</span><span style=color:#9cabca>;</span><span style=color:#7e9cd8> shift</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  case</span><span style=color:#98bb6c> "</span><span>$cmd</span><span style=color:#98bb6c>"</span><span style=color:#957fb8> in</span></span>
+<span class=giallo-l><span style=color:#e6c384>    *)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno</span><span> $cmd $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#957fb8>  esac</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><p>La primera línea lo que hace es asignar el primer parámetro (<code>$1</code>) a la variable <code>cmd</code> y luego lo elimina de la lista de argumentos (<code>$@</code>). Después lo que hacemos es comparar <code>cmd</code> con un patrón. Por ahora el único patrón que tenemos es <code>*</code>, que actúa como un comodín que coincide con todo, básicamente es nuestro default. Probemos.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7aa89f>deno</span><span style=color:#98bb6c> --version</span></span></code></pre><p>Bien, pero ahora si intentamos usar <code>deno</code> sin argumentos nos dará un error. Para arreglar eso vamos verificar si el primer parámetro está vacío, si ese es el caso sólo llamamos <code>deno</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>deno</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#957fb8>  if</span><span style=color:#9cabca> [</span><span style=color:#e6c384> -z</span><span style=color:#98bb6c> "</span><span>$1</span><span style=color:#98bb6c>"</span><span style=color:#9cabca> ];</span><span style=color:#957fb8>then</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    command</span><span style=color:#98bb6c> deno</span></span>
+<span class=giallo-l><span style=color:#957fb8>    return</span></span>
+<span class=giallo-l><span style=color:#957fb8>  fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  local</span><span> cmd</span><span style=color:#e6c384>=</span><span>$1</span><span style=color:#9cabca>;</span><span style=color:#7e9cd8> shift</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  case</span><span style=color:#98bb6c> "</span><span>$cmd</span><span style=color:#98bb6c>"</span><span style=color:#957fb8> in</span></span>
+<span class=giallo-l><span style=color:#e6c384>    *)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno</span><span> $cmd $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#957fb8>  esac</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><h3 id=invocando-sub-comandos>Invocando sub-comandos</h3><p>Ya estamos en el lugar que queremos, finalmente podremos agregar nuestros propios sub-comandos. Veamos cómo funcionaría.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=diff><span class=giallo-l><span>  deno()</span></span>
+<span class=giallo-l><span>  {</span></span>
+<span class=giallo-l><span>    if [ -z "$1" ];then</span></span>
+<span class=giallo-l><span>      command deno</span></span>
+<span class=giallo-l><span>      return</span></span>
+<span class=giallo-l><span>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    local cmd=$1; shift;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    case "$cmd" in</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     hola)</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       command deno eval "console.log('deno dice hola')"</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     ;;</span></span>
+<span class=giallo-l><span>      *)</span></span>
+<span class=giallo-l><span>        command deno $cmd $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>    esac</span></span>
+<span class=giallo-l><span>  }</span></span></code></pre><p>Si invocamos el comando <code>hola</code>:<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=plain><span class=giallo-l><span>$ deno hola</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>deno dice hola</span></span></code></pre><p>Ahora estamos seguros que funciona.<h3 id=deno-scripts>deno scripts</h3><p>Ya podemos comenzar con lo más importante, nuestro reemplazo para los <code>npm scripts</code>. Lo que quiero hacer primero es crear el comando <code>start</code>, el cual es el más común que usaría.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=diff><span class=giallo-l><span>  deno()</span></span>
+<span class=giallo-l><span>  {</span></span>
+<span class=giallo-l><span>    if [ -z "$1" ];then</span></span>
+<span class=giallo-l><span>      command deno</span></span>
+<span class=giallo-l><span>      return</span></span>
+<span class=giallo-l><span>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    local cmd=$1; shift;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    case "$cmd" in</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     start)</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       command deno run --allow-run ./Taskfile.js start $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     ;;</span></span>
+<span class=giallo-l><span>      *)</span></span>
+<span class=giallo-l><span>        command deno $cmd $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>    esac</span></span>
+<span class=giallo-l><span>  }</span></span></code></pre><p>Esto lo que hará será ejecutar un archivo llamado <code>Taskfile.js</code> usando <code>deno</code>. <code>--allow-run</code> nos permitirá usar <code>Deno.run</code> en nuestro código para poder llamar comandos externos dentro de <code>Taskfile.js</code>. Ahora vamos a usarlo.<p>Creamos <code>Taskfile.js</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=javascript><span class=giallo-l><span style=color:#957fb8>const</span><span> cmd</span><span style=color:#e6c384> =</span><span style=color:#9cabca> [</span><span style=color:#98bb6c>'echo'</span><span style=color:#9cabca>,</span><span style=color:#98bb6c> 'Taskfile: '</span><span style=color:#9cabca>,</span><span style=color:#e6c384> ...</span><span>Deno</span><span style=color:#9cabca>.</span><span style=color:#e6c384>args</span><span style=color:#9cabca>];</span></span>
+<span class=giallo-l><span>Deno</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>run</span><span style=color:#9cabca>({</span><span> cmd</span><span style=color:#9cabca> });</span></span></code></pre><p>Y llamamos <code>start</code> de esta manera.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=plain><span class=giallo-l><span>$ deno start hola</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>Taskfile start hola</span></span></code></pre><p>Genial. El siguiente paso sería crear un <code>Taskfile.js</code> "más inteligente," que sea capaz de ejecutar varias tareas. Ya he hecho algo así en el pasado (pueden encontrar los detalles <a rel="noopener external" href=https://dev.to/vonheikemen/a-simple-way-to-replace-npm-scripts-in-deno-4j0g target=_blank>aquí</a>), así que les mostraré el código que yo usaría.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=javascript><span class=giallo-l><span style=color:#957fb8>const</span><span> entrypoint</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> "./src/main.js"</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#7e9cd8>run</span><span style=color:#9cabca>(</span><span>Deno</span><span style=color:#9cabca>.</span><span style=color:#e6c384>args</span><span style=color:#9cabca>, {</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  start</span><span style=color:#9cabca>(</span><span style=color:#e6c384>...</span><span>args</span><span style=color:#9cabca>) {</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    exec</span><span style=color:#9cabca>([</span><span style=color:#98bb6c>"deno"</span><span style=color:#9cabca>,</span><span style=color:#98bb6c> "run"</span><span style=color:#9cabca>,</span><span> entrypoint</span><span style=color:#9cabca>,</span><span style=color:#e6c384> ...</span><span>args</span><span style=color:#9cabca>]);</span></span>
+<span class=giallo-l><span style=color:#9cabca>  },</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>  list</span><span style=color:#9cabca>() {</span></span>
+<span class=giallo-l><span>    console</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>log</span><span style=color:#9cabca>(</span><span style=color:#98bb6c>'Available tasks: '</span><span style=color:#9cabca>);</span></span>
+<span class=giallo-l><span>    Object</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>keys</span><span style=color:#9cabca>(</span><span style=color:#ff5d62>this</span><span style=color:#9cabca>).</span><span style=color:#7e9cd8>forEach</span><span style=color:#9cabca>((</span><span>k</span><span style=color:#9cabca>)</span><span style=color:#957fb8> =></span><span> console</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>log</span><span style=color:#9cabca>(</span><span style=color:#98bb6c>`* </span><span style=color:#9cabca>${</span><span>k</span><span style=color:#9cabca>}</span><span style=color:#98bb6c>`</span><span style=color:#9cabca>));</span></span>
+<span class=giallo-l><span style=color:#9cabca>  },</span></span>
+<span class=giallo-l><span style=color:#9cabca>});</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>function</span><span style=color:#7e9cd8> run</span><span style=color:#9cabca>([</span><span>name</span><span style=color:#9cabca>,</span><span style=color:#e6c384> ...</span><span>args</span><span style=color:#9cabca>],</span><span> tasks</span><span style=color:#9cabca>) {</span></span>
+<span class=giallo-l><span style=color:#957fb8;font-weight:700>  if</span><span style=color:#9cabca>(</span><span>tasks</span><span style=color:#9cabca>[</span><span>name</span><span style=color:#9cabca>]) {</span></span>
+<span class=giallo-l><span>    tasks</span><span style=color:#9cabca>[</span><span>name</span><span style=color:#9cabca>](</span><span style=color:#e6c384>...</span><span>args</span><span style=color:#9cabca>);</span></span>
+<span class=giallo-l><span style=color:#9cabca>  }</span><span style=color:#957fb8;font-weight:700> else</span><span style=color:#9cabca> {</span></span>
+<span class=giallo-l><span>    console</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>log</span><span style=color:#9cabca>(</span><span style=color:#98bb6c>`Task "</span><span style=color:#9cabca>${</span><span>name</span><span style=color:#9cabca>}</span><span style=color:#98bb6c>" not found</span><span style=color:#7fb4ca>\n</span><span style=color:#98bb6c>`</span><span style=color:#9cabca>);</span></span>
+<span class=giallo-l><span>    tasks</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>list</span><span style=color:#9cabca>();</span></span>
+<span class=giallo-l><span style=color:#9cabca>  }</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>async function</span><span style=color:#7e9cd8> exec</span><span style=color:#9cabca>(</span><span>args</span><span style=color:#9cabca>) {</span></span>
+<span class=giallo-l><span style=color:#957fb8>  const</span><span> proc</span><span style=color:#e6c384> =</span><span style=color:#957fb8;font-weight:700> await</span><span> Deno</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>run</span><span style=color:#9cabca>({</span><span> cmd</span><span style=color:#9cabca>:</span><span> args</span><span style=color:#9cabca> }).</span><span style=color:#7e9cd8>status</span><span style=color:#9cabca>();</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8;font-weight:700>  if</span><span style=color:#9cabca> (</span><span>proc</span><span style=color:#9cabca>.</span><span style=color:#e6c384>success ==</span><span style=color:#ffa066> false</span><span style=color:#9cabca>) {</span></span>
+<span class=giallo-l><span>    Deno</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>exit</span><span style=color:#9cabca>(</span><span>proc</span><span style=color:#9cabca>.</span><span style=color:#e6c384>code</span><span style=color:#9cabca>);</span></span>
+<span class=giallo-l><span style=color:#9cabca>  }</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8;font-weight:700>  return</span><span> proc</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><p>Con esto podríamos ejecutar el archivo <code>./src/main.js</code> al invocar <code>deno start</code>. Ahora tenemos otro problema, no queremos escribir todo eso cada vez que queremos iniciar un proyecto. Lo que haremos será crear un comando <code>init</code> que copie esta plantilla en la carpeta de nuestro proyecto.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=diff><span class=giallo-l><span>  deno()</span></span>
+<span class=giallo-l><span>  {</span></span>
+<span class=giallo-l><span>    if [ -z "$1" ];then</span></span>
+<span class=giallo-l><span>      command deno</span></span>
+<span class=giallo-l><span>      return</span></span>
+<span class=giallo-l><span>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    local cmd=$1; shift;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    case "$cmd" in</span></span>
+<span class=giallo-l><span>      start)</span></span>
+<span class=giallo-l><span>        command deno run --allow-run ./Taskfile.js start $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     init)</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       cp /path/to/template/Taskfile.js ./</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       echo "Taskfile.js created"</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     ;;</span></span>
+<span class=giallo-l><span>      *)</span></span>
+<span class=giallo-l><span>        command deno $cmd $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>    esac</span></span>
+<span class=giallo-l><span>  }</span></span></code></pre><p>Ya tiene buena forma. La última cosa que nos quedaría por hacer es manejar otras tareas además de <code>start</code>. Con <code>npm</code> podemos invocar <code>npm run</code> para elegir qué script queremos ejecutar, nuestro equivalente se llamará <code>x</code>.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=diff><span class=giallo-l><span>  deno()</span></span>
+<span class=giallo-l><span>  {</span></span>
+<span class=giallo-l><span>    if [ -z "$1" ];then</span></span>
+<span class=giallo-l><span>      command deno</span></span>
+<span class=giallo-l><span>      return</span></span>
+<span class=giallo-l><span>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    local cmd=$1; shift;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    case "$cmd" in</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     x)</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       command deno run --allow-run ./Taskfile.js $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     ;;</span></span>
+<span class=giallo-l><span>      start)</span></span>
+<span class=giallo-l><span>        command deno run --allow-run ./Taskfile.js start $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>      init)</span></span>
+<span class=giallo-l><span>        cp /path/to/template/Taskfile.js ./</span></span>
+<span class=giallo-l><span>        echo "Taskfile.js created"</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>      *)</span></span>
+<span class=giallo-l><span>        command deno $cmd $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>    esac</span></span>
+<span class=giallo-l><span>  }</span></span></code></pre><p>Ahora podríamos tener una "tarea" llamada <code>test:api</code> y llamarla de esta manera.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7aa89f>deno</span><span style=color:#98bb6c> x test:api</span></span></code></pre><h3 id=un-poco-mas-de-conveniencia>Un poco más de conveniencia</h3><p>Lo último que quiero hacer es crear una forma de ejecutar un script el cual pueda llamar las librerías que uso con más frecuencia sin usar su URL. Podemos hacer esto con el apoyo de un <a rel="noopener external" href=https://deno.land/manual@v1.9.0/linking_to_external_code/import_maps target=_blank>import-map</a>, un archivo <code>.json</code> en el cual podemos vincular un "alias" a una URL.<p>Yo uso uno como este.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=json><span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#9cabca>  "</span><span style=color:#d27e99>imports</span><span style=color:#9cabca>": {</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>@std/</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://deno.land/std@0.93.0/"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>@npm/</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://jspm.dev/"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>ansi-colors</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://jspm.dev/ansi-colors@4.1.1"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>arg</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://jspm.dev/arg@5.0.0"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>cheerio</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://jspm.dev/cheerio@1.0.0-rc.5"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>exec</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://deno.land/x/exec@0.0.5/mod.ts"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>ramda</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "https://jspm.dev/ramda@0.27.1"</span><span style=color:#9cabca>,</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#9cabca>    "</span><span style=color:#e6c384>@utils/</span><span style=color:#9cabca>":</span><span style=color:#98bb6c> "/path/to/deno/utils/"</span></span>
+<span class=giallo-l><span style=color:#9cabca>  }</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><p><code>deno</code> puede leerlo si le pasamos el argumento <code>--import-map</code>. Ahora vamos a crear un comando para usarlo.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=diff><span class=giallo-l><span>  deno()</span></span>
+<span class=giallo-l><span>  {</span></span>
+<span class=giallo-l><span>    if [ -z "$1" ];then</span></span>
+<span class=giallo-l><span>      command deno</span></span>
+<span class=giallo-l><span>      return</span></span>
+<span class=giallo-l><span>    fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    local cmd=$1; shift;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>    case "$cmd" in</span></span>
+<span class=giallo-l><span>      x)</span></span>
+<span class=giallo-l><span>        command deno run --allow-run ./Taskfile.js $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>      start)</span></span>
+<span class=giallo-l><span>        command deno run --allow-run ./Taskfile.js start $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>      init)</span></span>
+<span class=giallo-l><span>        cp /path/to/template/Taskfile.js ./</span></span>
+<span class=giallo-l><span>        echo "Taskfile.js created"</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     s|script)</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>       command deno run --import-map="/path/to/deno/import-map.json" $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>+</span><span style=color:#76946a>     ;;</span></span>
+<span class=giallo-l><span>      *)</span></span>
+<span class=giallo-l><span>        command deno $cmd $@</span></span>
+<span class=giallo-l><span>      ;;</span></span>
+<span class=giallo-l><span>    esac</span></span>
+<span class=giallo-l><span>  }</span></span></code></pre><p>Como ya es costumbre, tenemos que probar esto. Vamos a crear un script de prueba con este contenido.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=javascript><span class=giallo-l><span style=color:#ffa066>import</span><span> dayjs</span><span style=color:#957fb8> from</span><span style=color:#98bb6c> '@npm/dayjs'</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l><span style=color:#ffa066>import</span><span> c</span><span style=color:#957fb8> from</span><span style=color:#98bb6c> 'ansi-colors'</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>c</span><span style=color:#9cabca>.</span><span style=color:#e6c384>enabled = !</span><span>Deno</span><span style=color:#9cabca>.</span><span style=color:#e6c384>noColor</span><span style=color:#9cabca>;</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>const</span><span> date</span><span style=color:#e6c384> =</span><span style=color:#7e9cd8> dayjs</span><span style=color:#9cabca>().</span><span style=color:#7e9cd8>format</span><span style=color:#9cabca>(</span><span style=color:#98bb6c>'{YYYY} MM-DDTHH:mm:ss SSS [Z] A'</span><span style=color:#9cabca>);</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>console</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>log</span><span style=color:#9cabca>(</span><span>c</span><span style=color:#9cabca>.</span><span style=color:#7e9cd8>green</span><span style=color:#9cabca>(</span><span>date</span><span style=color:#9cabca>));</span></span></code></pre><blockquote><p>Tal vez quieran especificar la versión de la librería que están usando con <code>@npm</code>, en ese caso harían esto <code>@npm/dayjs@1.10.4</code></blockquote><p>Lo ejecutamos.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=plain><span class=giallo-l><span>$ deno script ./test.js</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>Download https://jspm.dev/dayjs@1.10.4</span></span>
+<span class=giallo-l><span>Download https://jspm.dev/npm:dayjs@1.10.4!cjs</span></span>
+<span class=giallo-l><span>{2021} 04-18T11:28:05 929 Z AM</span></span></code></pre><p>¡Jaja! Ahora tengo todo lo que quiero.<h3 id=el-resultado-final>El resultado final</h3><p>Después de todo este proceso la función <code>deno</code> debería quedar así.<pre class=giallo style=color:#dcd7ba;background-color:#1f1f28><code data-lang=shellscript><span class=giallo-l><span style=color:#7e9cd8>deno</span><span style=color:#9cabca>()</span></span>
+<span class=giallo-l><span style=color:#9cabca>{</span></span>
+<span class=giallo-l><span style=color:#957fb8>  if</span><span style=color:#9cabca> [</span><span style=color:#e6c384> -z</span><span style=color:#98bb6c> "</span><span>$1</span><span style=color:#98bb6c>"</span><span style=color:#9cabca> ];</span><span style=color:#957fb8>then</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>    command</span><span style=color:#98bb6c> deno</span></span>
+<span class=giallo-l><span style=color:#957fb8>    return</span></span>
+<span class=giallo-l><span style=color:#957fb8>  fi</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  local</span><span> cmd</span><span style=color:#e6c384>=</span><span>$1</span><span style=color:#9cabca>;</span><span style=color:#7e9cd8> shift</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span style=color:#957fb8>  case</span><span style=color:#98bb6c> "</span><span>$cmd</span><span style=color:#98bb6c>"</span><span style=color:#957fb8> in</span></span>
+<span class=giallo-l><span style=color:#c0a36e>    x</span><span style=color:#e6c384>)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno run --allow-run ./Taskfile.js</span><span> $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#c0a36e>    start</span><span style=color:#e6c384>)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno run --allow-run ./Taskfile.js start</span><span> $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#c0a36e>    init</span><span style=color:#e6c384>)</span></span>
+<span class=giallo-l><span style=color:#7aa89f>      cp</span><span style=color:#98bb6c> /path/to/template/Taskfile.js ./</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      echo</span><span style=color:#98bb6c> "Taskfile.js created"</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#c0a36e>    s</span><span style=color:#9cabca>|</span><span style=color:#c0a36e>script</span><span style=color:#e6c384>)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno run --import-map="/path/to/deno/import-map.json"</span><span> $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#e6c384>    *)</span></span>
+<span class=giallo-l><span style=color:#7e9cd8>      command</span><span style=color:#98bb6c> deno</span><span> $cmd $@</span></span>
+<span class=giallo-l><span style=color:#9cabca>    ;;</span></span>
+<span class=giallo-l><span style=color:#957fb8>  esac</span></span>
+<span class=giallo-l><span style=color:#9cabca>}</span></span></code></pre><h2 id=conclusion>Conclusión</h2><p>Entonces, ¿qué hicimos hoy? "Escondimos" el comando <code>deno</code> detrás de una función para poder agregar "sub-comandos" creados por nosotros. Logramos crear una especie de equivalente de <code>npm run</code> para <code>deno</code> y finalmente usamos import maps para simplificar la declaración de dependencias en un script. No está mal para un día de trabajo.<hr><p>¿Tienen alguna pregunta? Pueden dejar un comentario en cualquiera de estas plataformas:<ul><li><a href=https://dev.to/vonheikemen/extendiendo-deno-cli-usando-una-funcion-1153 rel=noopener target=_blank>dev.to</a><li><a href=https://vonheikemen.hashnode.dev/extending-the-deno-cli-using-a-shell-function-es rel=noopener target=_blank>Hashnode</a></ul><p>Pueden contactarme por las redes sociales:<ul><li>Twitter <a rel="noopener me" href=https://twitter.com/VonHeikemen_ target=_blank> @VonHeikemen_ </a><li>Bluesky <a rel="noopener me" href=https://bsky.app/profile/vonheikemen.bsky.social target=_blank> @vonheikemen.bsky.social </a><li>Mastodon <a rel="noopener me" href=https://hachyderm.io/@vonheikemen target=_blank> @vonheikemen@hachyderm.io </a></ul><p>Gracias por su tiempo. Si este artículo les pareció útil y quieren apoyar mis esfuerzos para crear más contenido, pueden dejar una propina en buy me a coffee ☕.</p><a href=https://ko-fi.com/vonheikemen style=justify-content:center;display:flex target=_blank> <img alt="Buy Me A Coffee" src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" style=width:217px!important;height:60px!important> </a></div></div>
