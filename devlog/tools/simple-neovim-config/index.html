@@ -168,16 +168,16 @@
 <span class=giallo-l><span style=color:#957fb8>end</span></span>
 <span class=giallo-l></span>
 <span class=giallo-l><span>MiniDeps.</span><span style=color:#7e9cd8>setup</span><span>({})</span></span>
-<span class=giallo-l><span>MiniDeps.</span><span style=color:#7e9cd8>add</span><span>(</span><span style=color:#98bb6c>'nvim-mini/mini.nvim'</span><span>)</span></span>
 <span class=giallo-l></span>
-<span class=giallo-l><span style=color:#957fb8>if</span><span> vim.fn.</span><span style=color:#7e9cd8>has</span><span>(</span><span style=color:#98bb6c>'nvim-0.11'</span><span>) </span><span style=color:#e6c384>==</span><span style=color:#d27e99> 1</span><span style=color:#957fb8> then</span></span>
-<span class=giallo-l><span>  MiniDeps.</span><span style=color:#7e9cd8>add</span><span>(</span><span style=color:#98bb6c>'neovim/nvim-lspconfig'</span><span>)</span></span>
-<span class=giallo-l><span style=color:#957fb8>else</span></span>
-<span class=giallo-l><span>  MiniDeps.</span><span style=color:#7e9cd8>add</span><span>({</span></span>
-<span class=giallo-l><span>    source</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'neovim/nvim-lspconfig'</span><span>,</span></span>
-<span class=giallo-l><span>    checkout</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'v1.8.0'</span></span>
-<span class=giallo-l><span>  })</span></span>
-<span class=giallo-l><span style=color:#957fb8>end</span></span>
+<span class=giallo-l><span>MiniDeps.</span><span style=color:#7e9cd8>add</span><span>({</span></span>
+<span class=giallo-l><span>  source</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'nvim-mini/mini.nvim'</span><span>,</span></span>
+<span class=giallo-l><span>  checkout</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> '3923662bf3d6ca49a9503f8d7196ea0450983e6a'</span><span>,</span></span>
+<span class=giallo-l><span>})</span></span>
+<span class=giallo-l></span>
+<span class=giallo-l><span>MiniDeps.</span><span style=color:#7e9cd8>add</span><span>({</span></span>
+<span class=giallo-l><span>  source</span><span style=color:#e6c384> =</span><span style=color:#98bb6c> 'neovim/nvim-lspconfig'</span><span>,</span></span>
+<span class=giallo-l><span>  checkout</span><span style=color:#e6c384> =</span><span> vim.fn.</span><span style=color:#7e9cd8>has</span><span>(</span><span style=color:#98bb6c>'nvim-0.10'</span><span>) </span><span style=color:#e6c384>==</span><span style=color:#d27e99> 1</span><span style=color:#e6c384> and</span><span style=color:#98bb6c> 'v2.5.0' </span><span style=color:#e6c384>or</span><span style=color:#98bb6c> 'v1.8.0'</span></span>
+<span class=giallo-l><span>})</span></span>
 <span class=giallo-l></span>
 <span class=giallo-l><span style=color:#7e9cd8>require</span><span>(</span><span style=color:#98bb6c>'mini.snippets'</span><span>).</span><span style=color:#7e9cd8>setup</span><span>({})</span></span>
 <span class=giallo-l><span style=color:#7e9cd8>require</span><span>(</span><span style=color:#98bb6c>'mini.completion'</span><span>).</span><span style=color:#7e9cd8>setup</span><span>({})</span></span>
